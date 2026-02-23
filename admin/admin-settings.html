@@ -1,0 +1,270 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings — Baking Corner Admin</title>
+    <link rel="stylesheet" href="../assets/style.css" />
+    <link rel="stylesheet" href="admin-style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <style>
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .json-editor {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #eee;
+            background: #fafafa;
+            resize: vertical;
+            outline: none;
+        }
+
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .color-row input[type=color] {
+            width: 48px;
+            height: 36px;
+            border: 1px solid #eee;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        .currency-preview {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #EC4899;
+            background: #FFF0F7;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body class="admin-body">
+
+    <div id="adminSidebarMount"></div>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <span class="admin-page-overline">Configuration</span>
+            <h1 class="admin-page-title">Settings</h1>
+        </div>
+
+        <div class="settings-grid">
+            <!-- Left Side -->
+            <div>
+                <!-- Shop Info -->
+                <div class="admin-card" style="margin-bottom:2rem">
+                    <h2 class="admin-card-title">Shop Information</h2>
+                    <div class="settings-section">
+                        <div class="admin-form-group">
+                            <label class="admin-label">Store Name</label>
+                            <input type="text" class="admin-input" id="storeName" value="Baking Corner" />
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">WhatsApp Number</label>
+                            <input type="text" class="admin-input" id="storeWA" value="+8801712730122" />
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Full Address</label>
+                            <input type="text" class="admin-input" id="storeAddress"
+                                value="Nangalkot Bottol Square, Cumilla" />
+                        </div>
+                    </div>
+                    <button class="admin-submit-btn" onclick="saveStoreInfo()">✓ Save Information</button>
+                </div>
+
+                <!-- Currency -->
+                <div class="admin-card" style="margin-bottom:2rem">
+                    <h2 class="admin-card-title">Currency Settings</h2>
+                    <div class="settings-section">
+                        <div class="admin-form-group">
+                            <label class="admin-label">Currency Symbol</label>
+                            <input type="text" class="admin-input" id="currencySymbol" value="৳"
+                                oninput="updateCurrencyPreview()" />
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Symbol Position</label>
+                            <select class="admin-input" id="currencyPosition" onchange="updateCurrencyPreview()"
+                                style="font-style:normal">
+                                <option value="before">Before Amount (৳500)</option>
+                                <option value="after">After Amount (500৳)</option>
+                            </select>
+                        </div>
+                        <div class="currency-preview" id="currencyPreview">৳ 1,200</div>
+                    </div>
+                    <button class="admin-submit-btn" onclick="saveCurrency(event)">✓ Save Currency</button>
+                </div>
+            </div>
+
+            <!-- Right Side -->
+            <div>
+                <!-- Display Controls -->
+                <div class="admin-card" style="margin-bottom:2rem">
+                    <h2 class="admin-card-title">Display Options</h2>
+                    <div class="settings-section">
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-label">Show Prices</div>
+                                <div class="settings-desc">Show/hide item prices on shop page</div>
+                            </div>
+                            <button class="toggle-switch on" id="togglePrices" onclick="toggleSetting(this)"></button>
+                        </div>
+                        <div class="settings-row">
+                            <div>
+                                <div class="settings-label">Language Toggle</div>
+                                <div class="settings-desc">Allow customers to switch EN/BN</div>
+                            </div>
+                            <button class="toggle-switch on" id="toggleLang" onclick="toggleSetting(this)"></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colors -->
+                <div class="admin-card">
+                    <h2 class="admin-card-title">Brand Colors</h2>
+                    <div class="settings-section">
+                        <div class="color-row">
+                            <label class="admin-label" style="display:inline;padding:0">Primary Color</label>
+                            <input type="color" id="colorPrimary" value="#F9A8D4" />
+                        </div>
+                        <div class="color-row">
+                            <label class="admin-label" style="display:inline;padding:0">Bold Accent</label>
+                            <input type="color" id="colorAccent" value="#DB2777" />
+                        </div>
+                    </div>
+                    <button class="admin-submit-btn" onclick="saveCustomizer(event)">✓ Save Colors</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="admin-card" style="margin-top:2rem; border:1px solid #ffe8e8">
+            <h2 class="admin-card-title" style="color:#ef4444">Danger Zone</h2>
+            <div class="settings-section">
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Factory Reset</div>
+                        <div class="settings-desc">Delete all site data and start fresh</div>
+                    </div>
+                    <button onclick="factoryReset()" class="admin-submit-btn"
+                        style="width:auto; background:#ef4444; color:white; padding:0.5rem 2rem">Reset All</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="admin-shared.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            adminAuthGuard();
+            renderAdminSidebar('settings');
+            loadSettings();
+        });
+
+        function loadSettings() {
+            const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+
+            if (s.storeName) document.getElementById('storeName').value = s.storeName;
+            if (s.storeWA) document.getElementById('storeWA').value = s.storeWA;
+            if (s.storeAddress) document.getElementById('storeAddress').value = s.storeAddress;
+
+            if (s.currencySymbol) document.getElementById('currencySymbol').value = s.currencySymbol;
+            if (s.currencyPosition) document.getElementById('currencyPosition').value = s.currencyPosition;
+
+            ['Prices', 'Lang'].forEach(key => {
+                const val = s['toggle' + key];
+                const btn = document.getElementById('toggle' + key);
+                if (btn && val === false) btn.classList.remove('on');
+            });
+
+            if (s.colorPrimary) document.getElementById('colorPrimary').value = s.colorPrimary;
+            if (s.colorAccent) document.getElementById('colorAccent').value = s.colorAccent;
+
+            updateCurrencyPreview();
+        }
+
+        function saveStoreInfo() {
+            const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            s.storeName = document.getElementById('storeName').value;
+            s.storeWA = document.getElementById('storeWA').value;
+            s.storeAddress = document.getElementById('storeAddress').value;
+            localStorage.setItem('siteSettings', JSON.stringify(s));
+            flashButton(event.target);
+        }
+
+        function saveCurrency(e) {
+            const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            s.currencySymbol = document.getElementById('currencySymbol').value;
+            s.currencyPosition = document.getElementById('currencyPosition').value;
+            localStorage.setItem('siteSettings', JSON.stringify(s));
+            flashButton(e.target);
+        }
+
+        function saveCustomizer(e) {
+            const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            s.colorPrimary = document.getElementById('colorPrimary').value;
+            s.colorAccent = document.getElementById('colorAccent').value;
+            localStorage.setItem('siteSettings', JSON.stringify(s));
+            flashButton(e.target);
+        }
+
+        function toggleSetting(btn) {
+            btn.classList.toggle('on');
+            const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            s[btn.id] = btn.classList.contains('on');
+            localStorage.setItem('siteSettings', JSON.stringify(s));
+        }
+
+        function updateCurrencyPreview() {
+            const sym = document.getElementById('currencySymbol').value || '৳';
+            const pos = document.getElementById('currencyPosition').value;
+            document.getElementById('currencyPreview').textContent = pos === 'after' ? '1,200 ' + sym : sym + ' 1,200';
+        }
+
+        function flashButton(btn) {
+            const oldText = btn.textContent;
+            btn.textContent = '✓ Saved!';
+            btn.style.background = '#4ade80';
+            btn.style.color = 'white';
+            setTimeout(() => {
+                btn.textContent = oldText;
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 2000);
+        }
+
+        function factoryReset() {
+            if (!confirm('This will wipe ALL data. Continue?')) return;
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = 'admin.html';
+        }
+    </script>
+</body>
+
+</html>

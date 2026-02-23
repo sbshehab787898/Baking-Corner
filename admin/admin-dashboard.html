@@ -4,12 +4,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Command Center â€” Baking Corner Admin</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>Dashboard — Baking Corner Admin</title>
+    <link rel="stylesheet" href="../assets/style.css" />
     <link rel="stylesheet" href="admin-style.css" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Outfit:wght@400;600;700;900&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
 </head>
 
 <body class="admin-body">
@@ -18,35 +16,35 @@
 
     <main class="admin-main">
         <div class="admin-page-header fade-in">
-            <span class="admin-page-overline">Store Overview</span>
-            <h1 class="admin-page-title">Command Center</h1>
+            <span class="admin-page-overline">Overview</span>
+            <h1 class="admin-page-title">Dashboard</h1>
         </div>
 
         <!-- Stat Cards -->
         <div class="stat-grid fade-in">
             <div class="stat-card">
-                <span class="stat-icon" style="color:#4ade80">ðŸ“ˆ</span>
-                <p class="stat-label">Market Valuation</p>
+                <span class="stat-icon" style="color:#4ade80">📈</span>
+                <p class="stat-label">Total Sales</p>
                 <p class="stat-value">$124,500</p>
                 <p class="stat-change up">+22.4% this month</p>
             </div>
             <div class="stat-card" id="dashCornerCard">
-                <span class="stat-icon" style="color:#FDB9C8">ðŸª</span>
-                <p class="stat-label">Boutique Corners</p>
-                <p class="stat-value" id="dashCornerCount">â€”</p>
-                <p class="stat-change neutral">Active segments</p>
+                <span class="stat-icon" style="color:#FDB9C8">🏬</span>
+                <p class="stat-label">Categories</p>
+                <p class="stat-value" id="dashCornerCount">—</p>
+                <p class="stat-change neutral">Active sections</p>
             </div>
             <div class="stat-card" id="dashProductCard">
-                <span class="stat-icon" style="color:#60a5fa">ðŸ“¦</span>
-                <p class="stat-label">Curated Assets</p>
-                <p class="stat-value" id="dashProductCount">â€”</p>
-                <p class="stat-change neutral">Masterpieces</p>
+                <span class="stat-icon" style="color:#60a5fa">📦</span>
+                <p class="stat-label">Products</p>
+                <p class="stat-value" id="dashProductCount">—</p>
+                <p class="stat-change neutral">Total items</p>
             </div>
             <div class="stat-card">
-                <span class="stat-icon" style="color:#D4AF37">âœ¨</span>
-                <p class="stat-label">Identity Rank</p>
-                <p class="stat-value">Top 2%</p>
-                <p class="stat-change neutral">Boutique Tier</p>
+                <span class="stat-icon" style="color:#D4AF37">✨</span>
+                <p class="stat-label">Store Status</p>
+                <p class="stat-value">Active</p>
+                <p class="stat-change neutral">Growth Mode</p>
             </div>
         </div>
 
@@ -57,41 +55,41 @@
                 <table class="activity-table">
                     <thead>
                         <tr>
-                            <th>Client</th>
-                            <th>Masterpiece</th>
-                            <th>Value</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Price</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td><strong>Aria Fontaine</strong></td>
-                            <td>Rose Velvet Dreams Ã—1</td>
-                            <td style="font-family:'Playfair Display',serif;font-weight:700;color:#F896AC">$128</td>
+                            <td>Rose Velvet Dreams ×1</td>
+                            <td style="font-weight:700;color:#F896AC">$128</td>
                             <td><span class="status-badge premium">Premium</span></td>
                         </tr>
                         <tr>
                             <td><strong>Lucien Moreau</strong></td>
-                            <td>Midnight Obsidian Torte Ã—2</td>
-                            <td style="font-family:'Playfair Display',serif;font-weight:700;color:#F896AC">$430</td>
+                            <td>Midnight Obsidian Torte ×2</td>
+                            <td style="font-weight:700;color:#F896AC">$430</td>
                             <td><span class="status-badge active">Fulfilled</span></td>
                         </tr>
                         <tr>
                             <td><strong>Isabelle Charta</strong></td>
-                            <td>Gold Leaf Macarons Ã—3</td>
-                            <td style="font-family:'Playfair Display',serif;font-weight:700;color:#F896AC">$258</td>
+                            <td>Gold Leaf Macarons ×3</td>
+                            <td style="font-weight:700;color:#F896AC">$258</td>
                             <td><span class="status-badge pending">Pending</span></td>
                         </tr>
                         <tr>
                             <td><strong>Mateo Vidal</strong></td>
-                            <td>Ivory Lace Wedding Cake Ã—1</td>
-                            <td style="font-family:'Playfair Display',serif;font-weight:700;color:#F896AC">$320</td>
+                            <td>Ivory Lace Wedding Cake ×1</td>
+                            <td style="font-weight:700;color:#F896AC">$320</td>
                             <td><span class="status-badge active">Fulfilled</span></td>
                         </tr>
                         <tr>
                             <td><strong>Celine Duval</strong></td>
-                            <td>Saffron Cloud Cake Ã—1</td>
-                            <td style="font-family:'Playfair Display',serif;font-weight:700;color:#F896AC">$265</td>
+                            <td>Saffron Cloud Cake ×1</td>
+                            <td style="font-weight:700;color:#F896AC">$265</td>
                             <td><span class="status-badge pending">Pending</span></td>
                         </tr>
                     </tbody>
@@ -103,21 +101,17 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="fade-in">
             <a href="admin-corners.html" class="admin-card"
                 style="text-decoration:none;color:inherit;display:block;transition:all 0.5s">
-                <div style="font-size:2rem;margin-bottom:1rem">ðŸª</div>
-                <h3
-                    style="font-family:'Playfair Display',serif;font-size:1.3rem;font-style:italic;margin-bottom:0.5rem">
-                    Boutique Corners</h3>
-                <p style="font-size:0.8rem;color:#8E7D72;font-style:italic">Manage your boutique segments and categories
-                    â†’</p>
+                <div style="font-size:2rem;margin-bottom:1rem">🏬</div>
+                <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:0.5rem">Manage
+                    Categories</h3>
+                <p style="font-size:0.8rem;color:#8E7D72">Organize your shop sections →</p>
             </a>
             <a href="admin-products.html" class="admin-card"
                 style="text-decoration:none;color:inherit;display:block;transition:all 0.5s">
-                <div style="font-size:2rem;margin-bottom:1rem">ðŸ“¦</div>
-                <h3
-                    style="font-family:'Playfair Display',serif;font-size:1.3rem;font-style:italic;margin-bottom:0.5rem">
-                    Archive & Creation</h3>
-                <p style="font-size:0.8rem;color:#8E7D72;font-style:italic">Add, remove, or update your product
-                    collection â†’</p>
+                <div style="font-size:2rem;margin-bottom:1rem">📦</div>
+                <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:0.5rem">Manage
+                    Products</h3>
+                <p style="font-size:0.8rem;color:#8E7D72">Add or update items in your shop →</p>
             </a>
         </div>
     </main>
@@ -133,13 +127,24 @@
 
             // Animate cards on hover
             document.querySelectorAll('a.admin-card').forEach(card => {
-                card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-6px)'; card.style.boxShadow = '0 20px 50px rgba(45,30,23,0.1)'; });
-                card.addEventListener('mouseleave', () => { card.style.transform = ''; card.style.boxShadow = ''; });
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-6px)';
+                    card.style.boxShadow = '0 20px 50px rgba(45,30,23,0.1)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = '';
+                    card.style.boxShadow = '';
+                });
             });
 
             // Scroll animations
             const obs = new IntersectionObserver(entries => {
-                entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+                entries.forEach(e => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('visible');
+                        obs.unobserve(e.target);
+                    }
+                });
             }, { threshold: 0.1 });
             document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
         });

@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product — Baking Corner</title>
+    <meta name="description"
+        content="View product details and reserve your custom cake from Baking Corner Luxury Atelier." />
+    <link rel="stylesheet" href="../assets/style.css" />
+    <style>
+        /* ── Breadcrumb ── */
+        .breadcrumb {
+            padding: 7rem 0 1.5rem;
+            background: white;
+        }
+
+        .breadcrumb-list {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            list-style: none;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+
+        .breadcrumb-list li::after {
+            content: '/';
+            margin-left: 0.5rem;
+            color: #ccc;
+        }
+
+        .breadcrumb-list li:last-child::after {
+            display: none;
+        }
+
+        .breadcrumb-list a {
+            color: var(--accent);
+            transition: opacity 0.2s;
+        }
+
+        .breadcrumb-list a:hover {
+            opacity: 0.7;
+        }
+
+        .breadcrumb-list li:last-child span {
+            color: var(--text-muted);
+        }
+
+        /* ── Product Layout ── */
+        .product-detail-section {
+            padding: 2rem 0 5rem;
+            background: white;
+        }
+
+        .product-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .product-detail-grid {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+        }
+
+        /* ── Image Column ── */
+        .pd-image-wrap {
+            position: sticky;
+            top: 6rem;
+        }
+
+        .pd-main-img {
+            width: 100%;
+            aspect-ratio: 4/5;
+            object-fit: cover;
+            border-radius: 3rem;
+            box-shadow: 0 40px 80px -20px rgba(45, 30, 23, 0.18);
+        }
+
+        .pd-thumbnails {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pd-thumb {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 1rem;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .pd-thumb.active,
+        .pd-thumb:hover {
+            border-color: var(--accent);
+        }
+
+        /* ── Info Column ── */
+        .pd-category-tag {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.4em;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .pd-name {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .pd-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .pd-share-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            background: #f8f8f8;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pd-share-btn:hover {
+            background: var(--secondary);
+            border-color: var(--primary);
+            color: var(--accent);
+        }
+
+        .pd-stars {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 13px;
+        }
+
+        .pd-stars span {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .pd-code {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            background: #f9f9f9;
+            border: 1px solid #f0f0f0;
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+        }
+
+        .pd-price-block {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .pd-price {
+            font-family: var(--font-serif);
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--accent);
+        }
+
+        .pd-stock {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #16a34a;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            margin-bottom: 1.5rem;
+        }
+
+        .pd-note {
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            font-style: italic;
+            line-height: 1.8;
+            background: var(--secondary);
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            border-left: 3px solid var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        /* ── Selectors ── */
+        .pd-option-label {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--text-dark);
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .pd-option-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .pd-chips {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .pd-chip {
+            padding: 0.6rem 1.4rem;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            border: 1.5px solid #e5e5e5;
+            background: white;
+            cursor: pointer;
+            transition: all 0.25s;
+            color: var(--text-dark);
+        }
+
+        .pd-chip:hover {
+            border-color: var(--primary);
+            color: var(--accent);
+        }
+
+        .pd-chip.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* ── Quantity ── */
+        .pd-qty-row {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .qty-control button {
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            background: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .qty-control button:hover {
+            background: var(--secondary);
+        }
+
+        .qty-control input {
+            width: 52px;
+            text-align: center;
+            border: none;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: var(--font-sans);
+            color: var(--text-dark);
+            outline: none;
+        }
+
+        .pd-min-note {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ── Action Buttons ── */
+        .pd-add-cart {
+            width: 100%;
+            padding: 1.25rem 2rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.4em;
+            cursor: pointer;
+            transition: all 0.4s;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 30px rgba(219, 39, 119, 0.3);
+        }
+
+        .pd-add-cart:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 50px rgba(219, 39, 119, 0.4);
+        }
+
+        .pd-secondary-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .pd-secondary-actions button {
+            flex: 1;
+            padding: 0.9rem;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            border: 1.5px solid #e5e5e5;
+            background: white;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .pd-secondary-actions button:hover {
+            border-color: var(--primary);
+            color: var(--accent);
+            background: var(--secondary);
+        }
+
+        /* ── Vendor / Shipping Box ── */
+        .pd-info-box {
+            background: #fafafa;
+            border: 1px solid #f0f0f0;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+        }
+
+        .pd-info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .pd-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .pd-info-row strong {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            min-width: 90px;
+        }
+
+        .pd-info-row span {
+            color: var(--text-dark);
+        }
+
+        /* ── Tabs ── */
+        .pd-tabs-section {
+            padding: 4rem 0;
+            background: white;
+            border-top: 1px solid #f5f5f5;
+        }
+
+        .pd-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 3rem;
+        }
+
+        .pd-tab {
+            padding: 1rem 2.5rem;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+        }
+
+        .pd-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .pd-tab-content {
+            display: none;
+        }
+
+        .pd-tab-content.active {
+            display: block;
+        }
+
+        .pd-desc-body {
+            font-size: 0.9rem;
+            line-height: 1.9;
+            color: var(--text-dark);
+            max-width: 760px;
+        }
+
+        .pd-desc-body h4 {
+            font-family: var(--font-serif);
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 2rem 0 0.75rem;
+        }
+
+        .pd-desc-body ul {
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .pd-desc-body ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* ── Reviews ── */
+        .review-card {
+            background: white;
+            border: 1px solid #f0f0f0;
+            border-radius: 2rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .reviewer-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .reviewer-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .review-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .review-text {
+            font-size: 0.875rem;
+            line-height: 1.8;
+            color: var(--text-dark);
+            font-style: italic;
+        }
+
+        /* ── Similar Products ── */
+        .similar-section {
+            padding: 5rem 0;
+            background: var(--secondary);
+        }
+
+        .similar-section .section-header {
+            margin-bottom: 3rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="container">
+            <a href="../home/index.html" class="nav-logo">
+                <div class="nav-logo-icon">🎂</div>
+                <div class="nav-logo-text">
+                    <span>Baking <span class="text-gradient-gold" style="font-style:italic">Corner</span></span>
+                    <span>Luxury Atelier</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="../home/index.html" data-t="atelier">Atelier</a>
+                <a href="shop.html" data-t="collection">Collection</a>
+                <a href="about.html" data-t="legacy">Legacy</a>
+                <a href="contact.html" data-t="concierge">Concierge</a>
+            </div>
+            <div class="nav-actions">
+                <button class="lang-btn lang-toggle"><span>🌐</span> <span class="lang-btn-text">বাংলা</span></button>
+                <button class="cart-btn" onclick="openCart()">🛍️<span class="cart-count"
+                        style="display:none">0</span></button>
+            </div>
+            <div class="mobile-controls">
+                <button class="lang-btn lang-toggle"><span class="lang-btn-text">বাংলা</span></button>
+                <button class="hamburger" id="hamburger"
+                    aria-label="Menu"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header"></div>
+        <nav class="mobile-nav-links">
+            <a href="../home/index.html" data-t="atelier">Atelier</a>
+            <a href="shop.html" data-t="collection">Collection</a>
+            <a href="about.html" data-t="legacy">Legacy</a>
+            <a href="contact.html" data-t="concierge">Concierge</a>
+        </nav>
+        <div class="mobile-menu-footer">
+            <button class="lang-btn lang-toggle" style="margin-bottom:1.5rem;width:100%;justify-content:center"><span
+                    class="lang-btn-text">বাংলা</span></button>
+            <p class="mobile-copyright">Baking Corner Luxury Confectionery © 2026</p>
+        </div>
+    </div>
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb-list" id="breadcrumbList">
+                <li><a href="../home/index.html">Home</a></li>
+                <li><a href="shop.html">Collection</a></li>
+                <li><span id="breadcrumbCategory">—</span></li>
+                <li><span id="breadcrumbName">—</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- PRODUCT DETAIL -->
+    <section class="product-detail-section">
+        <div class="container">
+            <div class="product-detail-grid">
+
+                <!-- Image Column -->
+                <div class="pd-image-wrap">
+                    <img id="pdMainImg" src="" alt="" class="pd-main-img" />
+                    <div class="pd-thumbnails" id="pdThumbnails"></div>
+                </div>
+
+                <!-- Info Column -->
+                <div class="pd-info">
+                    <span class="pd-category-tag" id="pdCategory">—</span>
+                    <h1 class="pd-name" id="pdName">—</h1>
+
+                    <div class="pd-meta-row">
+                        <button class="pd-share-btn" onclick="shareProduct()">🔗 Share</button>
+                        <div class="pd-stars" id="pdStars">★★★★★ <span>Reviews: 1</span></div>
+                        <span class="pd-code" id="pdCode">CODE: —</span>
+                    </div>
+
+                    <div class="pd-price-block">
+                        <span class="pd-price" id="pdPrice">—</span>
+                    </div>
+                    <div class="pd-stock">✦ In Stock</div>
+
+                    <div class="pd-note" id="pdNote">
+                        This is a pre-order–based item. We will be able to deliver this item within 48 hours of order
+                        placement.
+                    </div>
+
+                    <!-- Flavour Selector -->
+                    <div class="pd-option-group">
+                        <span class="pd-option-label">Flavour:</span>
+                        <div class="pd-chips" id="flavourChips">
+                            <button class="pd-chip selected" data-val="Vanilla"
+                                onclick="selectChip(this,'flavour')">Vanilla</button>
+                            <button class="pd-chip" data-val="Chocolate"
+                                onclick="selectChip(this,'flavour')">Chocolate</button>
+                            <button class="pd-chip" data-val="Strawberry"
+                                onclick="selectChip(this,'flavour')">Strawberry</button>
+                            <button class="pd-chip" data-val="Rasmalai"
+                                onclick="selectChip(this,'flavour')">Rasmalai</button>
+                            <button class="pd-chip" data-val="Custom"
+                                onclick="selectChip(this,'flavour')">Custom</button>
+                        </div>
+                    </div>
+
+                    <!-- Weight Selector -->
+                    <div class="pd-option-group">
+                        <span class="pd-option-label">Cake Weight:</span>
+                        <div class="pd-chips" id="weightChips">
+                            <button class="pd-chip selected" data-val="1kg" onclick="selectChip(this,'weight')">1
+                                kg</button>
+                            <button class="pd-chip" data-val="2kg" onclick="selectChip(this,'weight')">2 kg</button>
+                            <button class="pd-chip" data-val="3kg" onclick="selectChip(this,'weight')">3 kg</button>
+                            <button class="pd-chip" data-val="4kg" onclick="selectChip(this,'weight')">4 kg</button>
+                            <button class="pd-chip" data-val="Custom"
+                                onclick="selectChip(this,'weight')">Custom</button>
+                        </div>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="pd-qty-row">
+                        <div class="qty-control">
+                            <button onclick="changeQtyLocal(-1)">−</button>
+                            <input id="qtyInput" type="number" value="1" min="1" />
+                            <button onclick="changeQtyLocal(1)">+</button>
+                        </div>
+                        <span class="pd-min-note">Minimum quantity is 1.</span>
+                    </div>
+
+                    <!-- Actions -->
+                    <button class="pd-add-cart" onclick="addProductToCart()">🛍️ Add to Cart</button>
+                    <div class="pd-secondary-actions">
+                        <button onclick="toggleWishlist(this)">♡ Add to Wish List</button>
+                        <button onclick="alert('Compare coming soon!')">⇄ Compare</button>
+                    </div>
+
+                    <!-- Vendor / Shipping Info -->
+                    <div class="pd-info-box">
+                        <div class="pd-info-row"><strong>Vendor</strong><span>🎂 Baking Corner</span></div>
+                        <div class="pd-info-row"><strong>Ask</strong><span><a href="contact.html"
+                                    style="color:var(--accent)">Ask a question →</a></span></div>
+                        <div class="pd-info-row"><strong>Shipping</strong><span>📍 Nangalkot Bottol Square,
+                                Cumilla</span></div>
+                        <div class="pd-info-row"><strong>Delivery</strong><span>Within 48 hours of order
+                                placement</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TABS: Description / Reviews -->
+    <section class="pd-tabs-section">
+        <div class="container">
+            <div class="pd-tabs">
+                <button class="pd-tab active" onclick="switchTab('desc',this)">Description</button>
+                <button class="pd-tab" onclick="switchTab('reviews',this)">Reviews <span
+                        id="reviewCountBadge">(1)</span></button>
+            </div>
+            <div id="tab-desc" class="pd-tab-content active">
+                <div class="pd-desc-body" id="pdDescBody">
+                    <h4 id="pdDescTitle">—</h4>
+                    <p id="pdDescText">—</p>
+                    <h4>Item Information</h4>
+                    <ul>
+                        <li>Item code: <strong id="pdDescCode">—</strong></li>
+                        <li>Brand: <strong>Baking Corner</strong></li>
+                    </ul>
+                    <h4>Important Notes</h4>
+                    <ul>
+                        <li>Any complaint regarding products must be reported within 2 working hours of receiving.</li>
+                        <li>This is a pre-order item. Delivery within 48 hours of placement.</li>
+                        <li>Coverage area: Products will be delivered from our Nangalkot outlet.</li>
+                    </ul>
+                    <p style="margin-top:1.5rem;font-style:italic;color:var(--text-muted);font-size:0.82rem">
+                        Disclaimer: Actual color of the physical product may slightly vary due to lighting, photography,
+                        or your device display settings.
+                    </p>
+                </div>
+            </div>
+            <div id="tab-reviews" class="pd-tab-content">
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-avatar">👤</div>
+                        <div>
+                            <div class="reviewer-name">Verified Customer</div>
+                            <div class="review-date pd-stars">★★★★★ &nbsp;Feb 2026</div>
+                        </div>
+                    </div>
+                    <p class="review-text">"Absolutely stunning cake. The taste matched the presentation — moist,
+                        perfectly sweetened, and the custom design was executed flawlessly. Will order again!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SIMILAR PRODUCTS -->
+    <section class="similar-section">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="overline">You May Also Love</span>
+                <h2
+                    style="font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);letter-spacing:-0.03em;margin-top:0.75rem">
+                    Similar <span class="text-gradient-gold" style="font-style:italic">Products</span></h2>
+                <div class="premium-divider"></div>
+            </div>
+            <div class="grid-4" id="similarGrid"></div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-brand">
+                <div class="footer-logo-icon">🎂</div>
+                <h2>Baking <span class="text-gradient-gold" style="font-style:italic">Corner</span></h2>
+            </div>
+            <nav class="footer-nav">
+                <a href="../home/index.html" data-t="atelier">Atelier</a>
+                <a href="shop.html" data-t="collection">Collection</a>
+                <a href="about.html" data-t="legacy">Legacy</a>
+                <a href="contact.html" data-t="concierge">Concierge</a>
+            </nav>
+            <div class="footer-bottom">
+                <div class="footer-copy"><span class="sparkle">✦</span><span>Baking Corner Luxury Confectionery ©
+                        2026</span></div>
+                <div class="footer-legal">
+                    <a href="../legal/privacy.html">Privacy Protocol</a>
+                    <a href="../legal/terms.html">Engagement Terms</a>
+                    <a href="contact.html">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/script.js"></script>
+    <script>
+        // ── State ──
+        let currentProduct = null;
+        let selectedFlavour = 'Vanilla';
+        let selectedWeight = '1kg';
+
+        // ── Load Product ──
+        function loadProduct() {
+            const params = new URLSearchParams(window.location.search);
+            const id = parseInt(params.get('id'));
+            const product = (typeof products !== 'undefined' ? products : []).find(p => p.id === id);
+            if (!product) {
+                document.querySelector('.pd-name').textContent = 'Product not found.';
+                return;
+            }
+            currentProduct = product;
+
+            // Breadcrumb
+            document.getElementById('breadcrumbCategory').textContent = capitalize(product.category);
+            document.getElementById('breadcrumbName').textContent = product.name;
+
+            // Title
+            document.title = product.name + ' — Baking Corner';
+
+            // Image
+            const img = document.getElementById('pdMainImg');
+            img.src = product.image;
+            img.alt = product.name;
+
+            // Thumbnails (use same image for demo)
+            const thumbs = document.getElementById('pdThumbnails');
+            thumbs.innerHTML = [product.image, product.image, product.image].map((src, i) =>
+                `<img src="${src}" alt="View ${i + 1}" class="pd-thumb ${i === 0 ? 'active' : ''}" onclick="switchImg(this,'${src}')">`
+            ).join('');
+
+            // Meta
+            document.getElementById('pdCategory').textContent = '✦ ' + capitalize(product.category);
+            document.getElementById('pdName').textContent = product.name;
+            document.getElementById('pdCode').textContent = 'CODE: ' + product.name.replace(/\s+/g, '').toLowerCase().slice(0, 10);
+            document.getElementById('pdDescCode').textContent = product.name.replace(/\s+/g, '').toLowerCase().slice(0, 10);
+
+            // Price with currency
+            const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            const sym = s.currencySymbol || '৳';
+            const pos = s.currencyPosition || 'before';
+            const fmt = n => pos === 'after' ? n + sym : sym + n;
+            document.getElementById('pdPrice').textContent = fmt(product.price.toLocaleString('en-IN') + '.00');
+
+            // Description
+            document.getElementById('pdDescTitle').textContent = product.name;
+            document.getElementById('pdDescText').textContent = product.description;
+
+            // Similar products
+            buildSimilar(product);
+        }
+
+        function capitalize(str) {
+            return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+        }
+
+        function switchImg(thumb, src) {
+            document.getElementById('pdMainImg').src = src;
+            document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+        }
+
+        function buildSimilar(current) {
+            const similar = (typeof products !== 'undefined' ? products : [])
+                .filter(p => p.id !== current.id && p.category === current.category)
+                .slice(0, 4);
+            const all = (typeof products !== 'undefined' ? products : []).filter(p => p.id !== current.id).slice(0, 4);
+            const items = similar.length >= 2 ? similar : all;
+            const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            const sym = s.currencySymbol || '৳';
+            const pos = s.currencyPosition || 'before';
+            const fmt = n => pos === 'after' ? n + sym : sym + n;
+            document.getElementById('similarGrid').innerHTML = items.map(p => `
+                <div class="product-card fade-in visible">
+                    <div class="product-img">
+                        <img src="${p.image}" alt="${p.name}" loading="lazy">
+                        <div class="product-img-overlay"></div>
+                        <div class="product-badge">✦ ${p.category}</div>
+                    </div>
+                    <div class="product-body">
+                        <div class="product-header">
+                            <h3>${p.name}</h3>
+                            <span class="product-price">${fmt(p.price)}</span>
+                        </div>
+                        <p class="product-desc">"${p.description}"</p>
+                        <button class="product-btn" onclick="location.href='product.html?id=${p.id}'">View Item</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        // ── Selectors ──
+        function selectChip(btn, group) {
+            const container = btn.closest('.pd-chips');
+            container.querySelectorAll('.pd-chip').forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            if (group === 'flavour') selectedFlavour = btn.dataset.val;
+            if (group === 'weight') selectedWeight = btn.dataset.val;
+        }
+
+        function changeQtyLocal(d) {
+            const inp = document.getElementById('qtyInput');
+            const val = Math.max(1, parseInt(inp.value || 1) + d);
+            inp.value = val;
+        }
+
+        // ── Cart ──
+        function addProductToCart() {
+            if (!currentProduct) return;
+            const qty = parseInt(document.getElementById('qtyInput').value) || 1;
+            const existing = cart.find(i => i.id === currentProduct.id && i.flavour === selectedFlavour && i.weight === selectedWeight);
+            if (existing) {
+                existing.qty += qty;
+            } else {
+                cart.push({
+                    id: currentProduct.id,
+                    name: `${currentProduct.name} (${selectedFlavour}, ${selectedWeight})`,
+                    price: currentProduct.price,
+                    image: currentProduct.image,
+                    qty,
+                    flavour: selectedFlavour,
+                    weight: selectedWeight
+                });
+            }
+            saveCart();
+            updateCartCount();
+            renderCart();
+            openCart();
+        }
+
+        // ── Wishlist ──
+        function toggleWishlist(btn) {
+            const inList = btn.textContent.includes('♡');
+            btn.textContent = inList ? '♥ In Wish List' : '♡ Add to Wish List';
+            btn.style.color = inList ? '#EC4899' : '';
+        }
+
+        // ── Share ──
+        function shareProduct() {
+            if (navigator.share) {
+                navigator.share({ title: currentProduct?.name || 'Baking Corner', url: window.location.href });
+            } else {
+                navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied to clipboard!'));
+            }
+        }
+
+        // ── Tabs ──
+        function switchTab(id, btn) {
+            document.querySelectorAll('.pd-tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.pd-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // ── Init ──
+        document.addEventListener('DOMContentLoaded', () => {
+            applySiteCustomizations();
+            initNavbar();
+            initAnimations();
+            applyTranslations();
+            updateCartCount();
+            loadProduct();
+        });
+    </script>
+</body>
+
+</html>

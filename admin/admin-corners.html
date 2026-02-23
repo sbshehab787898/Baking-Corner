@@ -1,0 +1,393 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boutique Corners — Admin Portal</title>
+    <link rel="stylesheet" href="../assets/style.css" />
+    <script src="admin-shared.js"></script>
+    <style>
+        :root {
+            --admin-bg: #fdfaf9;
+            --glass-white: rgba(255, 255, 255, 0.82);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --luxury-gold: linear-gradient(135deg, #d4af37 0%, #f9f7c9 100%);
+        }
+
+        body {
+            background: var(--admin-bg);
+            font-family: 'Outfit', sans-serif;
+            color: #2d1e17;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 3.5rem;
+            overflow-x: hidden;
+            margin-left: 280px;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 35c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm60-17c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM66 70c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%23f9a8d4' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        @media(max-width:1024px) {
+            .admin-main {
+                margin-left: 0;
+                padding: 1.5rem;
+                padding-top: 5rem;
+            }
+        }
+
+        /* ── Header ── */
+        .page-header {
+            margin-bottom: 4rem;
+        }
+
+        .page-overline {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+            color: #d4af37;
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #2d1e17;
+            line-height: 1;
+        }
+
+        /* ── Layout Grid ── */
+        .management-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        @media(max-width:1200px) {
+            .management-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── Action Card (Add Corner) ── */
+        .action-card {
+            background: var(--glass-white);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 2.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.04);
+            position: sticky;
+            top: 2rem;
+        }
+
+        .card-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-style: italic;
+            margin-bottom: 2rem;
+            color: #2d1e17;
+        }
+
+        .lux-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .lux-label {
+            display: block;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--accent);
+            margin-bottom: 0.6rem;
+            padding-left: 0.5rem;
+        }
+
+        .lux-input {
+            width: 100%;
+            padding: 1rem 1.4rem;
+            background: white;
+            border: 1.5px solid #f0f0f0;
+            border-radius: 1.25rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .lux-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(249, 168, 212, 0.15);
+        }
+
+        .lux-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .lux-submit {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, #2d1e17, #4a3429);
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            cursor: pointer;
+            transition: all 0.4s;
+            margin-top: 1rem;
+        }
+
+        .lux-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(45, 30, 23, 0.25);
+            background: var(--accent);
+        }
+
+        /* ── Corner Items List ── */
+        .corners-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .corner-card {
+            background: white;
+            border-radius: 2.2rem;
+            padding: 2.2rem;
+            border: 1px solid #f2f2f2;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .corner-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary);
+        }
+
+        .corner-icon-box {
+            width: 64px;
+            height: 64px;
+            background: #fdf2f8;
+            border-radius: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .corner-info {
+            flex: 1;
+        }
+
+        .corner-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #2d1e17;
+        }
+
+        .corner-desc {
+            font-size: 0.85rem;
+            color: #8E7D72;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .corner-actions {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 1.5rem;
+            border-top: 1px solid #f9f9f9;
+        }
+
+        .delete-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            background: #fff5f5;
+            color: #ef4444;
+            border: 1px solid #ffebeb;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+            transform: scale(1.1);
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center;
+            padding: 6rem 2rem;
+            background: var(--glass-white);
+            border-radius: 3rem;
+            border: 1px dotted #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <div id="adminSidebarMount"></div>
+
+        <main class="admin-main">
+            <header class="page-header">
+                <span class="page-overline">Segment Management</span>
+                <h1 class="page-title">Boutique Corners</h1>
+            </header>
+
+            <div class="management-grid">
+                <!-- Add Form -->
+                <aside class="action-card">
+                    <h2 class="card-title">Establish New Segment</h2>
+                    <form onsubmit="handleAddCorner(event)">
+                        <div class="lux-group">
+                            <label class="lux-label">Segment Title</label>
+                            <input type="text" class="lux-input" id="newCornerName" placeholder="e.g. Gâteau Atelier"
+                                required />
+                        </div>
+                        <div class="lux-group">
+                            <label class="lux-label">Signature Description</label>
+                            <textarea class="lux-input lux-textarea" id="newCornerDesc"
+                                placeholder="Describe the essence of this corner..." required></textarea>
+                        </div>
+                        <div class="lux-group">
+                            <label class="lux-label">Segment Icon / Emoji</label>
+                            <input type="text" class="lux-input" id="newCornerIcon" placeholder="e.g. 🎂"
+                                maxlength="4" />
+                        </div>
+                        <button type="submit" class="lux-submit">✦ Initialize Corner</button>
+                    </form>
+                </aside>
+
+                <!-- List Area -->
+                <div id="cornersList" class="corners-container">
+                    <!-- Dynamic Content -->
+                    <div class="empty-state">
+                        <span style="font-size:3rem;display:block;margin-bottom:1rem">⏳</span>
+                        <p
+                            style="color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;font-size:10px">
+                            Summoning segments...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let data;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            adminAuthGuard();
+            renderAdminSidebar('corners');
+            data = getAdminData();
+            renderCorners();
+        });
+
+        function renderCorners() {
+            const list = document.getElementById('cornersList');
+            if (!data.corners || !data.corners.length) {
+                list.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1">
+                        <span style="font-size:3rem;display:block;margin-bottom:1rem">🎨</span>
+                        <h3 style="font-family:'Cormorant Garamond', serif; font-size:1.5rem; margin-bottom:0.5rem">Empty Atelier</h3>
+                        <p style="color:#aaa; font-size:0.875rem">No boutique segments established yet.</p>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = data.corners.map(c => `
+                <div class="corner-card" id="corner-${c.id}">
+                    <div style="display:flex; align-items:center; gap:1.5rem">
+                        <div class="corner-icon-box">${c.icon || '🍰'}</div>
+                        <div class="corner-info">
+                            <h3 class="corner-name">${c.name}</h3>
+                            <div style="font-size:9px; font-weight:900; letter-spacing:0.3em; color:#d4af37; text-transform:uppercase">Exclusive Segment</div>
+                        </div>
+                    </div>
+                    <p class="corner-desc">"${c.description || 'A unique collection of artisanal masterpieces.'}"</p>
+                    <div class="corner-actions">
+                        <button class="delete-btn" onclick="deleteCorner(${c.id})">🗑 Purge</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleAddCorner(e) {
+            e.preventDefault();
+            const name = document.getElementById('newCornerName').value.trim();
+            const desc = document.getElementById('newCornerDesc').value.trim();
+            const icon = document.getElementById('newCornerIcon').value.trim() || '🍰';
+
+            if (!name) return;
+
+            // Generate unique ID
+            const newCorner = {
+                id: Date.now(),
+                name,
+                description: desc,
+                icon
+            };
+
+            data.corners.push(newCorner);
+            saveAdminData('adminCorners', data.corners);
+
+            // UI Feedback
+            e.target.reset();
+            renderCorners();
+        }
+
+        function deleteCorner(id) {
+            if (!confirm('Permanentely remove this segment from the boutique? All associated records will be archived.')) return;
+
+            data.corners = data.corners.filter(c => c.id !== id);
+            saveAdminData('adminCorners', data.corners);
+
+            const el = document.getElementById('corner-' + id);
+            if (el) {
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0.9) translateY(20px)';
+                el.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                setTimeout(() => renderCorners(), 400);
+            } else {
+                renderCorners();
+            }
+        }
+    </script>
+</body>
+
+</html>

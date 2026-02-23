@@ -4,12 +4,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Archive & Creation â€” Baking Corner Admin</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>Manage Products — Baking Corner Admin</title>
+    <link rel="stylesheet" href="../assets/style.css" />
     <link rel="stylesheet" href="admin-style.css" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Outfit:wght@400;600;700;900&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
 </head>
 
 <body class="admin-body">
@@ -19,21 +17,21 @@
     <main class="admin-main">
         <div class="admin-page-header">
             <span class="admin-page-overline">Inventory</span>
-            <h1 class="admin-page-title">Archive <em style="color:#F896AC">&amp; Creation</em></h1>
+            <h1 class="admin-page-title">Manage Products</h1>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:2rem;align-items:start">
 
             <!-- Add Product Form -->
             <div class="admin-card" style="position:sticky;top:2rem">
-                <h2 class="admin-card-title">Register Masterpiece</h2>
+                <h2 class="admin-card-title">Add New Product</h2>
                 <form onsubmit="handleAddProduct(event)">
                     <div class="admin-form-group">
-                        <label class="admin-label">Name</label>
-                        <input type="text" class="admin-input" id="pName" placeholder="..." required />
+                        <label class="admin-label">Product Name</label>
+                        <input type="text" class="admin-input" id="pName" placeholder="e.g. Chocolate Cake" required />
                     </div>
                     <div class="admin-form-group">
-                        <label class="admin-label">Price ($)</label>
+                        <label class="admin-label">Price</label>
                         <input type="number" class="admin-input" id="pPrice" placeholder="0.00" step="0.01" min="0"
                             required />
                     </div>
@@ -53,10 +51,10 @@
                     </div>
                     <div class="admin-form-group">
                         <label class="admin-label">Description</label>
-                        <textarea class="admin-input" id="pDesc" placeholder="Short description..."
+                        <textarea class="admin-input" id="pDesc" placeholder="Brief description..."
                             style="min-height:80px;resize:vertical"></textarea>
                     </div>
-                    <button type="submit" class="admin-submit-btn">âœ¦ Archive Creation</button>
+                    <button type="submit" class="admin-submit-btn">✓ Save Product</button>
                 </form>
             </div>
 
@@ -67,7 +65,7 @@
                     style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap">
                     <div style="position:relative;flex:1;min-width:200px">
                         <span
-                            style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:#aaa">ðŸ”</span>
+                            style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:#aaa">🔍</span>
                         <input type="text" id="productSearch" class="admin-input"
                             style="padding-left:3rem;border-radius:9999px" placeholder="Search products..." />
                     </div>
@@ -82,7 +80,7 @@
                         style="display:grid;grid-template-columns:56px 1fr 80px 44px;gap:1rem;padding:0.5rem 0.5rem 1rem;border-bottom:1px solid #f5f5f5;margin-bottom:0.5rem">
                         <span></span>
                         <span
-                            style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.35em;color:#aaa">Masterpiece</span>
+                            style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.35em;color:#aaa">Product</span>
                         <span
                             style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.35em;color:#aaa">Price</span>
                         <span></span>
@@ -120,6 +118,11 @@
 
             count.textContent = filtered.length + ' Items';
 
+            const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            const sym = settings.currencySymbol || '$';
+            const pos = settings.currencyPosition || 'before';
+            const fmt = n => pos === 'after' ? n.toFixed(2) + sym : sym + n.toFixed(2);
+
             if (!filtered.length) {
                 list.innerHTML = '<p style="color:#aaa;font-style:italic;text-align:center;padding:3rem">No products found.</p>';
                 return;
@@ -134,8 +137,8 @@
           <div class="product-name">${p.name}</div>
           <div class="product-cat">${p.category || ''}</div>
         </div>
-        <div class="product-price-cell">$${parseFloat(p.price).toFixed(2)}</div>
-        <button class="delete-btn" onclick="deleteProduct(${p.id})" title="Remove">ðŸ—‘ï¸</button>
+        <div class="product-price-cell">${fmt(parseFloat(p.price))}</div>
+        <button class="delete-btn" onclick="deleteProduct(${p.id})" title="Remove">🗑</button>
       </div>
     `).join('');
         }
@@ -157,18 +160,27 @@
             renderProducts();
             // Flash success
             const btn = e.target.querySelector('.admin-submit-btn');
-            btn.textContent = 'âœ“ Added!';
-            btn.style.background = '#FDB9C8';
+            btn.textContent = '✓ Saved!';
+            btn.style.background = '#4ade80';
             btn.style.color = 'white';
-            setTimeout(() => { btn.textContent = 'âœ¦ Archive Creation'; btn.style.background = ''; btn.style.color = ''; }, 2000);
+            setTimeout(() => {
+                btn.textContent = '✓ Save Product';
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 2000);
         }
 
         function deleteProduct(id) {
-            if (!confirm('Remove this masterpiece from the archive?')) return;
+            if (!confirm('Are you sure you want to delete this product?')) return;
             data.products = data.products.filter(p => p.id !== id);
             saveAdminData('adminProducts', data.products);
             const el = document.getElementById('prod-' + id);
-            if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = 'all 0.3s'; setTimeout(() => renderProducts(), 300); }
+            if (el) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(20px)';
+                el.style.transition = 'all 0.3s';
+                setTimeout(() => renderProducts(), 300);
+            }
         }
     </script>
 </body>
