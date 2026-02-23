@@ -16,9 +16,9 @@
         }
 
         body {
-            background: var(--admin-bg);
-            font-family: 'Outfit', sans-serif;
-            color: #2d1e17;
+            background: #FFF5FB;
+            font-family: 'Inter', 'Outfit', sans-serif;
+            color: #2D1E17;
         }
 
         .admin-layout {
@@ -28,10 +28,9 @@
 
         .admin-main {
             flex: 1;
-            padding: 3.5rem;
+            padding: 3rem 3.5rem;
             overflow-x: hidden;
             margin-left: 280px;
-            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 35c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm60-17c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM66 70c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%23f9a8d4' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
 
         @media(max-width:1024px) {
@@ -52,18 +51,16 @@
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 0.5em;
-            color: #d4af37;
+            color: #D4AF37;
             display: block;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
         }
 
         .page-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
             font-weight: 700;
-            letter-spacing: -0.03em;
-            color: #2d1e17;
-            line-height: 1;
+            line-height: 1.2;
         }
 
         /* ── Layout Grid ── */
@@ -82,27 +79,20 @@
 
         /* ── Action Card (Add Corner) ── */
         .action-card {
-            background: var(--glass-white);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
+            background: white;
             border-radius: 2.5rem;
             padding: 2.5rem;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 8px 24px rgba(45, 30, 23, 0.05);
+            border: 1px solid #f5f5f5;
             position: sticky;
             top: 2rem;
         }
 
         .card-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.8rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
             font-weight: 700;
-            font-style: italic;
             margin-bottom: 2rem;
-            color: #2d1e17;
-        }
-
-        .lux-group {
-            margin-bottom: 1.5rem;
         }
 
         .lux-label {
@@ -110,28 +100,31 @@
             font-size: 9px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 0.3em;
-            color: var(--accent);
-            margin-bottom: 0.6rem;
+            letter-spacing: 0.35em;
+            color: #D4AF37;
+            margin-bottom: 0.5rem;
             padding-left: 0.5rem;
         }
 
         .lux-input {
             width: 100%;
-            padding: 1rem 1.4rem;
-            background: white;
-            border: 1.5px solid #f0f0f0;
-            border-radius: 1.25rem;
-            font-family: inherit;
-            font-size: 0.9rem;
-            outline: none;
-            transition: all 0.3s;
-            box-sizing: border-box;
+            padding: 1rem 1.2rem;
+            background: #F9F9F9 !important;
+            border: 2px solid transparent !important;
+            border-radius: 1.5rem !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 0.875rem !important;
+            font-weight: 600 !important;
+            font-style: italic !important;
+            outline: none !important;
+            transition: all 0.3s !important;
+            box-sizing: border-box !important;
         }
 
         .lux-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(249, 168, 212, 0.15);
+            border-color: rgba(253, 185, 200, 0.4) !important;
+            background: white !important;
+            box-shadow: 0 4px 16px rgba(253, 185, 200, 0.1) !important;
         }
 
         .lux-textarea {
@@ -170,35 +163,33 @@
 
         .corner-card {
             background: white;
-            border-radius: 2.2rem;
-            padding: 2.2rem;
-            border: 1px solid #f2f2f2;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+            border-radius: 2rem;
+            padding: 2rem;
+            border: 1px solid #f5f5f5;
+            box-shadow: 0 8px 24px rgba(45, 30, 23, 0.05);
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-            transition: all 0.4s;
+            transition: all 0.5s;
             position: relative;
-            overflow: hidden;
         }
 
         .corner-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
-            border-color: var(--primary);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(45, 30, 23, 0.1);
         }
 
         .corner-icon-box {
-            width: 64px;
-            height: 64px;
-            background: #fdf2f8;
-            border-radius: 1.5rem;
+            width: 56px;
+            height: 56px;
+            background: #FFFDD0;
+            border-radius: 1.2rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            color: var(--accent);
+            font-size: 1.5rem;
             flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1);
         }
 
         .corner-info {
@@ -206,18 +197,18 @@
         }
 
         .corner-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.6rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: #2d1e17;
+            margin-bottom: 0.2rem;
+            color: #2D1E17;
         }
 
         .corner-desc {
             font-size: 0.85rem;
             color: #8E7D72;
             line-height: 1.6;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             font-style: italic;
         }
 
@@ -234,10 +225,10 @@
             background: #fff5f5;
             color: #ef4444;
             border: 1px solid #ffebeb;
-            font-size: 10px;
-            font-weight: 900;
+            font-size: 9px;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.15em;
             cursor: pointer;
             transition: all 0.3s;
         }
@@ -266,31 +257,31 @@
 
         <main class="admin-main">
             <header class="page-header">
-                <span class="page-overline">Segment Management</span>
-                <h1 class="page-title">Boutique Corners</h1>
+                <span class="page-overline">Shop Organization</span>
+                <h1 class="page-title">Categories</h1>
             </header>
 
             <div class="management-grid">
                 <!-- Add Form -->
                 <aside class="action-card">
-                    <h2 class="card-title">Establish New Segment</h2>
+                    <h2 class="card-title">Add New Category</h2>
                     <form onsubmit="handleAddCorner(event)">
                         <div class="lux-group">
-                            <label class="lux-label">Segment Title</label>
-                            <input type="text" class="lux-input" id="newCornerName" placeholder="e.g. Gâteau Atelier"
+                            <label class="lux-label">Category Name</label>
+                            <input type="text" class="lux-input" id="newCornerName" placeholder="e.g. Traditional Cakes"
                                 required />
                         </div>
                         <div class="lux-group">
-                            <label class="lux-label">Signature Description</label>
+                            <label class="lux-label">Category Description</label>
                             <textarea class="lux-input lux-textarea" id="newCornerDesc"
-                                placeholder="Describe the essence of this corner..." required></textarea>
+                                placeholder="What kind of items are in this category..." required></textarea>
                         </div>
                         <div class="lux-group">
-                            <label class="lux-label">Segment Icon / Emoji</label>
+                            <label class="lux-label">Category Icon (Emoji)</label>
                             <input type="text" class="lux-input" id="newCornerIcon" placeholder="e.g. 🎂"
                                 maxlength="4" />
                         </div>
-                        <button type="submit" class="lux-submit">✦ Initialize Corner</button>
+                        <button type="submit" class="lux-submit">✓ Add Category</button>
                     </form>
                 </aside>
 
@@ -336,12 +327,12 @@
                         <div class="corner-icon-box">${c.icon || '🍰'}</div>
                         <div class="corner-info">
                             <h3 class="corner-name">${c.name}</h3>
-                            <div style="font-size:9px; font-weight:900; letter-spacing:0.3em; color:#d4af37; text-transform:uppercase">Exclusive Segment</div>
+                            <div style="font-size:9px; font-weight:900; letter-spacing:0.2em; color:#D4AF37; text-transform:uppercase">Shop Category</div>
                         </div>
                     </div>
-                    <p class="corner-desc">"${c.description || 'A unique collection of artisanal masterpieces.'}"</p>
+                    <p class="corner-desc">"${c.description || 'A unique collection of artisanal products.'}"</p>
                     <div class="corner-actions">
-                        <button class="delete-btn" onclick="deleteCorner(${c.id})">🗑 Purge</button>
+                        <button class="delete-btn" onclick="deleteCorner(${c.id})">🗑 Delete</button>
                     </div>
                 </div>
             `).join('');
