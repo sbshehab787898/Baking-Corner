@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Staff Login — Baking Corner</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="admin-style.css" />
+</head>
+
+<body
+    style="background:var(--secondary);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem">
+
+    <div class="login-card">
+        <div class="login-icon-wrap">⚙️</div>
+        <h2 class="login-title">Admin Portal</h2>
+        <p class="login-sub">Secure Cryptographic Access Required</p>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="login-field">
+                <label class="admin-label">Identifier</label>
+                <input type="text" id="loginUser" class="admin-input" placeholder="Username" required
+                    autocomplete="username" />
+            </div>
+            <div class="login-field">
+                <label class="admin-label">Passcode</label>
+                <input type="password" id="loginPass" class="admin-input" placeholder="Password" required
+                    autocomplete="current-password" />
+            </div>
+            <p id="loginError" class="login-error" style="display:none">Identity Verification Failed. Try again.</p>
+            <button type="submit" class="login-submit-btn" id="loginBtn">
+                INITIALIZE ADMIN SESSION
+            </button>
+        </form>
+
+        <div class="login-hint">
+            <p>Dev Hint: Identifier <strong>admin</strong> | Passcode <strong>admin</strong></p>
+        </div>
+
+        <a href="index.html" class="login-back-link">← Back to Site</a>
+    </div>
+
+    <script>
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUser').value.trim();
+            const p = document.getElementById('loginPass').value.trim();
+            const btn = document.getElementById('loginBtn');
+            const err = document.getElementById('loginError');
+
+            btn.textContent = 'Verifying...';
+            btn.style.opacity = '0.7';
+
+            setTimeout(() => {
+                if (u === 'admin' && p === 'admin') {
+                    sessionStorage.setItem('adminAuth', '1');
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    err.style.display = 'block';
+                    btn.textContent = 'INITIALIZE ADMIN SESSION';
+                    btn.style.opacity = '1';
+                    document.getElementById('loginPass').value = '';
+                }
+            }, 600);
+        }
+    </script>
+</body>
+
+</html>

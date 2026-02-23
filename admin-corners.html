@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boutique Corners â€” Baking Corner Admin</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="admin-style.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Outfit:wght@400;600;700;900&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body class="admin-body">
+
+    <div id="adminSidebarMount"></div>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <span class="admin-page-overline">Management</span>
+            <h1 class="admin-page-title">Boutique <em style="color:#F896AC">Corners</em></h1>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:2rem;align-items:start">
+
+            <!-- Add New Corner -->
+            <div class="admin-card" id="addCornerCard">
+                <h2 class="admin-card-title">Establish New Segment</h2>
+                <form onsubmit="handleAddCorner(event)">
+                    <div class="admin-form-group">
+                        <label class="admin-label">Corner Title</label>
+                        <input type="text" class="admin-input" id="newCornerName" placeholder="..." required />
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Description</label>
+                        <textarea class="admin-input" id="newCornerDesc" placeholder="A short description..."
+                            style="min-height:100px;resize:vertical"></textarea>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Icon / Emoji</label>
+                        <input type="text" class="admin-input" id="newCornerIcon" placeholder="e.g. ðŸ°" maxlength="4" />
+                    </div>
+                    <button type="submit" class="admin-submit-btn">âœ¦ Initialize Corner</button>
+                </form>
+            </div>
+
+            <!-- Corners List -->
+            <div id="cornersList">
+                <p style="color:#aaa;font-style:italic;text-align:center;padding:3rem">Loading corners...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="admin-shared.js"></script>
+    <script>
+        let data;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            adminAuthGuard();
+            renderAdminSidebar('corners');
+            data = getAdminData();
+            renderCorners();
+        });
+
+        function renderCorners() {
+            const list = document.getElementById('cornersList');
+            if (!data.corners.length) {
+                list.innerHTML = '<p style="color:#aaa;font-style:italic;text-align:center;padding:3rem">No corners yet. Add one!</p>';
+                return;
+            }
+            list.innerHTML = data.corners.map(c => `
+      <div class="corner-item" id="corner-${c.id}">
+        <div style="font-size:2rem;flex-shrink:0">${c.icon || 'ðŸŽ‚'}</div>
+        <div style="flex:1;min-width:0">
+          <div class="corner-item-name">${c.name}</div>
+          <div class="corner-item-desc">${c.description || 'No description provided.'}</div>
+        </div>
+        <div style="display:flex;gap:0.75rem;flex-shrink:0">
+          <button class="delete-btn" onclick="deleteCorner(${c.id})" title="Delete">ðŸ—‘ï¸</button>
+        </div>
+      </div>
+    `).join('');
+        }
+
+        function handleAddCorner(e) {
+            e.preventDefault();
+            const name = document.getElementById('newCornerName').value.trim();
+            const desc = document.getElementById('newCornerDesc').value.trim();
+            const icon = document.getElementById('newCornerIcon').value.trim() || 'ðŸŽ‚';
+            if (!name) return;
+            data.corners.push({ id: Date.now(), name, description: desc, icon });
+            saveAdminData('adminCorners', data.corners);
+            e.target.reset();
+            renderCorners();
+        }
+
+        function deleteCorner(id) {
+            if (!confirm('Remove this corner from the atelier?')) return;
+            data.corners = data.corners.filter(c => c.id !== id);
+            saveAdminData('adminCorners', data.corners);
+            const el = document.getElementById('corner-' + id);
+            if (el) { el.style.opacity = '0'; el.style.transform = 'scale(0.95)'; el.style.transition = 'all 0.3s'; setTimeout(() => renderCorners(), 300); }
+        }
+    </script>
+</body>
+
+</html>

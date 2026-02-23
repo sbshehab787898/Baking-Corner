@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atelier Settings â€” Baking Corner Admin</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="admin-style.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Outfit:wght@400;600;700;900&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body class="admin-body">
+
+    <div id="adminSidebarMount"></div>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <span class="admin-page-overline">Configuration</span>
+            <h1 class="admin-page-title">Atelier <em style="color:#F896AC">Settings</em></h1>
+        </div>
+
+        <!-- Store Info -->
+        <div class="admin-card" style="margin-bottom:2rem">
+            <h2 class="admin-card-title">Store Information</h2>
+            <div class="settings-section">
+                <p class="settings-section-title">Atelier Identity</p>
+                <div class="admin-form-group">
+                    <label class="admin-label">Store Name</label>
+                    <input type="text" class="admin-input" id="storeName" value="Baking Corner" />
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Tagline</label>
+                    <input type="text" class="admin-input" id="storeTagline" value="Luxury Atelier" />
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">WhatsApp Number</label>
+                    <input type="text" class="admin-input" id="storeWA" value="+8801712730122" />
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">Delivery Address</label>
+                    <input type="text" class="admin-input" id="storeAddress" value="Nangalkot Bottol Square, Cumilla" />
+                </div>
+            </div>
+            <button class="admin-submit-btn" onclick="saveStoreInfo()">âœ¦ Save Store Information</button>
+        </div>
+
+        <!-- Controls -->
+        <div class="admin-card" style="margin-bottom:2rem">
+            <h2 class="admin-card-title">Site Controls</h2>
+
+            <div class="settings-section">
+                <p class="settings-section-title">Visibility & Access</p>
+
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Shop / Collection Page</div>
+                        <div class="settings-desc">Toggle visibility of the Collection page</div>
+                    </div>
+                    <button class="toggle-switch on" id="toggleShop" onclick="toggleSetting(this)"></button>
+                </div>
+
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">WhatsApp Order Button</div>
+                        <div class="settings-desc">Show/hide WhatsApp ordering option</div>
+                    </div>
+                    <button class="toggle-switch on" id="toggleWA" onclick="toggleSetting(this)"></button>
+                </div>
+
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Price List Display</div>
+                        <div class="settings-desc">Show/hide price list on Collection page</div>
+                    </div>
+                    <button class="toggle-switch on" id="togglePrices" onclick="toggleSetting(this)"></button>
+                </div>
+
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Language Toggle (EN/BN)</div>
+                        <div class="settings-desc">Allow visitors to switch language</div>
+                    </div>
+                    <button class="toggle-switch on" id="toggleLang" onclick="toggleSetting(this)"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="admin-card" style="margin-bottom:2rem">
+            <h2 class="admin-card-title">Security</h2>
+            <div class="settings-section">
+                <p class="settings-section-title">Update Credentials</p>
+                <div class="admin-form-group">
+                    <label class="admin-label">Current Password</label>
+                    <input type="password" class="admin-input" id="curPass" placeholder="..." />
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                    <div class="admin-form-group">
+                        <label class="admin-label">New Password</label>
+                        <input type="password" class="admin-input" id="newPass" placeholder="..." />
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Confirm Password</label>
+                        <input type="password" class="admin-input" id="confPass" placeholder="..." />
+                    </div>
+                </div>
+                <p id="passMsg" style="font-size:0.8rem;font-style:italic;color:#4ade80;display:none;margin-top:0.5rem">
+                    Password updated successfully.</p>
+            </div>
+            <button class="admin-submit-btn" onclick="changePassword()">âœ¦ Update Credentials</button>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="admin-card" style="border:1px solid #fecaca">
+            <h2 class="admin-card-title" style="color:#ef4444">Danger Zone</h2>
+            <div class="settings-section">
+                <p class="settings-section-title">Irreversible Actions</p>
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Clear All Products</div>
+                        <div class="settings-desc">Remove all products from the archive</div>
+                    </div>
+                    <button onclick="clearProducts()"
+                        style="padding:0.75rem 1.5rem;background:#fff5f5;color:#ef4444;border:1px solid #fecaca;border-radius:1rem;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;cursor:pointer;transition:all 0.3s">Clear
+                        All</button>
+                </div>
+                <div class="settings-row">
+                    <div>
+                        <div class="settings-label">Clear All Corners</div>
+                        <div class="settings-desc">Remove all boutique corners</div>
+                    </div>
+                    <button onclick="clearCorners()"
+                        style="padding:0.75rem 1.5rem;background:#fff5f5;color:#ef4444;border:1px solid #fecaca;border-radius:1rem;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;cursor:pointer;transition:all 0.3s">Clear
+                        All</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="admin-shared.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            adminAuthGuard();
+            renderAdminSidebar('settings');
+            loadSettings();
+        });
+
+        function loadSettings() {
+            const settings = JSON.parse(sessionStorage.getItem('siteSettings') || '{}');
+            if (settings.storeName) document.getElementById('storeName').value = settings.storeName;
+            if (settings.storeTagline) document.getElementById('storeTagline').value = settings.storeTagline;
+            if (settings.storeWA) document.getElementById('storeWA').value = settings.storeWA;
+            if (settings.storeAddress) document.getElementById('storeAddress').value = settings.storeAddress;
+            ['Shop', 'WA', 'Prices', 'Lang'].forEach(key => {
+                const val = settings['toggle' + key];
+                const btn = document.getElementById('toggle' + key);
+                if (btn && val === false) btn.classList.remove('on');
+            });
+        }
+
+        function saveStoreInfo() {
+            const settings = JSON.parse(sessionStorage.getItem('siteSettings') || '{}');
+            settings.storeName = document.getElementById('storeName').value;
+            settings.storeTagline = document.getElementById('storeTagline').value;
+            settings.storeWA = document.getElementById('storeWA').value;
+            settings.storeAddress = document.getElementById('storeAddress').value;
+            sessionStorage.setItem('siteSettings', JSON.stringify(settings));
+            const btn = event.target;
+            btn.textContent = 'âœ“ Saved!';
+            btn.style.background = '#FDB9C8';
+            btn.style.color = 'white';
+            setTimeout(() => { btn.textContent = 'âœ¦ Save Store Information'; btn.style.background = ''; btn.style.color = ''; }, 2000);
+        }
+
+        function toggleSetting(btn) {
+            btn.classList.toggle('on');
+            const settings = JSON.parse(sessionStorage.getItem('siteSettings') || '{}');
+            const key = btn.id;
+            settings[key] = btn.classList.contains('on');
+            sessionStorage.setItem('siteSettings', JSON.stringify(settings));
+        }
+
+        function changePassword() {
+            const cur = document.getElementById('curPass').value;
+            const nw = document.getElementById('newPass').value;
+            const cf = document.getElementById('confPass').value;
+            const msg = document.getElementById('passMsg');
+            if (cur !== 'admin') { msg.textContent = 'Current password incorrect.'; msg.style.color = '#ef4444'; msg.style.display = 'block'; return; }
+            if (nw !== cf || !nw) { msg.textContent = 'Passwords do not match.'; msg.style.color = '#ef4444'; msg.style.display = 'block'; return; }
+            sessionStorage.setItem('adminPass', nw);
+            msg.textContent = 'Password updated. Note: Resets to default on page reload.';
+            msg.style.color = '#4ade80';
+            msg.style.display = 'block';
+            document.getElementById('curPass').value = '';
+            document.getElementById('newPass').value = '';
+            document.getElementById('confPass').value = '';
+        }
+
+        function clearProducts() {
+            if (!confirm('Remove ALL products? This cannot be undone.')) return;
+            saveAdminData('adminProducts', []);
+            alert('All products cleared.');
+        }
+
+        function clearCorners() {
+            if (!confirm('Remove ALL corners? This cannot be undone.')) return;
+            saveAdminData('adminCorners', []);
+            alert('All corners cleared.');
+        }
+    </script>
+</body>
+
+</html>

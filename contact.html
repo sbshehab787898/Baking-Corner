@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Concierge — Baking Corner</title>
+    <meta name="description"
+        content="Contact Baking Corner for custom cake orders, wedding commissions, and private consultations. Reach us via WhatsApp or our inquiry form." />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">
+                <div class="nav-logo-icon">🎂</div>
+                <div class="nav-logo-text">
+                    <span>Baking <span class="text-gradient-gold" style="font-style:italic">Corner</span></span>
+                    <span>Luxury Atelier</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" data-t="atelier">Atelier</a>
+                <a href="shop.html" data-t="collection">Collection</a>
+                <a href="about.html" data-t="legacy">Legacy</a>
+                <a href="contact.html" data-t="concierge">Concierge</a>
+            </div>
+            <div class="nav-actions">
+                <button class="lang-btn lang-toggle"><span>🌐</span> <span class="lang-btn-text">বাংলা</span></button>
+                <a href="admin.html" class="nav-icon-btn">👤</a>
+                <button class="cart-btn" onclick="alert('Cart coming soon!')">🛍️<span class="cart-count"
+                        style="display:none">0</span></button>
+            </div>
+            <div class="mobile-controls">
+                <button class="lang-btn lang-toggle"><span class="lang-btn-text">বাংলা</span></button>
+                <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <span style="font-family:'Playfair Display',serif;font-size:1.5rem;font-style:italic;font-weight:700">Baking
+                <span class="text-gradient-gold">Corner</span></span>
+            <button id="closeMenu"
+                style="width:56px;height:56px;background:#f5f5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem">✕</button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="index.html" data-t="atelier">Atelier</a>
+            <a href="shop.html" data-t="collection">Collection</a>
+            <a href="about.html" data-t="legacy">Legacy</a>
+            <a href="contact.html" data-t="concierge">Concierge</a>
+        </nav>
+        <div class="mobile-menu-footer">
+            <a href="admin.html" class="mobile-admin-link">
+                <div style="display:flex;align-items:center;gap:1rem"><span style="color:var(--primary)">⚙️</span><span
+                        data-t="staffPortal">Staff Login Portal</span></div><span>›</span>
+            </a>
+            <button class="lang-btn lang-toggle" style="margin-bottom:1.5rem;width:100%;justify-content:center"><span
+                    class="lang-btn-text">বাংলা</span></button>
+            <p class="mobile-copyright">Baking Corner Luxury Confectionery © 2026</p>
+        </div>
+    </div>
+
+    <!-- PAGE HERO -->
+    <div class="page-hero bg-white" style="padding-top:10rem;padding-bottom:4rem">
+        <div class="container">
+            <div class="fade-in">
+                <span class="overline" data-t="contactHeroOverline">Private Consultation</span>
+                <h1>
+                    <span data-lang="en">Direct <span class="text-gradient-gold"
+                            style="font-style:italic">Liaison</span></span>
+                    <span data-lang="bn" style="display:none">সরাসরি <span class="text-gradient-gold"
+                            style="font-style:italic">যোগাযোগ</span></span>
+                </h1>
+                <div class="premium-divider"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT CONTENT -->
+    <section class="section-padding bg-white" style="padding-top:4rem">
+        <div class="container">
+            <div class="grid-2" style="gap:5rem;align-items:start;max-width:1200px;margin:0 auto">
+
+                <!-- Inquiry Form -->
+                <div class="contact-form-card fade-in-left">
+                    <h2 style="font-family:'Playfair Display',serif;font-size:2rem;letter-spacing:-0.03em;margin-bottom:2.5rem"
+                        data-t="inquiryPortal">Inquiry Portal</h2>
+                    <form id="contactForm" onsubmit="handleFormSubmit(event)">
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label data-t="fullName">Full Name</label>
+                                <input type="text" placeholder="Name..." required />
+                            </div>
+                            <div class="form-group">
+                                <label data-t="emailAddress">Email Address</label>
+                                <input type="email" placeholder="Email..." required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label data-t="inquiryCategory">Inquiry Category</label>
+                            <select>
+                                <option>Global Custom Request</option>
+                                <option>Wedding &amp; Gala Commissions</option>
+                                <option>Corporate Gifting Series</option>
+                                <option>Atelier Visit Appointment</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label data-t="requirementDetails">Requirement Details</label>
+                            <textarea placeholder="Details..."></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn" data-t="initCommunication">Initiate
+                            Communication</button>
+                    </form>
+                </div>
+
+                <!-- Info Panel -->
+                <div class="fade-in-right" style="padding-top:1rem">
+                    <span class="overline" style="margin-bottom:2rem;display:block" data-t="globalPresence">Global
+                        Presence</span>
+                    <h3 style="font-family:'Playfair Display',serif;font-size:2rem;letter-spacing:-0.03em;margin-bottom:3rem"
+                        data-t="atelierHQ">The Grand Atelier HQ</h3>
+
+                    <div class="contact-info-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <p
+                                style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:0.4rem">
+                                নাঙ্গলকোট বটতল চত্বর, কুমিল্লা</p>
+                            <p style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;color:var(--text-muted);font-style:italic;opacity:0.7"
+                                data-t="privateAppointment">By Private Appointment</p>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-icon">📱</div>
+                        <div>
+                            <p
+                                style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:0.4rem">
+                                +880 1712-730122</p>
+                            <p style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;color:var(--text-muted);font-style:italic;opacity:0.7"
+                                data-t="dailyLiaison">Daily Liaison Available</p>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-icon">🌐</div>
+                        <div>
+                            <p
+                                style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:0.4rem">
+                                global@bakingcorner.com</p>
+                            <p style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;color:var(--text-muted);font-style:italic;opacity:0.7"
+                                data-t="responseGuarantee">24H Response Guarantee</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:3rem;padding-top:2.5rem;border-top:1px solid #f5f5f5">
+                        <a href="https://wa.me/8801712730122" target="_blank" rel="noopener noreferrer" class="wa-btn"
+                            style="display:inline-flex">
+                            💬 <span data-t="whatsappContact">WhatsApp Order</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-brand">
+                <div class="footer-logo-icon">🎂</div>
+                <h2>Baking <span class="text-gradient-gold" style="font-style:italic">Corner</span></h2>
+            </div>
+            <nav class="footer-nav">
+                <a href="index.html" data-t="atelier">Atelier</a>
+                <a href="shop.html" data-t="collection">Collection</a>
+                <a href="about.html" data-t="legacy">Legacy</a>
+                <a href="contact.html" data-t="concierge">Concierge</a>
+                <a href="admin.html" data-t="staffPortal">Staff Login Portal</a>
+            </nav>
+            <div class="footer-bottom">
+                <div class="footer-copy"><span class="sparkle">✦</span><span>Baking Corner Luxury Confectionery ©
+                        2026</span></div>
+                <div class="footer-legal"><a href="#">Privacy Protocol</a><a href="#">Engagement Terms</a></div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('.submit-btn');
+            btn.textContent = '✓ Message Sent!';
+            btn.style.background = 'var(--primary)';
+            btn.style.color = 'white';
+            setTimeout(() => {
+                btn.textContent = translations[currentLang]['initCommunication'] || 'Initiate Communication';
+                btn.style.background = '';
+                btn.style.color = '';
+                e.target.reset();
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

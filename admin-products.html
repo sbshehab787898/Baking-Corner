@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Archive & Creation â€” Baking Corner Admin</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="admin-style.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Outfit:wght@400;600;700;900&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body class="admin-body">
+
+    <div id="adminSidebarMount"></div>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <span class="admin-page-overline">Inventory</span>
+            <h1 class="admin-page-title">Archive <em style="color:#F896AC">&amp; Creation</em></h1>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:2rem;align-items:start">
+
+            <!-- Add Product Form -->
+            <div class="admin-card" style="position:sticky;top:2rem">
+                <h2 class="admin-card-title">Register Masterpiece</h2>
+                <form onsubmit="handleAddProduct(event)">
+                    <div class="admin-form-group">
+                        <label class="admin-label">Name</label>
+                        <input type="text" class="admin-input" id="pName" placeholder="..." required />
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Price ($)</label>
+                        <input type="number" class="admin-input" id="pPrice" placeholder="0.00" step="0.01" min="0"
+                            required />
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Category</label>
+                        <select class="admin-input" id="pCat">
+                            <option value="cakes">Cakes</option>
+                            <option value="pastries">Pastries</option>
+                            <option value="macarons">Macarons</option>
+                            <option value="chocolates">Chocolates</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Image URL</label>
+                        <input type="url" class="admin-input" id="pImg" placeholder="https://..." />
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-label">Description</label>
+                        <textarea class="admin-input" id="pDesc" placeholder="Short description..."
+                            style="min-height:80px;resize:vertical"></textarea>
+                    </div>
+                    <button type="submit" class="admin-submit-btn">âœ¦ Archive Creation</button>
+                </form>
+            </div>
+
+            <!-- Products List -->
+            <div>
+                <!-- Search + count bar -->
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap">
+                    <div style="position:relative;flex:1;min-width:200px">
+                        <span
+                            style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:#aaa">ðŸ”</span>
+                        <input type="text" id="productSearch" class="admin-input"
+                            style="padding-left:3rem;border-radius:9999px" placeholder="Search products..." />
+                    </div>
+                    <span id="productCount"
+                        style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.3em;color:#aaa;white-space:nowrap">0
+                        Items</span>
+                </div>
+
+                <div class="admin-card" style="padding:1.5rem">
+                    <!-- Table header -->
+                    <div
+                        style="display:grid;grid-template-columns:56px 1fr 80px 44px;gap:1rem;padding:0.5rem 0.5rem 1rem;border-bottom:1px solid #f5f5f5;margin-bottom:0.5rem">
+                        <span></span>
+                        <span
+                            style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.35em;color:#aaa">Masterpiece</span>
+                        <span
+                            style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.35em;color:#aaa">Price</span>
+                        <span></span>
+                    </div>
+                    <div id="productsList"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="admin-shared.js"></script>
+    <script>
+        let data;
+        let searchQuery = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            adminAuthGuard();
+            renderAdminSidebar('products');
+            data = getAdminData();
+            renderProducts();
+
+            document.getElementById('productSearch').addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderProducts();
+            });
+        });
+
+        function renderProducts() {
+            const list = document.getElementById('productsList');
+            const count = document.getElementById('productCount');
+            const filtered = data.products.filter(p =>
+                p.name.toLowerCase().includes(searchQuery) ||
+                (p.category || '').toLowerCase().includes(searchQuery)
+            );
+
+            count.textContent = filtered.length + ' Items';
+
+            if (!filtered.length) {
+                list.innerHTML = '<p style="color:#aaa;font-style:italic;text-align:center;padding:3rem">No products found.</p>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(p => `
+      <div class="product-row" id="prod-${p.id}">
+        <img src="${p.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=100'}"
+             class="product-thumb" alt="${p.name}"
+             onerror="this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=100'"/>
+        <div class="product-info">
+          <div class="product-name">${p.name}</div>
+          <div class="product-cat">${p.category || ''}</div>
+        </div>
+        <div class="product-price-cell">$${parseFloat(p.price).toFixed(2)}</div>
+        <button class="delete-btn" onclick="deleteProduct(${p.id})" title="Remove">ðŸ—‘ï¸</button>
+      </div>
+    `).join('');
+        }
+
+        function handleAddProduct(e) {
+            e.preventDefault();
+            const newProd = {
+                id: Date.now(),
+                name: document.getElementById('pName').value.trim(),
+                price: parseFloat(document.getElementById('pPrice').value),
+                category: document.getElementById('pCat').value,
+                image: document.getElementById('pImg').value.trim() ||
+                    'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600',
+                description: document.getElementById('pDesc').value.trim()
+            };
+            data.products.unshift(newProd);
+            saveAdminData('adminProducts', data.products);
+            e.target.reset();
+            renderProducts();
+            // Flash success
+            const btn = e.target.querySelector('.admin-submit-btn');
+            btn.textContent = 'âœ“ Added!';
+            btn.style.background = '#FDB9C8';
+            btn.style.color = 'white';
+            setTimeout(() => { btn.textContent = 'âœ¦ Archive Creation'; btn.style.background = ''; btn.style.color = ''; }, 2000);
+        }
+
+        function deleteProduct(id) {
+            if (!confirm('Remove this masterpiece from the archive?')) return;
+            data.products = data.products.filter(p => p.id !== id);
+            saveAdminData('adminProducts', data.products);
+            const el = document.getElementById('prod-' + id);
+            if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = 'all 0.3s'; setTimeout(() => renderProducts(), 300); }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baking Corner — Luxury Atelier</title>
+    <meta name="description"
+        content="Baking Corner — Where Science Meets Devotion. Premium custom cakes, macarons, and confections crafted with the finest ingredients." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+</head>
+
+<body>
+
+    <!-- ====== NAVBAR ====== -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">
+                <div class="nav-logo-icon">🎂</div>
+                <div class="nav-logo-text">
+                    <span>Baking <span class="text-gradient-gold" style="font-style:italic">Corner</span></span>
+                    <span>Luxury Atelier</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" data-t="atelier">Atelier</a>
+                <a href="shop.html" data-t="collection">Collection</a>
+                <a href="about.html" data-t="legacy">Legacy</a>
+                <a href="contact.html" data-t="concierge">Concierge</a>
+            </div>
+            <div class="nav-actions">
+                <button class="lang-btn lang-toggle"><span>🌐</span> <span class="lang-btn-text">বাংলা</span></button>
+                <a href="admin.html" class="nav-icon-btn" title="Admin">👤</a>
+                <button class="cart-btn" onclick="alert('Cart coming soon!')">
+                    🛍️
+                    <span class="cart-count" style="display:none">0</span>
+                </button>
+            </div>
+            <div class="mobile-controls">
+                <button class="lang-btn lang-toggle"><span class="lang-btn-text">বাংলা</span></button>
+                <button class="hamburger" id="hamburger" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <span style="font-family:'Playfair Display',serif;font-size:1.5rem;font-style:italic;font-weight:700">Baking
+                <span class="text-gradient-gold">Corner</span></span>
+            <button id="closeMenu"
+                style="width:56px;height:56px;background:#f5f5f5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem">✕</button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="index.html" data-t="atelier">Atelier</a>
+            <a href="shop.html" data-t="collection">Collection</a>
+            <a href="about.html" data-t="legacy">Legacy</a>
+            <a href="contact.html" data-t="concierge">Concierge</a>
+        </nav>
+        <div class="mobile-menu-footer">
+            <a href="admin.html" class="mobile-admin-link">
+                <div style="display:flex;align-items:center;gap:1rem"><span style="color:var(--primary)">⚙️</span> <span
+                        data-t="staffPortal">Staff Login Portal</span></div>
+                <span>›</span>
+            </a>
+            <button class="lang-btn lang-toggle" style="margin-bottom:1.5rem;width:100%;justify-content:center"><span
+                    class="lang-btn-text">বাংলা</span></button>
+            <p class="mobile-copyright">Baking Corner Luxury Confectionery © 2026</p>
+        </div>
+    </div>
+
+    <!-- ====== HERO ====== -->
+    <section class="hero">
+        <div class="hero-ring"></div>
+        <div class="container" style="position:relative;z-index:1">
+            <div class="hero-content fade-in">
+                <span class="overline mb-8" data-t="heroSub">Baking Corner — Luxury Atelier</span>
+                <h1>
+                    <span data-lang="en">Pure <span class="text-gradient-gold"
+                            style="font-style:italic">Artistry</span><br><span
+                            style="font-size:0.55em;font-weight:400;display:block;margin-top:0.5rem">Beyond
+                            Sweetness</span></span>
+                    <span data-lang="bn" style="display:none"><span class="text-gradient-gold"
+                            style="font-style:italic">মিষ্টতার</span> ঊর্ধ্বে<br><span
+                            style="font-size:0.55em;font-weight:400;display:block;margin-top:0.5rem">খাঁটি
+                            শৈল্পিকতা</span></span>
+                </h1>
+                <p class="hero-desc" data-t="heroDesc"></p>
+                <div class="hero-actions">
+                    <a href="shop.html" class="btn-premium"><span class="btn-premium-inner"
+                            data-t="exploreAtelier">Explore Atelier</span></a>
+                    <a href="about.html" class="btn-ghost" data-t="ourHeritage">Our Heritage <span>→</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== PHILOSOPHY ====== -->
+    <section class="section-padding bg-white">
+        <div class="container">
+            <div class="grid-2">
+                <div class="fade-in-left" style="position:relative">
+                    <div class="philosophy-img">
+                        <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&q=80&w=1000"
+                            alt="Craftsmanship" loading="lazy" />
+                    </div>
+                    <div class="glass philosophy-card-float"
+                        style="position:absolute;bottom:-60px;right:-60px;padding:2.5rem;border-radius:3rem;max-width:320px">
+                        <div style="font-size:2rem;margin-bottom:1rem">✨</div>
+                        <h4 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:0.5rem;font-style:italic"
+                            data-t="noCompromise">No Compromise.</h4>
+                        <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.7" data-t="qualityDesc"></p>
+                    </div>
+                </div>
+                <div class="fade-in-right" style="padding-left:2rem;margin-top:2rem">
+                    <span class="overline mb-6" data-t="philosophyOverline">The Atelier Philosophy</span>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(2.2rem,4vw,3.5rem);margin:1.5rem 0 2rem;line-height:1.1;letter-spacing:-0.03em"
+                        data-t="philosophyTitle">Where Science Meets Devotion.</h2>
+                    <div class="premium-divider left"></div>
+                    <p style="font-size:1rem;color:var(--text-muted);margin:2rem 0 3rem;line-height:2"
+                        data-t="philosophyDesc"></p>
+                    <div class="grid-2" style="gap:2rem">
+                        <div>
+                            <div style="font-size:1.5rem;margin-bottom:0.75rem">🏆</div>
+                            <h5
+                                style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.3em;margin-bottom:0.5rem">
+                                Awarded Mastery</h5>
+                            <p style="font-size:11px;color:var(--text-muted);font-style:italic">Voted Best Boutique
+                                Bakery 2024</p>
+                        </div>
+                        <div>
+                            <div style="font-size:1.5rem;margin-bottom:0.75rem">❤️</div>
+                            <h5
+                                style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.3em;margin-bottom:0.5rem">
+                                Pure Devotion</h5>
+                            <p style="font-size:11px;color:var(--text-muted);font-style:italic">Every item made fresh by
+                                appointment</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== BOUTIQUE CORNERS ====== -->
+    <section class="section-padding" style="background:rgba(255,253,208,0.2)">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="overline" data-t="boutiqueCorners">Boutique Corners</span>
+                <h2 data-t="boutiqueCorners" style="margin-top:1rem">Boutique Corners</h2>
+                <div class="premium-divider"></div>
+            </div>
+            <div class="grid-3">
+                <a href="shop.html?corner=cakes" class="corner-card fade-in" style="text-decoration:none;color:inherit">
+                    <div class="icon-wrap">🎂</div>
+                    <h3>Gâteau Atelier</h3>
+                    <p>"Bespoke tiered creations for ceremonies of the highest distinction."</p>
+                    <div class="link-arrow"><span data-t="visitSection">Visit Section</span> <span>›</span></div>
+                </a>
+                <a href="shop.html?corner=pastries" class="corner-card fade-in"
+                    style="text-decoration:none;color:inherit;animation-delay:0.1s">
+                    <div class="icon-wrap">🥐</div>
+                    <h3>Viennoiserie</h3>
+                    <p>"Morning masterpieces, perfected over decades of devotion to craft."</p>
+                    <div class="link-arrow"><span data-t="visitSection">Visit Section</span> <span>›</span></div>
+                </a>
+                <a href="shop.html?corner=chocolates" class="corner-card fade-in"
+                    style="text-decoration:none;color:inherit;animation-delay:0.2s">
+                    <div class="icon-wrap">🍫</div>
+                    <h3>Chocolatier</h3>
+                    <p>"Grand-cru single-origin confections from the world's most remote estates."</p>
+                    <div class="link-arrow"><span data-t="visitSection">Visit Section</span> <span>›</span></div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== FEATURED PRODUCTS ====== -->
+    <section class="section-padding bg-white">
+        <div class="container">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;margin-bottom:4rem;gap:2rem"
+                class="fade-in">
+                <div>
+                    <span class="overline" data-t="limitedEdition">Limited Collection</span>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.5rem);margin-top:1rem;letter-spacing:-0.03em"
+                        data-t="gourmetShowcase">Gourmet Showcase</h2>
+                </div>
+                <a href="shop.html" class="btn-ghost"
+                    style="border-bottom:2px solid rgba(253,185,200,0.3);padding-bottom:1rem">
+                    <span data-t="viewFullAtelier">View Full Atelier</span> <span>›</span>
+                </a>
+            </div>
+            <div class="grid-4" id="homeProductsGrid"></div>
+        </div>
+    </section>
+
+    <!-- ====== FOOTER ====== -->
+    <footer>
+        <div class="container">
+            <div class="footer-brand">
+                <div class="footer-logo-icon">🎂</div>
+                <h2>Baking <span class="text-gradient-gold" style="font-style:italic">Corner</span></h2>
+            </div>
+            <nav class="footer-nav">
+                <a href="index.html" data-t="atelier">Atelier</a>
+                <a href="shop.html" data-t="collection">Collection</a>
+                <a href="about.html" data-t="legacy">Legacy</a>
+                <a href="contact.html" data-t="concierge">Concierge</a>
+                <a href="admin.html" data-t="staffPortal">Staff Login Portal</a>
+            </nav>
+            <div class="footer-bottom">
+                <div class="footer-copy">
+                    <span class="sparkle">✦</span>
+                    <span>Baking Corner Luxury Confectionery © 2026</span>
+                </div>
+                <div class="footer-legal">
+                    <a href="#">Privacy Protocol</a>
+                    <a href="#">Engagement Terms</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Render home featured products
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.getElementById('homeProductsGrid');
+            if (grid) {
+                grid.innerHTML = products.slice(0, 4).map(p => `
+      <div class="product-card fade-in">
+        <div class="product-img">
+          <img src="${p.image}" alt="${p.name}" loading="lazy">
+          <div class="product-img-overlay"></div>
+          <div class="product-badge">✦ ${p.category}</div>
+        </div>
+        <div class="product-body">
+          <div class="product-header">
+            <h3>${p.name}</h3>
+            <span class="product-price">$${p.price}</span>
+          </div>
+          <p class="product-desc">"${p.description}"</p>
+          <button class="product-btn" onclick="addToCart(${p.id})" data-t="reserveItem">Reserve Item</button>
+        </div>
+      </div>
+    `).join('');
+                initAnimations();
+                applyTranslations();
+            }
+            // Make lang mobile button visible
+            // (handled via CSS .mobile-controls now)
+        });
+    </script>
+</body>
+
+</html>
