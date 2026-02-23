@@ -350,7 +350,7 @@ function copyTemplate() {
 // ========================
 // Shop Filter & Search
 // ========================
-const products = [
+let products = [
     { id: 1, name: 'Rose Velvet Dreams', price: 128, category: 'cakes', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=600', description: 'A symphony of red velvet layered with rose-infused cream cheese.' },
     { id: 2, name: 'Gold Leaf Macarons', price: 86, category: 'macarons', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600', description: 'Hand-piped shells filled with grand-cru chocolate ganache, adorned with 24k gold.' },
     { id: 3, name: 'Midnight Obsidian Torte', price: 215, category: 'cakes', image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&q=80&w=600', description: 'Seven layers of dark chocolate sponge, cognac syrup, and mousse.' },
@@ -360,6 +360,15 @@ const products = [
     { id: 7, name: 'Pearl Truffle Collection', price: 145, category: 'chocolates', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&q=80&w=600', description: 'A curated box of 12 hand-rolled grand-cru truffles.' },
     { id: 8, name: 'Saffron Cloud Cake', price: 265, category: 'cakes', image: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&q=80&w=600', description: 'Delicate sponge infused with Persian saffron, layered with clotted cream.' }
 ];
+
+async function syncProducts() {
+    if (!window.supabaseClient) return;
+    const { data, error } = await window.supabaseClient.from('products').select('*');
+    if (!error && data && data.length > 0) {
+        products = data;
+        filterProducts();
+    }
+}
 
 let activeFilter = 'all';
 let searchQuery = '';
@@ -649,44 +658,96 @@ function toggleBkash() {
     }
 }
 
-function submitOrder(e) {
+async function submitOrder(e) {
     e.preventDefault();
     const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
     const sym = settings.currencySymbol || '৳';
     const pos = settings.currencyPosition || 'before';
     const fmt = n => pos === 'after' ? n + sym : sym + n;
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const order = {
-        id: 'ORD-' + Date.now(),
-        date: new Date().toISOString(),
+
+    const orderId = 'ORD-' + Date.now();
+    const orderData = {
+        id: orderId,
         status: 'Pending',
+        customer_name: document.getElementById('cfName').value.trim(),
+        customer_phone: document.getElementById('cfPhone').value.trim(),
+        customer_address: document.getElementById('cfAddress').value.trim(),
+        delivery_date: document.getElementById('cfDate').value,
+        payment_method: document.getElementById('cfPayment').value,
+        payment_no: document.getElementById('cfMobilePayNo').value.trim(),
+        notes: document.getElementById('cfNotes').value.trim(),
+        total: total,
+        items: cart.map(i => ({
+            id: i.id,
+            name: i.name,
+            price: i.price,
+            qty: i.qty,
+            image: i.image
+        }))
+    };
+
+    // Save to Supabase if available
+    let dbSuccess = false;
+    if (window.supabaseClient) {
+        try {
+            const { error } = await window.supabaseClient.from('orders').insert([orderData]);
+            if (error) {
+                console.error('Supabase Insert Error:', error.message);
+            } else {
+                dbSuccess = true;
+            }
+        } catch (err) {
+            console.error('Database connection failed:', err);
+        }
+    }
+
+    // Always keep a local copy as backup
+    const localOrder = {
+        ...orderData,
+        date: new Date().toISOString(),
         customer: {
-            name: document.getElementById('cfName').value.trim(),
-            phone: document.getElementById('cfPhone').value.trim(),
-            address: document.getElementById('cfAddress').value.trim(),
-            delivery: document.getElementById('cfDate').value,
-            payment: document.getElementById('cfPayment').value,
-            paymentNo: document.getElementById('cfMobilePayNo').value.trim(),
-            notes: document.getElementById('cfNotes').value.trim()
+            name: orderData.customer_name,
+            phone: orderData.customer_phone,
+            address: orderData.customer_address,
+            delivery: orderData.delivery_date,
+            payment: orderData.payment_method,
+            paymentNo: orderData.payment_no,
+            notes: orderData.notes
         },
-        items: cart.map(i => ({ ...i })),
-        total,
         totalFormatted: fmt(total)
     };
-    // Save order
+
     const orders = JSON.parse(localStorage.getItem('siteOrders') || '[]');
-    orders.unshift(order);
+    orders.unshift(localOrder);
     localStorage.setItem('siteOrders', JSON.stringify(orders));
+
     // Clear cart
-    cart = []; saveCart(); updateCartCount();
+    cart = [];
+    saveCart();
+    updateCartCount();
+
     // Show success screen
     document.getElementById('checkoutScreen').style.display = 'none';
     document.getElementById('successScreen').style.display = 'flex';
-    // Redirect to admin orders after 2.5s
+
+    // Update success message text
+    const successMsg = document.querySelector('#successScreen .success-msg');
+    if (successMsg) {
+        successMsg.textContent = 'Your order has been received. Redirecting to shop...';
+    }
+
+    // Redirect to shop page after 3 seconds
     setTimeout(() => {
-        const isAdmin = sessionStorage.getItem('adminAuth');
-        window.location.href = (isAdmin ? '' : '../') + 'admin/admin-orders.html';
-    }, 2500);
+        const loc = window.location.pathname;
+        let prefix = '';
+        if (loc.includes('/home/')) {
+            prefix = '../pages/';
+        } else if (loc.includes('/pages/')) {
+            prefix = '';
+        }
+        window.location.href = prefix + 'shop.html';
+    }, 3000);
 }
 
 function injectCartStyles() {
@@ -757,6 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
     buildDynamicContent();
     initShopFilters();
     updateCartCount();
+    syncProducts(); // Supabase Sync
 });
 function addToCart(id) {
     const product = products.find(p => p.id === id);

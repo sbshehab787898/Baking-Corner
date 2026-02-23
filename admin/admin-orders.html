@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Orders — Admin Portal</title>
     <link rel="stylesheet" href="../assets/style.css" />
+    <link rel="stylesheet" href="admin-style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/supabase-client.js"></script>
     <script src="admin-shared.js"></script>
     <style>
         :root {
@@ -455,9 +458,10 @@
         let allOrders = [];
         let activeFilter = 'All';
 
-        function init() {
+        async function init() {
             adminAuthGuard();
             renderAdminSidebar('orders');
+            await syncAdminDataFromSupabase();
             allOrders = JSON.parse(localStorage.getItem('siteOrders') || '[]');
             renderStats();
             renderOrders();
@@ -470,7 +474,7 @@
             const sym = settings.currencySymbol || '৳';
             const pos = settings.currencyPosition || 'before';
             const fmt = n => pos === 'after' ? n.toLocaleString('en-IN') + sym : sym + n.toLocaleString('en-IN');
-            const totalRevenue = allOrders.filter(o => o.status === 'Delivered').reduce((s, o) => s + o.total, 0);
+            const totalRevenue = allOrders.filter(o => o.status === 'Delivered').reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
 
             document.getElementById('statsRow').innerHTML = `
                 <div class="stat-box"><div class="stat-num">${allOrders.length}</div><div class="stat-lbl">Total Orders</div></div>
@@ -487,6 +491,9 @@
         }
 
         function renderOrders() {
+            // Reload from storage to ensure we have synced cloud data
+            allOrders = JSON.parse(localStorage.getItem('siteOrders') || '[]');
+
             const search = (document.getElementById('ordersSearch').value || '').toLowerCase();
             let filtered = allOrders;
             if (activeFilter !== 'All') filtered = filtered.filter(o => o.status === activeFilter);
@@ -561,20 +568,28 @@
             }).join('');
         }
 
-        function updateStatus(orderId, newStatus, selectEl) {
+        async function updateStatus(orderId, newStatus, selectEl) {
             const idx = allOrders.findIndex(o => o.id === orderId);
             if (idx < 0) return;
             allOrders[idx].status = newStatus;
             localStorage.setItem('siteOrders', JSON.stringify(allOrders));
+
+            // Sync to DB
+            await dbUpdateOrderStatus(orderId, newStatus);
+
             selectEl.className = 'status-badge status-select status-' + newStatus;
             renderStats();
             renderAdminSidebar('orders'); // Updates sidebar badge
         }
 
-        function deleteOrder(orderId) {
+        async function deleteOrder(orderId) {
             if (!confirm('Are you sure you want to delete this order?')) return;
             allOrders = allOrders.filter(o => o.id !== orderId);
             localStorage.setItem('siteOrders', JSON.stringify(allOrders));
+
+            // Sync to DB
+            await dbDeleteOrder(orderId);
+
             renderStats();
             renderOrders();
             renderAdminSidebar('orders');

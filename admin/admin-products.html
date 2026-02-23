@@ -96,9 +96,10 @@
         let data;
         let searchQuery = '';
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             adminAuthGuard();
             renderAdminSidebar('products');
+            await syncAdminDataFromSupabase();
             data = getAdminData();
             renderProducts();
 
@@ -118,10 +119,18 @@
 
             count.textContent = filtered.length + ' Items';
 
+            // Populate category dropdown
+            const catSelect = document.getElementById('pCat');
+            if (catSelect && data.corners) {
+                const currentVal = catSelect.value;
+                catSelect.innerHTML = data.corners.map(c => `<option value="${c.name.toLowerCase()}">${c.name}</option>`).join('') + '<option value="other">Other</option>';
+                if (currentVal) catSelect.value = currentVal;
+            }
+
             const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
-            const sym = settings.currencySymbol || '$';
+            const sym = settings.currencySymbol || '৳';
             const pos = settings.currencyPosition || 'before';
-            const fmt = n => pos === 'after' ? n.toFixed(2) + sym : sym + n.toFixed(2);
+            const fmt = n => pos === 'after' ? n.toLocaleString('en-IN') + sym : sym + n.toLocaleString('en-IN');
 
             if (!filtered.length) {
                 list.innerHTML = '<p style="color:#aaa;font-style:italic;text-align:center;padding:3rem">No products found.</p>';
@@ -143,7 +152,7 @@
     `).join('');
         }
 
-        function handleAddProduct(e) {
+        async function handleAddProduct(e) {
             e.preventDefault();
             const newProd = {
                 id: Date.now(),
@@ -154,6 +163,10 @@
                     'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600',
                 description: document.getElementById('pDesc').value.trim()
             };
+
+            // Sync to DB
+            await dbAddProduct(newProd);
+
             data.products.unshift(newProd);
             saveAdminData('adminProducts', data.products);
             e.target.reset();
@@ -170,10 +183,14 @@
             }, 2000);
         }
 
-        function deleteProduct(id) {
+        async function deleteProduct(id) {
             if (!confirm('Are you sure you want to delete this product?')) return;
             data.products = data.products.filter(p => p.id !== id);
             saveAdminData('adminProducts', data.products);
+
+            // Sync to DB
+            await dbDeleteProduct(id);
+
             const el = document.getElementById('prod-' + id);
             if (el) {
                 el.style.opacity = '0';

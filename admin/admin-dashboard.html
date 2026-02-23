@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="../assets/style.css" />
     <link rel="stylesheet" href="admin-style.css" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/supabase-client.js"></script>
 </head>
 
 <body class="admin-body">
@@ -25,8 +27,8 @@
             <div class="stat-card">
                 <span class="stat-icon" style="color:#4ade80">📈</span>
                 <p class="stat-label">Total Sales</p>
-                <p class="stat-value">$124,500</p>
-                <p class="stat-change up">+22.4% this month</p>
+                <p class="stat-value" id="dashTotalSales">৳0</p>
+                <p class="stat-change up" id="dashSalesChange">+0% this month</p>
             </div>
             <div class="stat-card" id="dashCornerCard">
                 <span class="stat-icon" style="color:#FDB9C8">🏬</span>
@@ -61,37 +63,8 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Aria Fontaine</strong></td>
-                            <td>Rose Velvet Dreams ×1</td>
-                            <td style="font-weight:700;color:#F896AC">$128</td>
-                            <td><span class="status-badge premium">Premium</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Lucien Moreau</strong></td>
-                            <td>Midnight Obsidian Torte ×2</td>
-                            <td style="font-weight:700;color:#F896AC">$430</td>
-                            <td><span class="status-badge active">Fulfilled</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Isabelle Charta</strong></td>
-                            <td>Gold Leaf Macarons ×3</td>
-                            <td style="font-weight:700;color:#F896AC">$258</td>
-                            <td><span class="status-badge pending">Pending</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Mateo Vidal</strong></td>
-                            <td>Ivory Lace Wedding Cake ×1</td>
-                            <td style="font-weight:700;color:#F896AC">$320</td>
-                            <td><span class="status-badge active">Fulfilled</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Celine Duval</strong></td>
-                            <td>Saffron Cloud Cake ×1</td>
-                            <td style="font-weight:700;color:#F896AC">$265</td>
-                            <td><span class="status-badge pending">Pending</span></td>
-                        </tr>
+                    <tbody id="recentOrdersBody">
+                        <!-- Dynamic content -->
                     </tbody>
                 </table>
             </div>
@@ -118,12 +91,39 @@
 
     <script src="admin-shared.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             adminAuthGuard();
             renderAdminSidebar('dashboard');
+            await syncAdminDataFromSupabase();
             const data = getAdminData();
+
+            // Render Stats
             document.getElementById('dashCornerCount').textContent = data.corners.length;
             document.getElementById('dashProductCount').textContent = data.products.length;
+
+            const total = data.orders.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
+            const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            const sym = settings.currencySymbol || '৳';
+            const pos = settings.currencyPosition || 'before';
+            const fmt = n => pos === 'after' ? n.toLocaleString('en-IN') + sym : sym + n.toLocaleString('en-IN');
+
+            document.getElementById('dashTotalSales').textContent = fmt(total);
+
+            // Render Recent Orders (Last 5)
+            const recent = data.orders.slice(0, 5);
+            const body = document.getElementById('recentOrdersBody');
+            if (recent.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:#aaa">No orders yet.</td></tr>';
+            } else {
+                body.innerHTML = recent.map(o => `
+                    <tr>
+                        <td><strong>${o.customer?.name || 'Guest'}</strong></td>
+                        <td>${o.items?.map(i => i.name).join(', ') || 'Custom Order'}</td>
+                        <td style="font-weight:700;color:#F896AC">${fmt(parseFloat(o.total) || 0)}</td>
+                        <td><span class="status-badge ${o.status?.toLowerCase() || 'pending'}">${o.status || 'Pending'}</span></td>
+                    </tr>
+                `).join('');
+            }
 
             // Animate cards on hover
             document.querySelectorAll('a.admin-card').forEach(card => {

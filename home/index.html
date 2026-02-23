@@ -9,6 +9,8 @@
         content="Baking Corner — Premium custom cakes, macarons, and confections crafted with the finest ingredients." />
     <link rel="stylesheet" href="../assets/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/supabase-client.js"></script>
 </head>
 
 <body>
@@ -224,31 +226,39 @@
     <script src="../assets/script.js"></script>
     <script>
         // Render home featured products
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Need to wait if products are being synced
+            if (typeof syncProducts === 'function') {
+                await syncProducts();
+            }
+
             const grid = document.getElementById('homeProductsGrid');
             if (grid) {
+                const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+                const sym = settings.currencySymbol || '৳';
+                const pos = settings.currencyPosition || 'before';
+                const fmt = n => pos === 'after' ? n.toLocaleString('en-IN') + sym : sym + n.toLocaleString('en-IN');
+
                 grid.innerHTML = products.slice(0, 4).map(p => `
-      <div class="product-card fade-in">
-        <div class="product-img">
-          <img src="${p.image}" alt="${p.name}" loading="lazy">
-          <div class="product-img-overlay"></div>
-          <div class="product-badge">✦ ${p.category}</div>
-        </div>
-        <div class="product-body">
-          <div class="product-header">
-            <h3>${p.name}</h3>
-            <span class="product-price">৳${p.price}</span>
-          </div>
-          <p class="product-desc">"${p.description}"</p>
-          <button class="product-btn" onclick="addToCart(${p.id})" data-t="reserveItem">Reserve Item</button>
-        </div>
-      </div>
-    `).join('');
+                    <div class="product-card fade-in">
+                        <div class="product-img">
+                            <img src="${p.image}" alt="${p.name}" loading="lazy">
+                            <div class="product-img-overlay"></div>
+                            <div class="product-badge">✦ ${p.category}</div>
+                        </div>
+                        <div class="product-body">
+                            <div class="product-header">
+                                <h3>${p.name}</h3>
+                                <span class="product-price">${fmt(p.price)}</span>
+                            </div>
+                            <p class="product-desc">"${p.description}"</p>
+                            <button class="product-btn" onclick="addToCart(${p.id})" data-t="reserveItem">Reserve Item</button>
+                        </div>
+                    </div>
+                `).join('');
                 initAnimations();
                 applyTranslations();
             }
-            // Make lang mobile button visible
-            // (handled via CSS .mobile-controls now)
         });
     </script>
 </body>

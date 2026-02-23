@@ -12,24 +12,27 @@ function adminAuthGuard() {
 // ========================
 function renderAdminSidebar(activePage) {
   const pages = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊', href: 'admin-dashboard.html' },
+    { id: 'dashboard', label: 'Dashboard', icon: '💎', href: 'admin-dashboard.html' },
     { id: 'orders', label: 'Orders', icon: '🧾', href: 'admin-orders.html' },
-    { id: 'corners', label: 'Categories', icon: '🏪', href: 'admin-corners.html' },
+    { id: 'corners', label: 'Categories', icon: '🏬', href: 'admin-corners.html' },
     { id: 'products', label: 'Products', icon: '📦', href: 'admin-products.html' },
     { id: 'settings', label: 'Settings', icon: '⚙️', href: 'admin-settings.html' },
   ];
 
   // Count pending orders for badge
-  const orders = JSON.parse(localStorage.getItem('siteOrders') || '[]');
-  const pendingCount = orders.filter(o => o.status === 'Pending').length;
+  let pendingCount = 0;
+  try {
+    const orders = JSON.parse(localStorage.getItem('siteOrders') || '[]');
+    pendingCount = orders.filter(o => o.status === 'Pending').length;
+  } catch (e) { }
 
   const sidebarHTML = `
     <aside class="admin-sidebar" id="adminSidebar">
       <div class="sidebar-brand">
-        <div class="sidebar-icon">⚙️</div>
+        <div class="sidebar-icon">🍩</div>
         <div>
           <span class="sidebar-sub">Admin Area</span>
-          <span class="sidebar-title">Control <em>Center</em></span>
+          <span class="sidebar-title">Baking <em>Corner</em></span>
         </div>
       </div>
 
@@ -46,10 +49,12 @@ function renderAdminSidebar(activePage) {
       </nav>
 
       <div class="sidebar-footer">
+        <a href="../home/index.html" class="sidebar-home-link" style="margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem;background:#f8fafc;border-radius:1rem;color:#64748b;font-weight:700">
+          🏘️ <span>View Website</span>
+        </a>
         <button class="sidebar-logout" onclick="adminLogout()">
-          🚪 <span>Logout</span>
+          🚪 <span>Logout Admin</span>
         </button>
-        <a href="../home/index.html" class="sidebar-home-link">← Back to Site</a>
       </div>
     </aside>
 
@@ -74,27 +79,101 @@ function adminLogout() {
   window.location.href = 'admin.html';
 }
 
-// Shared admin data (in-memory, synced via sessionStorage)
+// Shared admin data
 function getAdminData() {
   return {
-    products: JSON.parse(sessionStorage.getItem('adminProducts') || 'null') || [
-      { id: 1, name: 'Rose Velvet Dreams', price: 128, category: 'cakes', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200', description: 'A symphony of red velvet.' },
-      { id: 2, name: 'Gold Leaf Macarons', price: 86, category: 'macarons', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200', description: 'Hand-piped shells with 24k gold.' },
-      { id: 3, name: 'Midnight Obsidian Torte', price: 215, category: 'cakes', image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=200', description: 'Seven layers of dark chocolate.' },
-      { id: 4, name: 'Ivory Lace Cake', price: 320, category: 'cakes', image: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=200', description: 'Handcrafted sugar lace.' },
-      { id: 5, name: 'Champagne Choux', price: 72, category: 'pastries', image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200', description: 'Pate a choux with Dom Perignon cream.' },
-      { id: 6, name: 'Bergamot Tart', price: 96, category: 'pastries', image: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=200', description: 'Earl grey custard.' },
-      { id: 7, name: 'Pearl Truffle Collection', price: 145, category: 'chocolates', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=200', description: '12 hand-rolled grand-cru truffles.' },
-      { id: 8, name: 'Saffron Cloud Cake', price: 265, category: 'cakes', image: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=200', description: 'Persian saffron with clotted cream.' }
-    ],
-    corners: JSON.parse(sessionStorage.getItem('adminCorners') || 'null') || [
-      { id: 1, name: 'Gateau Atelier', description: 'Bespoke tiered creations for ceremonies of the highest distinction.' },
-      { id: 2, name: 'Viennoiserie', description: 'Morning masterpieces, perfected over decades of devotion to craft.' },
-      { id: 3, name: 'Chocolatier', description: 'Grand-cru single-origin confections from the world\'s most remote estates.' }
-    ]
+    products: JSON.parse(sessionStorage.getItem('adminProducts') || '[]'),
+    corners: JSON.parse(sessionStorage.getItem('adminCorners') || '[]'),
+    orders: JSON.parse(localStorage.getItem('siteOrders') || '[]')
   };
 }
 
-function saveAdminData(key, data) {
-  sessionStorage.setItem(key, JSON.stringify(data));
+async function saveAdminData(type, data) {
+  sessionStorage.setItem('admin' + type.charAt(0).toUpperCase() + type.slice(1), JSON.stringify(data));
+  if (type === 'orders') localStorage.setItem('siteOrders', JSON.stringify(data));
 }
+
+async function dbAddProduct(product) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('products').insert([product]);
+  if (error) console.error('Supabase Product Add Error:', error);
+}
+
+async function dbDeleteProduct(id) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('products').delete().eq('id', id);
+  if (error) console.error('Supabase Product Delete Error:', error);
+}
+
+async function dbAddCategory(category) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('categories').insert([category]);
+  if (error) console.error('Supabase Category Add Error:', error);
+}
+
+async function dbDeleteCategory(id) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('categories').delete().eq('id', id);
+  if (error) console.error('Supabase Category Delete Error:', error);
+}
+
+async function dbUpdateOrderStatus(id, status) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('orders').update({ status }).eq('id', id);
+  if (error) console.error('Supabase Order Status Update Error:', error);
+}
+
+async function dbDeleteOrder(id) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('orders').delete().eq('id', id);
+  if (error) console.error('Supabase Order Delete Error:', error);
+}
+
+async function syncAdminDataFromSupabase() {
+  if (!window.supabaseClient) return;
+
+  try {
+    // Sync Products
+    const { data: products, error: pError } = await window.supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+    if (!pError && products) {
+      sessionStorage.setItem('adminProducts', JSON.stringify(products));
+    }
+
+    // Sync Categories
+    const { data: corners, error: cError } = await window.supabaseClient.from('categories').select('*').order('created_at', { ascending: true });
+    if (!cError && corners) {
+      sessionStorage.setItem('adminCorners', JSON.stringify(corners));
+    }
+
+    // Sync Orders
+    const { data: orders, error: oError } = await window.supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+    if (!oError && orders) {
+      const formattedOrders = orders.map(o => ({
+        ...o,
+        date: o.created_at || new Date().toISOString(),
+        customer: {
+          name: o.customer_name || 'Guest',
+          phone: o.customer_phone || 'N/A',
+          address: o.customer_address || '',
+          delivery: o.delivery_date || '',
+          payment: o.payment_method || 'Cash',
+          paymentNo: o.payment_no || '',
+          notes: o.notes || ''
+        }
+      }));
+      localStorage.setItem('siteOrders', JSON.stringify(formattedOrders));
+    } else if (oError) {
+      console.error('Supabase Sync Orders Error:', oError.message);
+    }
+  } catch (err) {
+    console.error('Sync process failed:', err);
+  }
+
+  // Refresh UI if functions exist
+  if (typeof renderOrders === 'function') renderOrders();
+  if (typeof renderProducts === 'function') renderProducts();
+  if (typeof renderCorners === 'function') renderCorners();
+  if (typeof renderStats === 'function') renderStats();
+}
+
+

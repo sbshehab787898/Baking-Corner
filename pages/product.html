@@ -8,6 +8,8 @@
     <meta name="description"
         content="View product details and reserve your custom cake from Baking Corner Luxury Atelier." />
     <link rel="stylesheet" href="../assets/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/supabase-client.js"></script>
     <style>
         /* ── Breadcrumb ── */
         .breadcrumb {
@@ -926,12 +928,18 @@
         }
 
         // ── Init ──
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             applySiteCustomizations();
             initNavbar();
             initAnimations();
             applyTranslations();
             updateCartCount();
+
+            // Wait for Supabase products to load if needed
+            if (typeof syncProducts === 'function') {
+                await syncProducts();
+            }
+
             loadProduct();
         });
     </script>

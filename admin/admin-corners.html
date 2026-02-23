@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Boutique Corners — Admin Portal</title>
+    <title>Categories — Admin Portal</title>
     <link rel="stylesheet" href="../assets/style.css" />
+    <link rel="stylesheet" href="admin-style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/supabase-client.js"></script>
     <script src="admin-shared.js"></script>
     <style>
         :root {
@@ -302,9 +305,10 @@
     <script>
         let data;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             adminAuthGuard();
             renderAdminSidebar('corners');
+            await syncAdminDataFromSupabase();
             data = getAdminData();
             renderCorners();
         });
@@ -338,7 +342,7 @@
             `).join('');
         }
 
-        function handleAddCorner(e) {
+        async function handleAddCorner(e) {
             e.preventDefault();
             const name = document.getElementById('newCornerName').value.trim();
             const desc = document.getElementById('newCornerDesc').value.trim();
@@ -354,6 +358,9 @@
                 icon
             };
 
+            // Sync to DB
+            await dbAddCategory(newCorner);
+
             data.corners.push(newCorner);
             saveAdminData('adminCorners', data.corners);
 
@@ -362,11 +369,14 @@
             renderCorners();
         }
 
-        function deleteCorner(id) {
+        async function deleteCorner(id) {
             if (!confirm('Permanentely remove this segment from the boutique? All associated records will be archived.')) return;
 
             data.corners = data.corners.filter(c => c.id !== id);
             saveAdminData('adminCorners', data.corners);
+
+            // Sync to DB
+            await dbDeleteCategory(id);
 
             const el = document.getElementById('corner-' + id);
             if (el) {
