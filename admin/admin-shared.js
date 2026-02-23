@@ -89,8 +89,15 @@ function getAdminData() {
 }
 
 async function saveAdminData(type, data) {
-  sessionStorage.setItem('admin' + type.charAt(0).toUpperCase() + type.slice(1), JSON.stringify(data));
-  if (type === 'orders') localStorage.setItem('siteOrders', JSON.stringify(data));
+  let key = type;
+  if (!key.startsWith('admin') && !key.startsWith('site')) {
+    key = 'admin' + type.charAt(0).toUpperCase() + type.slice(1);
+  }
+  sessionStorage.setItem(key, JSON.stringify(data));
+
+  if (type === 'orders' || type === 'siteOrders') {
+    localStorage.setItem('siteOrders', JSON.stringify(data));
+  }
 }
 
 async function dbAddProduct(product) {
