@@ -24,7 +24,11 @@
     <!-- NAVBAR -->
     <nav class="navbar" id="navbar">
         <div class="container">
-            <a href="../home/index.html" class="nav-logo"><img src="../assets/logo.jpeg" class="nav-logo-img" alt="Baking Corner Logo"><div class="nav-logo-text"><span>Baking <span class="text-gradient-gold" style="font-style:italic">Corner</span></span></div></a>
+            <a href="../home/index.html" class="nav-logo"><img src="../assets/logo.jpeg" class="nav-logo-img"
+                    alt="Baking Corner Logo">
+                <div class="nav-logo-text"><span>Baking <span class="text-gradient-gold"
+                            style="font-style:italic">Corner</span></span></div>
+            </a>
             <div class="nav-links">
                 <a href="../home/index.html" data-t="atelier">Atelier</a>
                 <a href="shop.html" data-t="collection">Collection</a>
@@ -38,6 +42,10 @@
             </div>
             <div class="mobile-controls">
                 <button class="lang-btn lang-toggle"><span class="lang-btn-text">বাংলা</span></button>
+                <button class="cart-btn" onclick="openCart()">
+                    🛍️
+                    <span class="cart-count" style="display:none">0</span>
+                </button>
                 <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
             </div>
         </div>
@@ -46,7 +54,8 @@
         <div class="mobile-menu-header">
             <span style="font-family:'Playfair Display',serif;font-size:1.5rem;font-style:italic;font-weight:700">Baking
                 <span class="text-gradient-gold">Corner</span></span>
-
+            <button id="closeMenu"
+                style="background:#f5f5f5; border:none; width:44px; height:44px; border-radius:50%; font-size:1.5rem; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#000;">✕</button>
         </div>
         <nav class="mobile-nav-links">
             <a href="../home/index.html" data-t="atelier">Atelier</a>
@@ -121,9 +130,9 @@
                     <div class="pricing-card" id="priceListCard">
                         <div id="priceList"></div>
                         <div class="design-note">
-                            <span data-lang="en">✦ Custom design charges applied separately. Minimum 2 days advance
+                            <span data-lang="en">Custom design charges applied separately. Minimum 2 days advance
                                 order required.</span>
-                            <span data-lang="bn" style="display:none">✦ কাস্টম ডিজাইনের চার্জ আলাদাভাবে প্রযোজ্য।
+                            <span data-lang="bn" style="display:none">কাস্টম ডিজাইনের চার্জ আলাদাভাবে প্রযোজ্য।
                                 কমপক্ষে ২ দিন আগে অর্ডার দিতে হবে।</span>
                         </div>
                     </div>
@@ -187,6 +196,3 @@
 </body>
 
 </html>
-
-
-

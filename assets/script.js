@@ -238,22 +238,40 @@ function initNavbar() {
 
     if (hamburger && mobileMenu) {
         hamburger.addEventListener('click', () => {
+            const isOpen = mobileMenu.classList.toggle('open');
             hamburger.classList.toggle('open');
-            mobileMenu.classList.toggle('open');
-            document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+            if (isOpen) {
+                const scrollY = window.scrollY;
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${scrollY}px`;
+                document.body.style.width = '100%';
+                document.body.dataset.scrollY = scrollY;
+            } else {
+                const scrollY = parseInt(document.body.dataset.scrollY || '0');
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                window.scrollTo(0, scrollY);
+            }
         });
         if (closeMenu) {
             closeMenu.addEventListener('click', () => {
                 hamburger.classList.remove('open');
                 mobileMenu.classList.remove('open');
-                document.body.style.overflow = '';
+                const scrollY = parseInt(document.body.dataset.scrollY || '0');
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                window.scrollTo(0, scrollY);
             });
         }
         mobileMenu.querySelectorAll('a').forEach(a => {
             a.addEventListener('click', () => {
                 hamburger.classList.remove('open');
                 mobileMenu.classList.remove('open');
-                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
             });
         });
     }
@@ -441,7 +459,7 @@ function filterProducts() {
       <div class="product-img">
         <img src="${p.image}" alt="${p.name}" loading="lazy">
         <div class="product-img-overlay"></div>
-        <div class="product-badge">✦ ${p.category}</div>
+        <div class="product-badge">${p.category}</div>
       </div>
       <div class="product-body">
         <div class="product-header">
@@ -554,44 +572,37 @@ function renderCart() {
     const sym = settings.currencySymbol || '৳';
     const pos = settings.currencyPosition || 'before';
     const fmt = (n) => pos === 'after' ? n + sym : sym + n;
+    const buildFooterMarkup = (totalValue = '') => `
+            <div class="cart-total">${t('total')}: <span class="cart-total-val">${totalValue}</span></div>
+            <button class="cart-checkout-btn" onclick="showOrderForm()">✨ ${t('completeOrder')}</button>
+            <button class="cart-clear-btn" onclick="clearCart()">${t('clearBasket')}</button>
+        `;
 
     let body = drawer.querySelector('.cart-body');
     let footer = drawer.querySelector('.cart-footer');
     const cartScreen = drawer.querySelector('#cartScreen') || drawer.querySelector('.cart-screen');
+
     if (!body && cartScreen) {
         body = document.createElement('div');
         body.className = 'cart-body';
         cartScreen.appendChild(body);
     }
+
     if (!footer && cartScreen) {
         footer = document.createElement('div');
         footer.className = 'cart-footer';
         footer.style.display = 'none';
-        footer.innerHTML = `
-            <div class="cart-total">Total: <span class="cart-total-val"></span></div>
-            <button class="cart-checkout-btn" onclick="showOrderForm()">✨ Proceed to Order</button>
-            <button class="cart-clear-btn" onclick="clearCart()">Clear Basket</button>
-        `;
+        footer.innerHTML = buildFooterMarkup();
         cartScreen.appendChild(footer);
     }
+
     if (!body || !footer) return;
-    if (!footer.querySelector('.cart-total-val') || !footer.querySelector('.cart-checkout-btn')) {
-        footer.innerHTML = `
-            <div class="cart-total">Total: <span class="cart-total-val"></span></div>
-            <button class="cart-checkout-btn" onclick="showOrderForm()">✨ Proceed to Order</button>
-            <button class="cart-clear-btn" onclick="clearCart()">Clear Basket</button>
-        `;
-    }
 
     if (!cart.length) {
         body.innerHTML = `<div class="cart-empty">🛍️<p>${t('emptyBasket')}</p></div>`;
         footer.style.display = 'none';
         return;
     }
-
-    const totalStr = t('total');
-    const completeOrderStr = t('completeOrder');
-    const clearBasketStr = t('clearBasket');
 
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
     body.innerHTML = cart.map(item => `
@@ -611,23 +622,7 @@ function renderCart() {
   `).join('');
 
     footer.style.display = 'block';
-    footer.style.position = 'sticky';
-    footer.style.bottom = '0';
-    footer.style.background = '#fff';
-    footer.style.zIndex = '3';
-
-    // Safety check for footer content
-    const totalEl = footer.querySelector('.cart-total');
-    if (totalEl) totalEl.firstChild.textContent = totalStr + ': ';
-
-    const totalValEl = footer.querySelector('.cart-total-val');
-    if (totalValEl) totalValEl.textContent = fmt(total);
-
-    const checkoutBtn = footer.querySelector('.cart-checkout-btn');
-    if (checkoutBtn) checkoutBtn.textContent = '✨ ' + completeOrderStr;
-
-    const clearBtn = footer.querySelector('.cart-clear-btn');
-    if (clearBtn) clearBtn.textContent = clearBasketStr;
+    footer.innerHTML = buildFooterMarkup(fmt(total));
 }
 
 function openCart() {
@@ -662,23 +657,23 @@ function openCart() {
             <div class="checkout-summary" id="checkoutSummary"></div>
             <form id="orderForm" onsubmit="submitOrder(event)">
               <div class="cf-group">
-                <label class="cf-label">✦ Full Name *</label>
+                <label class="cf-label">Full Name *</label>
                 <input type="text" class="cf-input" id="cfName" placeholder="Your full name" required />
               </div>
               <div class="cf-group">
-                <label class="cf-label">✦ Mobile Number *</label>
+                <label class="cf-label">Mobile Number *</label>
                 <input type="tel" class="cf-input" id="cfPhone" placeholder="01XXXXXXXXX" required />
               </div>
               <div class="cf-group">
-                <label class="cf-label">✦ Delivery Address *</label>
+                <label class="cf-label">Delivery Address *</label>
                 <input type="text" class="cf-input" id="cfAddress" placeholder="Your full address" required />
               </div>
               <div class="cf-group">
-                <label class="cf-label">✦ Preferred Delivery Date &amp; Time *</label>
+                <label class="cf-label">Preferred Delivery Date &amp; Time *</label>
                 <input type="datetime-local" class="cf-input" id="cfDate" required />
               </div>
               <div class="cf-group">
-                <label class="cf-label">✦ Payment Method *</label>
+                <label class="cf-label">Payment Method *</label>
                 <select class="cf-input" id="cfPayment" onchange="toggleBkash()" required>
                   <option value="">Select payment method</option>
                   <option value="Cash">Cash on Delivery</option>
@@ -687,11 +682,11 @@ function openCart() {
                 </select>
               </div>
               <div class="cf-group" id="cfMobilePayGroup" style="display:none">
-                <label class="cf-label" id="cfMobilePayLabel">✦ bKash/Nagad Number *</label>
+                <label class="cf-label" id="cfMobilePayLabel">bKash/Nagad Number *</label>
                 <input type="tel" class="cf-input" id="cfMobilePayNo" placeholder="Payment number" />
               </div>
               <div class="cf-group">
-                <label class="cf-label">✦ Special Instructions (Optional)</label>
+                <label class="cf-label">Special Instructions (Optional)</label>
                 <textarea class="cf-input cf-textarea" id="cfNotes" placeholder="Cake message, design notes, allergies..."></textarea>
               </div>
               <button type="submit" class="cart-checkout-btn" style="margin-top:1rem">✓ ${t('placeOrder')}</button>
@@ -719,12 +714,23 @@ function openCart() {
     if (successScreen) successScreen.style.display = 'none';
     renderCart();
     drawer.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.dataset.cartScrollY = scrollY;
 }
 
 function closeCart() {
     const drawer = document.getElementById('cartDrawer');
-    if (drawer) { drawer.classList.remove('open'); document.body.style.overflow = ''; }
+    if (drawer) {
+        drawer.classList.remove('open');
+        const scrollY = parseInt(document.body.dataset.cartScrollY || '0');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+    }
 }
 
 function clearCart() {
@@ -771,7 +777,7 @@ function toggleBkash() {
     const numField = document.getElementById('cfMobilePayNo');
     if (method === 'Bkash' || method === 'Nagad') {
         group.style.display = 'block';
-        label.textContent = '✦ ' + method + ' Number *';
+        label.textContent = method + ' Number *';
         numField.required = true;
     } else {
         group.style.display = 'none';
@@ -899,3 +905,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ========================
 // Init
+
