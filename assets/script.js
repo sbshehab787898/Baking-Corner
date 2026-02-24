@@ -31,7 +31,18 @@ const translations = {
         commandCenter: 'Dashboard', archiveCreation: 'Products',
         valuation: 'Sales', marketValuation: 'Total Sales',
         registerMasterpiece: 'Add Product', terminateAuthority: 'Logout',
-        identityRank: 'Status'
+        identityRank: 'Status',
+        yourBasket: 'Your Basket',
+        completeOrder: 'Complete Order',
+        clearBasket: 'Clear Basket',
+        emptyBasket: 'Your basket is empty',
+        total: 'Total',
+        proceedToOrder: 'Complete Order',
+        placeOrder: 'Place Order',
+        back: '← Back',
+        orderDetails: 'Order Details',
+        successPlaced: 'Order Placed!',
+        redirectingShop: 'Redirecting to shop...'
     },
     bn: {
         atelier: 'বেকারি', collection: 'দোকান', legacy: 'আমাদের গল্প',
@@ -62,7 +73,18 @@ const translations = {
         commandCenter: 'ড্যাশবোর্ড', archiveCreation: 'পণ্য',
         valuation: 'বিক্রয়', marketValuation: 'মোট বিক্রয়',
         registerMasterpiece: 'পণ্য যোগ করুন', terminateAuthority: 'লগআউট',
-        identityRank: 'অবস্থা'
+        identityRank: 'অবস্থা',
+        yourBasket: 'আপনার ঝুড়ি',
+        completeOrder: 'অর্ডার সম্পূর্ণ করুন',
+        clearBasket: 'ঝুড়ি খালি করুন',
+        emptyBasket: 'আপনার ঝুড়ি খালি',
+        total: 'মোট',
+        proceedToOrder: 'অর্ডার সম্পূর্ণ করুন',
+        placeOrder: 'অর্ডার করুন',
+        back: '← ফিরে যান',
+        orderDetails: 'অর্ডার এর বিস্তারিত',
+        successPlaced: 'অর্ডার সম্পন্ন হয়েছে!',
+        redirectingShop: 'দোকান পৃষ্ঠায় রিডাইরেক্ট করা হচ্ছে...'
     },
     orderFields: {
         en: {
@@ -259,12 +281,40 @@ function initAnimations() {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
+            } else {
+                entry.target.classList.remove('visible');
             }
         });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-    document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach(el => {
+    const autoRevealSelectors = [
+        '.section-header',
+        '.grid-2 > *',
+        '.grid-3 > *',
+        '.grid-4 > *',
+        '.price-item',
+        '.philosophy-card',
+        '.contact-info-card',
+        '.footer-brand',
+        '.footer-nav',
+        '.footer-bottom',
+        '.pd-image-wrap',
+        '.pd-info',
+        '.pd-tabs-section .container > *',
+        '.similar-section .product-card'
+    ];
+    autoRevealSelectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+            if (!el.classList.contains('fade-in') && !el.classList.contains('fade-in-left') && !el.classList.contains('fade-in-right')) {
+                el.classList.add('fade-in');
+            }
+        });
+    });
+
+    document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right').forEach((el, idx) => {
+        if (!el.style.getPropertyValue('--reveal-delay')) {
+            el.style.setProperty('--reveal-delay', `${(idx % 6) * 70}ms`);
+        }
         observer.observe(el);
     });
 }
@@ -438,6 +488,27 @@ function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
+function normalizeCart() {
+    if (!Array.isArray(cart)) {
+        cart = [];
+        saveCart();
+        return;
+    }
+    cart = cart
+        .filter(i => i && i.id !== undefined && i.id !== null)
+        .map(i => {
+            const qty = Number.isFinite(+i.qty) && +i.qty > 0 ? Math.floor(+i.qty) : 1;
+            const parsed = Number.isFinite(+i.price)
+                ? +i.price
+                : parseFloat(String(i.price || '').replace(/[^0-9.]/g, ''));
+            const price = Number.isFinite(parsed) ? parsed : 0;
+            return { ...i, qty, price };
+        });
+    saveCart();
+}
+
+normalizeCart();
+
 function updateCartCount() {
     const total = cart.reduce((s, i) => s + i.qty, 0);
     document.querySelectorAll('.cart-count').forEach(el => {
@@ -484,14 +555,43 @@ function renderCart() {
     const pos = settings.currencyPosition || 'before';
     const fmt = (n) => pos === 'after' ? n + sym : sym + n;
 
-    const body = drawer.querySelector('.cart-body');
-    const footer = drawer.querySelector('.cart-footer');
+    let body = drawer.querySelector('.cart-body');
+    let footer = drawer.querySelector('.cart-footer');
+    const cartScreen = drawer.querySelector('#cartScreen') || drawer.querySelector('.cart-screen');
+    if (!body && cartScreen) {
+        body = document.createElement('div');
+        body.className = 'cart-body';
+        cartScreen.appendChild(body);
+    }
+    if (!footer && cartScreen) {
+        footer = document.createElement('div');
+        footer.className = 'cart-footer';
+        footer.style.display = 'none';
+        footer.innerHTML = `
+            <div class="cart-total">Total: <span class="cart-total-val"></span></div>
+            <button class="cart-checkout-btn" onclick="showOrderForm()">✨ Proceed to Order</button>
+            <button class="cart-clear-btn" onclick="clearCart()">Clear Basket</button>
+        `;
+        cartScreen.appendChild(footer);
+    }
+    if (!body || !footer) return;
+    if (!footer.querySelector('.cart-total-val') || !footer.querySelector('.cart-checkout-btn')) {
+        footer.innerHTML = `
+            <div class="cart-total">Total: <span class="cart-total-val"></span></div>
+            <button class="cart-checkout-btn" onclick="showOrderForm()">✨ Proceed to Order</button>
+            <button class="cart-clear-btn" onclick="clearCart()">Clear Basket</button>
+        `;
+    }
 
     if (!cart.length) {
-        body.innerHTML = `<div class="cart-empty">🛍️<p>Your basket is empty</p></div>`;
+        body.innerHTML = `<div class="cart-empty">🛍️<p>${t('emptyBasket')}</p></div>`;
         footer.style.display = 'none';
         return;
     }
+
+    const totalStr = t('total');
+    const completeOrderStr = t('completeOrder');
+    const clearBasketStr = t('clearBasket');
 
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
     body.innerHTML = cart.map(item => `
@@ -511,7 +611,23 @@ function renderCart() {
   `).join('');
 
     footer.style.display = 'block';
-    footer.querySelector('.cart-total-val').textContent = fmt(total);
+    footer.style.position = 'sticky';
+    footer.style.bottom = '0';
+    footer.style.background = '#fff';
+    footer.style.zIndex = '3';
+
+    // Safety check for footer content
+    const totalEl = footer.querySelector('.cart-total');
+    if (totalEl) totalEl.firstChild.textContent = totalStr + ': ';
+
+    const totalValEl = footer.querySelector('.cart-total-val');
+    if (totalValEl) totalValEl.textContent = fmt(total);
+
+    const checkoutBtn = footer.querySelector('.cart-checkout-btn');
+    if (checkoutBtn) checkoutBtn.textContent = '✨ ' + completeOrderStr;
+
+    const clearBtn = footer.querySelector('.cart-clear-btn');
+    if (clearBtn) clearBtn.textContent = clearBasketStr;
 }
 
 function openCart() {
@@ -525,21 +641,21 @@ function openCart() {
         <!-- Cart Screen -->
         <div class="cart-screen" id="cartScreen">
           <div class="cart-head">
-            <span>🛍️ Your Basket</span>
+            <span class="view-title">🛍️ ${t('yourBasket')}</span>
             <button onclick="closeCart()">✕</button>
           </div>
           <div class="cart-body"></div>
           <div class="cart-footer" style="display:none">
-            <div class="cart-total">Total: <span class="cart-total-val"></span></div>
-            <button class="cart-checkout-btn" onclick="showOrderForm()">✨ Proceed to Order</button>
-            <button class="cart-clear-btn" onclick="clearCart()">Clear Basket</button>
+            <div class="cart-total">${t('total')}: <span class="cart-total-val"></span></div>
+            <button class="cart-checkout-btn" onclick="showOrderForm()">✨ ${t('completeOrder')}</button>
+            <button class="cart-clear-btn" onclick="clearCart()">${t('clearBasket')}</button>
           </div>
         </div>
         <!-- Order Form Screen -->
         <div class="checkout-screen" id="checkoutScreen" style="display:none">
           <div class="cart-head">
-            <button onclick="hideOrderForm()" style="font-size:0.85rem;font-weight:700;color:#EC4899;letter-spacing:0.05em">← Back</button>
-            <span>📝 Order Details</span>
+            <button onclick="hideOrderForm()" style="font-size:0.85rem;font-weight:700;color:#EC4899;letter-spacing:0.05em">${t('back')}</button>
+            <span>📝 ${t('orderDetails')}</span>
             <button onclick="closeCart()">✕</button>
           </div>
           <div class="checkout-body">
@@ -578,7 +694,7 @@ function openCart() {
                 <label class="cf-label">✦ Special Instructions (Optional)</label>
                 <textarea class="cf-input cf-textarea" id="cfNotes" placeholder="Cake message, design notes, allergies..."></textarea>
               </div>
-              <button type="submit" class="cart-checkout-btn" style="margin-top:1rem">✓ Place Order</button>
+              <button type="submit" class="cart-checkout-btn" style="margin-top:1rem">✓ ${t('placeOrder')}</button>
             </form>
           </div>
         </div>
@@ -586,16 +702,21 @@ function openCart() {
         <div class="checkout-screen" id="successScreen" style="display:none">
           <div class="success-body">
             <div class="success-icon">🎉</div>
-            <h3 class="success-title">Order Placed!</h3>
-            <p class="success-msg">Your order has been received. Redirecting to admin panel...</p>
+            <h3 class="success-title">${t('successPlaced')}</h3>
+            <p class="success-msg">${t('redirectingShop')}</p>
             <div class="success-loader"><div class="success-bar"></div></div>
           </div>
         </div>
       </div>`;
 
         document.body.appendChild(drawer);
-        injectCartStyles();
     }
+    const cartScreen = document.getElementById('cartScreen');
+    const checkoutScreen = document.getElementById('checkoutScreen');
+    const successScreen = document.getElementById('successScreen');
+    if (cartScreen) cartScreen.style.display = 'flex';
+    if (checkoutScreen) checkoutScreen.style.display = 'none';
+    if (successScreen) successScreen.style.display = 'none';
     renderCart();
     drawer.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -750,66 +871,21 @@ async function submitOrder(e) {
     }, 3000);
 }
 
-function injectCartStyles() {
-    if (document.getElementById('cartStyles')) return;
-    const s = document.createElement('style');
-    s.id = 'cartStyles';
-    s.textContent = `
-    #cartDrawer { position:fixed;inset:0;z-index:9000;pointer-events:none; }
-    #cartDrawer.open { pointer-events:all; }
-    .cart-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.4);opacity:0;transition:opacity 0.4s; }
-    #cartDrawer.open .cart-overlay { opacity:1; }
-    .cart-panel { position:absolute;right:0;top:0;bottom:0;width:min(440px,100vw);background:#fff;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.4s cubic-bezier(.25,.46,.45,.94);box-shadow:-20px 0 60px rgba(0,0,0,.12); }
-    #cartDrawer.open .cart-panel { transform:translateX(0); }
-    .cart-screen { display:flex;flex-direction:column;height:100%; }
-    .checkout-screen { display:none;flex-direction:column;height:100%; }
-    .cart-head { display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.75rem;border-bottom:1px solid #f0f0f0;font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;flex-shrink:0; }
-    .cart-head button { background:none;border:none;cursor:pointer;font-size:1.1rem;color:#999;transition:color 0.2s; }
-    .cart-head button:hover { color:#EC4899; }
-    .cart-body { flex:1;overflow-y:auto;padding:1.25rem 1.75rem; }
-    .checkout-body { flex:1;overflow-y:auto;padding:1.25rem 1.75rem; }
-    .cart-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:1rem;color:#bbb;font-style:italic;font-size:1rem; }
-    .cart-item { display:flex;align-items:center;gap:1rem;padding:1rem 0;border-bottom:1px solid #f9f9f9; }
-    .cart-item-img { width:60px;height:60px;object-fit:cover;border-radius:0.75rem;flex-shrink:0; }
-    .cart-item-info { flex:1;min-width:0; }
-    .cart-item-name { font-weight:700;font-size:0.88rem;margin-bottom:0.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-    .cart-item-price { font-size:0.83rem;color:#EC4899;font-weight:700;margin-bottom:0.4rem; }
-    .cart-item-qty { display:flex;align-items:center;gap:0.5rem; }
-    .cart-item-qty button { width:26px;height:26px;border-radius:50%;border:1px solid #eee;background:#fafafa;cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s; }
-    .cart-item-qty button:hover { background:#EC4899;color:white;border-color:#EC4899; }
-    .cart-item-qty span { font-weight:700;min-width:18px;text-align:center; }
-    .cart-item-remove { background:none;border:none;cursor:pointer;color:#ddd;font-size:0.9rem;flex-shrink:0;transition:color 0.2s;padding:0.2rem; }
-    .cart-item-remove:hover { color:#ef4444; }
-    .cart-footer { padding:1.25rem 1.75rem;border-top:1px solid #f0f0f0;flex-shrink:0; }
-    .cart-total { font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;margin-bottom:0.9rem;display:flex;justify-content:space-between;align-items:center; }
-    .cart-total-val { color:#EC4899; }
-    .cart-checkout-btn { width:100%;padding:1rem;background:linear-gradient(135deg,#EC4899,#DB2777);color:white;border:none;border-radius:9999px;font-weight:900;font-size:10px;text-transform:uppercase;letter-spacing:0.3em;cursor:pointer;transition:all 0.3s;margin-bottom:0.75rem; }
-    .cart-checkout-btn:hover { transform:translateY(-2px);box-shadow:0 10px 30px rgba(219,39,119,0.35); }
-    .cart-clear-btn { width:100%;padding:0.7rem;background:none;border:1px solid #eee;border-radius:9999px;font-size:0.78rem;color:#aaa;cursor:pointer;transition:all 0.2s; }
-    .cart-clear-btn:hover { border-color:#ef4444;color:#ef4444; }
-    /* Checkout form */
-    .checkout-order-summary { background:#fdf4f9;border:1px solid #fce7f3;border-radius:1rem;padding:1rem 1.25rem;margin-bottom:1.5rem; }
-    .co-row { display:flex;justify-content:space-between;font-size:0.83rem;padding:0.3rem 0;color:#555; }
-    .co-total { display:flex;justify-content:space-between;font-weight:900;font-size:0.95rem;color:#EC4899;border-top:1px solid #fce7f3;margin-top:0.5rem;padding-top:0.5rem; }
-    .cf-group { margin-bottom:1rem; }
-    .cf-label { display:block;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.3em;color:#777;margin-bottom:0.4rem; }
-    .cf-input { width:100%;padding:0.7rem 1rem;border:1.5px solid #e5e5e5;border-radius:0.75rem;font-family:inherit;font-size:0.875rem;color:#1E1E2E;outline:none;transition:border-color 0.25s;background:white;box-sizing:border-box; }
-    .cf-input:focus { border-color:#F9A8D4;box-shadow:0 0 0 3px rgba(249,168,212,0.15); }
-    .cf-textarea { resize:vertical;min-height:80px; }
-    select.cf-input { cursor:pointer; }
-    /* Success screen */
-    .success-body { display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:1.5rem;padding:2rem;text-align:center; }
-    .success-icon { font-size:4rem;animation:popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275); }
-    .success-title { font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:#1E1E2E; }
-    .success-msg { color:#777;font-size:0.9rem;line-height:1.6; }
-    .success-loader { width:100%;height:4px;background:#f0f0f0;border-radius:9999px;overflow:hidden;margin-top:1rem; }
-    .success-bar { height:100%;background:linear-gradient(90deg,#EC4899,#DB2777);border-radius:9999px;animation:loadBar 2.5s linear forwards; }
-    @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
-    @keyframes loadBar { from{width:0} to{width:100%} }
-    `;
-    document.head.appendChild(s);
-}
 // ========================
+// Preloader Logic
+// ========================
+window.addEventListener('load', () => {
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        setTimeout(() => {
+            preloader.classList.add('fade-out');
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 500);
+        }, 300);
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     applySiteCustomizations();
     initNavbar();
@@ -820,10 +896,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     syncProducts(); // Supabase Sync
 });
-function addToCart(id) {
-    const product = products.find(p => p.id === id);
-    if (product) { cart.push(product); localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
-}
 
 // ========================
 // Init

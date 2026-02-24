@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baking Corner — Premium Bakery</title>
+    <title>Baking Corner</title>
     <meta name="description"
         content="Baking Corner — Premium custom cakes, macarons, and confections crafted with the finest ingredients." />
     <link rel="stylesheet" href="../assets/style.css" />
@@ -15,14 +15,20 @@
 
 <body>
 
+    <div id="preloader">
+        <img src="../assets/logo.jpeg" alt="Logo" class="loader-logo">
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+
     <!-- ====== NAVBAR ====== -->
     <nav class="navbar" id="navbar">
         <div class="container">
             <a href="index.html" class="nav-logo">
-                <div class="nav-logo-icon">🎂</div>
+                <img src="../assets/logo.jpeg" class="nav-logo-img" alt="Baking Corner Logo">
                 <div class="nav-logo-text">
                     <span>Baking <span class="text-gradient-gold" style="font-style:italic">Corner</span></span>
-                    <span>Premium Bakery</span>
                 </div>
             </a>
             <div class="nav-links">
@@ -65,7 +71,7 @@
 
             <button class="lang-btn lang-toggle" style="margin-bottom:1.5rem;width:100%;justify-content:center"><span
                     class="lang-btn-text">বাংলা</span></button>
-            <p class="mobile-copyright">Baking Corner Premium Bakery © 2026</p>
+            <p class="mobile-copyright">Baking Corner Luxury Confectionery © 2026</p>
         </div>
     </div>
 
@@ -74,16 +80,9 @@
         <div class="hero-ring"></div>
         <div class="container" style="position:relative;z-index:1">
             <div class="hero-content fade-in">
-                <span class="overline mb-8" data-t="heroSub">Baking Corner — Premium Bakery</span>
                 <h1>
-                    <span data-lang="en">Pure <span class="text-gradient-gold"
-                            style="font-style:italic">Artistry</span><br><span
-                            style="font-size:0.55em;font-weight:400;display:block;margin-top:0.5rem">Beyond
-                            Sweetness</span></span>
-                    <span data-lang="bn" style="display:none"><span class="text-gradient-gold"
-                            style="font-style:italic">মিষ্টতার</span> ঊর্ধ্বে<br><span
-                            style="font-size:0.55em;font-weight:400;display:block;margin-top:0.5rem">খাঁটি
-                            শৈল্পিকতা</span></span>
+                    <span data-lang="en" class="text-gradient-gold">Fresh &amp; Pure Tasty</span>
+                    <span data-lang="bn" class="text-gradient-gold" style="display:none">Fresh &amp; Pure Tasty</span>
                 </h1>
                 <p class="hero-desc" data-t="heroDesc"></p>
                 <div class="hero-actions">
@@ -106,7 +105,7 @@
                     </div>
                     <div class="glass philosophy-card-float"
                         style="position:absolute;bottom:-60px;right:-60px;padding:2.5rem;border-radius:3rem;max-width:320px">
-                        <div style="font-size:2rem;margin-bottom:1rem">✨</div>
+                        <div style="font-size:2rem;margin-bottom:1rem"></div>
                         <h4 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:0.5rem;font-style:italic"
                             data-t="noCompromise">No Compromise.</h4>
                         <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.7" data-t="qualityDesc"></p>
@@ -199,8 +198,8 @@
     <footer>
         <div class="container">
             <div class="footer-brand">
-                <div class="footer-logo-icon">🎂</div>
-                <h2>Baking <span class="text-gradient-gold" style="font-style:italic">Corner</span></h2>
+                <img src="../assets/logo.jpeg" class="footer-logo-img" alt="Baking Corner Logo">
+                <h2><span class="text-gradient-gold">Baking Corner</span></h2>
             </div>
             <nav class="footer-nav">
                 <a href="index.html" data-t="atelier">Atelier</a>
@@ -211,8 +210,7 @@
             </nav>
             <div class="footer-bottom">
                 <div class="footer-copy">
-                    <span class="sparkle">✦</span>
-                    <span>Baking Corner Premium Bakery © 2026</span>
+                    <span>Baking Corner Luxury Confectionery � 2026</span>
                 </div>
                 <div class="footer-legal">
                     <a href="../legal/privacy.html">Privacy Protocol</a>
@@ -252,7 +250,7 @@
                                 <span class="product-price">${fmt(p.price)}</span>
                             </div>
                             <p class="product-desc">"${p.description}"</p>
-                            <button class="product-btn" onclick="addToCart(${p.id})" data-t="reserveItem">Reserve Item</button>
+                            <button class="product-btn" onclick="addToCart(1)" data-t="reserveItem">Reserve Item</button>
                         </div>
                     </div>
                 `).join('');
@@ -264,3 +262,7 @@
 </body>
 
 </html>
+
+
+
+

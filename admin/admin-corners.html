@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Categories — Admin Portal</title>
+    <title>Baking Corner</title>
     <link rel="stylesheet" href="../assets/style.css" />
     <link rel="stylesheet" href="admin-style.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -44,7 +44,7 @@
             }
         }
 
-        /* ── Header ── */
+        /* -- Header -- */
         .page-header {
             margin-bottom: 4rem;
         }
@@ -66,7 +66,7 @@
             line-height: 1.2;
         }
 
-        /* ── Layout Grid ── */
+        /* -- Layout Grid -- */
         .management-grid {
             display: grid;
             grid-template-columns: 380px 1fr;
@@ -80,7 +80,7 @@
             }
         }
 
-        /* ── Action Card (Add Corner) ── */
+        /* -- Action Card (Add Corner) -- */
         .action-card {
             background: white;
             border-radius: 2.5rem;
@@ -157,7 +157,7 @@
             background: var(--accent);
         }
 
-        /* ── Corner Items List ── */
+        /* -- Corner Items List -- */
         .corners-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -243,7 +243,7 @@
             transform: scale(1.1);
         }
 
-        /* ── Empty State ── */
+        /* -- Empty State -- */
         .empty-state {
             text-align: center;
             padding: 6rem 2rem;
@@ -255,6 +255,13 @@
 </head>
 
 <body>
+
+    <div id="preloader">
+        <img src="../assets/logo.jpeg" alt="Logo" class="loader-logo">
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
     <div class="admin-layout">
         <div id="adminSidebarMount"></div>
 
@@ -281,10 +288,10 @@
                         </div>
                         <div class="lux-group">
                             <label class="lux-label">Category Icon (Emoji)</label>
-                            <input type="text" class="lux-input" id="newCornerIcon" placeholder="e.g. 🎂"
+                            <input type="text" class="lux-input" id="newCornerIcon" placeholder="e.g. ??"
                                 maxlength="4" />
                         </div>
-                        <button type="submit" class="lux-submit">✓ Add Category</button>
+                        <button type="submit" class="lux-submit">? Add Category</button>
                     </form>
                 </aside>
 
@@ -292,7 +299,7 @@
                 <div id="cornersList" class="corners-container">
                     <!-- Dynamic Content -->
                     <div class="empty-state">
-                        <span style="font-size:3rem;display:block;margin-bottom:1rem">⏳</span>
+                        <span style="font-size:3rem;display:block;margin-bottom:1rem">?</span>
                         <p
                             style="color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;font-size:10px">
                             Summoning segments...</p>
@@ -318,7 +325,7 @@
             if (!data.corners || !data.corners.length) {
                 list.innerHTML = `
                     <div class="empty-state" style="grid-column: 1/-1">
-                        <span style="font-size:3rem;display:block;margin-bottom:1rem">🎨</span>
+                        <span style="font-size:3rem;display:block;margin-bottom:1rem">??</span>
                         <h3 style="font-family:'Cormorant Garamond', serif; font-size:1.5rem; margin-bottom:0.5rem">Empty Atelier</h3>
                         <p style="color:#aaa; font-size:0.875rem">No boutique segments established yet.</p>
                     </div>`;
@@ -328,7 +335,7 @@
             list.innerHTML = data.corners.map(c => `
                 <div class="corner-card" id="corner-${c.id}">
                     <div style="display:flex; align-items:center; gap:1.5rem">
-                        <div class="corner-icon-box">${c.icon || '🍰'}</div>
+                        <div class="corner-icon-box">${c.icon || '??'}</div>
                         <div class="corner-info">
                             <h3 class="corner-name">${c.name}</h3>
                             <div style="font-size:9px; font-weight:900; letter-spacing:0.2em; color:#D4AF37; text-transform:uppercase">Shop Category</div>
@@ -336,7 +343,7 @@
                     </div>
                     <p class="corner-desc">"${c.description || 'A unique collection of artisanal products.'}"</p>
                     <div class="corner-actions">
-                        <button class="delete-btn" onclick="deleteCorner(${c.id})">🗑 Delete</button>
+                        <button class="delete-btn" onclick="deleteCorner(${c.id})">?? Delete</button>
                     </div>
                 </div>
             `).join('');
@@ -346,7 +353,7 @@
             e.preventDefault();
             const name = document.getElementById('newCornerName').value.trim();
             const desc = document.getElementById('newCornerDesc').value.trim();
-            const icon = document.getElementById('newCornerIcon').value.trim() || '🍰';
+            const icon = document.getElementById('newCornerIcon').value.trim() || '??';
 
             if (!name) return;
 
@@ -392,3 +399,6 @@
 </body>
 
 </html>
+
+
+

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Settings — Baking Corner Admin</title>
+    <title>Baking Corner</title>
     <link rel="stylesheet" href="../assets/style.css" />
     <link rel="stylesheet" href="admin-style.css" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
@@ -68,6 +68,13 @@
 
 <body class="admin-body">
 
+    <div id="preloader">
+        <img src="../assets/logo.jpeg" alt="Logo" class="loader-logo">
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+
     <div id="adminSidebarMount"></div>
 
     <main class="admin-main">
@@ -97,7 +104,7 @@
                                 value="Nangalkot Bottol Square, Cumilla" />
                         </div>
                     </div>
-                    <button class="admin-submit-btn" onclick="saveStoreInfo()">✓ Save Information</button>
+                    <button class="admin-submit-btn" onclick="saveStoreInfo()">? Save Information</button>
                 </div>
 
                 <!-- Currency -->
@@ -106,20 +113,20 @@
                     <div class="settings-section">
                         <div class="admin-form-group">
                             <label class="admin-label">Currency Symbol</label>
-                            <input type="text" class="admin-input" id="currencySymbol" value="৳"
+                            <input type="text" class="admin-input" id="currencySymbol" value="?"
                                 oninput="updateCurrencyPreview()" />
                         </div>
                         <div class="admin-form-group">
                             <label class="admin-label">Symbol Position</label>
                             <select class="admin-input" id="currencyPosition" onchange="updateCurrencyPreview()"
                                 style="font-style:normal">
-                                <option value="before">Before Amount (৳500)</option>
-                                <option value="after">After Amount (500৳)</option>
+                                <option value="before">Before Amount (?500)</option>
+                                <option value="after">After Amount (500?)</option>
                             </select>
                         </div>
-                        <div class="currency-preview" id="currencyPreview">৳ 1,200</div>
+                        <div class="currency-preview" id="currencyPreview">? 1,200</div>
                     </div>
-                    <button class="admin-submit-btn" onclick="saveCurrency(event)">✓ Save Currency</button>
+                    <button class="admin-submit-btn" onclick="saveCurrency(event)">? Save Currency</button>
                 </div>
             </div>
 
@@ -159,7 +166,7 @@
                             <input type="color" id="colorAccent" value="#DB2777" />
                         </div>
                     </div>
-                    <button class="admin-submit-btn" onclick="saveCustomizer(event)">✓ Save Colors</button>
+                    <button class="admin-submit-btn" onclick="saveCustomizer(event)">? Save Colors</button>
                 </div>
             </div>
         </div>
@@ -243,14 +250,14 @@
         }
 
         function updateCurrencyPreview() {
-            const sym = document.getElementById('currencySymbol').value || '৳';
+            const sym = document.getElementById('currencySymbol').value || '?';
             const pos = document.getElementById('currencyPosition').value;
             document.getElementById('currencyPreview').textContent = pos === 'after' ? '1,200 ' + sym : sym + ' 1,200';
         }
 
         function flashButton(btn) {
             const oldText = btn.textContent;
-            btn.textContent = '✓ Saved!';
+            btn.textContent = '? Saved!';
             btn.style.background = '#4ade80';
             btn.style.color = 'white';
             setTimeout(() => {
@@ -270,3 +277,6 @@
 </body>
 
 </html>
+
+
+

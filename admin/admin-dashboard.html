@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard — Baking Corner Admin</title>
+    <title>Baking Corner</title>
     <link rel="stylesheet" href="../assets/style.css" />
     <link rel="stylesheet" href="admin-style.css" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
@@ -13,6 +13,13 @@
 </head>
 
 <body class="admin-body">
+
+    <div id="preloader">
+        <img src="../assets/logo.jpeg" alt="Logo" class="loader-logo">
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
 
     <div id="adminSidebarMount"></div>
 
@@ -25,25 +32,25 @@
         <!-- Stat Cards -->
         <div class="stat-grid fade-in">
             <div class="stat-card">
-                <span class="stat-icon" style="color:#4ade80">📈</span>
+                <span class="stat-icon" style="color:#4ade80">??</span>
                 <p class="stat-label">Total Sales</p>
-                <p class="stat-value" id="dashTotalSales">৳0</p>
+                <p class="stat-value" id="dashTotalSales">?0</p>
                 <p class="stat-change up" id="dashSalesChange">+0% this month</p>
             </div>
             <div class="stat-card" id="dashCornerCard">
-                <span class="stat-icon" style="color:#FDB9C8">🏬</span>
+                <span class="stat-icon" style="color:#FDB9C8">??</span>
                 <p class="stat-label">Categories</p>
-                <p class="stat-value" id="dashCornerCount">—</p>
+                <p class="stat-value" id="dashCornerCount">�</p>
                 <p class="stat-change neutral">Active sections</p>
             </div>
             <div class="stat-card" id="dashProductCard">
-                <span class="stat-icon" style="color:#60a5fa">📦</span>
+                <span class="stat-icon" style="color:#60a5fa">??</span>
                 <p class="stat-label">Products</p>
-                <p class="stat-value" id="dashProductCount">—</p>
+                <p class="stat-value" id="dashProductCount">�</p>
                 <p class="stat-change neutral">Total items</p>
             </div>
             <div class="stat-card">
-                <span class="stat-icon" style="color:#D4AF37">✨</span>
+                <span class="stat-icon" style="color:#D4AF37">?</span>
                 <p class="stat-label">Store Status</p>
                 <p class="stat-value">Active</p>
                 <p class="stat-change neutral">Growth Mode</p>
@@ -74,17 +81,17 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="fade-in">
             <a href="admin-corners.html" class="admin-card"
                 style="text-decoration:none;color:inherit;display:block;transition:all 0.5s">
-                <div style="font-size:2rem;margin-bottom:1rem">🏬</div>
+                <div style="font-size:2rem;margin-bottom:1rem">??</div>
                 <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:0.5rem">Manage
                     Categories</h3>
-                <p style="font-size:0.8rem;color:#8E7D72">Organize your shop sections →</p>
+                <p style="font-size:0.8rem;color:#8E7D72">Organize your shop sections ?</p>
             </a>
             <a href="admin-products.html" class="admin-card"
                 style="text-decoration:none;color:inherit;display:block;transition:all 0.5s">
-                <div style="font-size:2rem;margin-bottom:1rem">📦</div>
+                <div style="font-size:2rem;margin-bottom:1rem">??</div>
                 <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:0.5rem">Manage
                     Products</h3>
-                <p style="font-size:0.8rem;color:#8E7D72">Add or update items in your shop →</p>
+                <p style="font-size:0.8rem;color:#8E7D72">Add or update items in your shop ?</p>
             </a>
         </div>
     </main>
@@ -103,7 +110,7 @@
 
             const total = data.orders.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
             const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
-            const sym = settings.currencySymbol || '৳';
+            const sym = settings.currencySymbol || '?';
             const pos = settings.currencyPosition || 'before';
             const fmt = n => pos === 'after' ? n.toLocaleString('en-IN') + sym : sym + n.toLocaleString('en-IN');
 
@@ -152,3 +159,6 @@
 </body>
 
 </html>
+
+
+

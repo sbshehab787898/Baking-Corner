@@ -29,7 +29,7 @@ function renderAdminSidebar(activePage) {
   const sidebarHTML = `
     <aside class="admin-sidebar" id="adminSidebar">
       <div class="sidebar-brand">
-        <div class="sidebar-icon">🍩</div>
+        <img src="../assets/logo.jpeg" style="width:40px;height:40px;object-fit:contain;border-radius:10px;margin-right:1rem">
         <div>
           <span class="sidebar-sub">Admin Area</span>
           <span class="sidebar-title">Baking <em>Corner</em></span>
