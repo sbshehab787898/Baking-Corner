@@ -55,8 +55,24 @@
                         </select>
                     </div>
                     <div class="admin-form-group">
-                        <label class="admin-label">Image URL</label>
-                        <input type="url" class="admin-input" id="pImg" placeholder="https://..." />
+                        <label class="admin-label">Product Photo</label>
+                        <div id="uploadBox"
+                            style="border:2px dashed #fdb9c8;border-radius:1.25rem;padding:1.5rem;text-align:center;cursor:pointer;background:#fff8fb;transition:all 0.3s;position:relative;"
+                            onclick="document.getElementById('pImg').click()">
+                            <img id="imgPreview" src="" alt=""
+                                style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:0.75rem;margin-bottom:0.75rem;" />
+                            <div id="uploadPrompt">
+                                <div style="font-size:2.5rem;margin-bottom:0.5rem;">📷</div>
+                                <div
+                                    style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;color:#EC4899;">
+                                    Click to Upload Photo</div>
+                                <div style="font-size:10px;color:#aaa;margin-top:0.3rem;">JPG, PNG, WEBP — Max 5MB</div>
+                            </div>
+                            <input type="file" id="pImg" accept="image/*" style="display:none;"
+                                onchange="previewImage(event)" />
+                        </div>
+                        <div id="uploadStatus" style="font-size:11px;color:#aaa;margin-top:0.4rem;text-align:center;">
+                        </div>
                     </div>
                     <div class="admin-form-group">
                         <label class="admin-label">Description</label>
@@ -161,35 +177,94 @@
     `).join('');
         }
 
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('imgPreview');
+                const prompt = document.getElementById('uploadPrompt');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                prompt.style.display = 'none';
+                document.getElementById('uploadStatus').textContent = '✅ ' + file.name;
+                document.getElementById('uploadBox').style.borderColor = '#4ade80';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function uploadImageToSupabase(file) {
+            if (!window.supabaseClient || !file) return null;
+            const ext = file.name.split('.').pop();
+            const fileName = 'product_' + Date.now() + '.' + ext;
+            const { data: uploadData, error } = await window.supabaseClient
+                .storage
+                .from('product-images')
+                .upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) {
+                console.error('Upload error:', error.message);
+                return null;
+            }
+            const { data: urlData } = window.supabaseClient
+                .storage
+                .from('product-images')
+                .getPublicUrl(fileName);
+            return urlData.publicUrl || null;
+        }
+
         async function handleAddProduct(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('.admin-submit-btn');
+            const fileInput = document.getElementById('pImg');
+            const file = fileInput.files[0];
+
+            btn.textContent = '⏳ Uploading...';
+            btn.disabled = true;
+            document.getElementById('uploadStatus').textContent = file ? '⏳ Uploading photo...' : '';
+
+            // Photo upload করো Supabase Storage তে
+            let imageUrl = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600';
+            if (file) {
+                const uploaded = await uploadImageToSupabase(file);
+                if (uploaded) {
+                    imageUrl = uploaded;
+                    document.getElementById('uploadStatus').textContent = '✅ Photo uploaded!';
+                } else {
+                    document.getElementById('uploadStatus').textContent = '⚠️ Upload failed, using default image.';
+                }
+            }
+
             const newProd = {
                 id: Date.now(),
                 name: document.getElementById('pName').value.trim(),
                 price: parseFloat(document.getElementById('pPrice').value),
                 category: document.getElementById('pCat').value,
-                image: document.getElementById('pImg').value.trim() ||
-                    'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600',
+                image: imageUrl,
                 description: document.getElementById('pDesc').value.trim()
             };
 
-            // Sync to DB
             await dbAddProduct(newProd);
-
             data.products.unshift(newProd);
             saveAdminData('adminProducts', data.products);
+
+            // Reset form
             e.target.reset();
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('uploadPrompt').style.display = 'block';
+            document.getElementById('uploadBox').style.borderColor = '#fdb9c8';
+            document.getElementById('uploadStatus').textContent = '';
+
             renderProducts();
-            // Flash success
-            const btn = e.target.querySelector('.admin-submit-btn');
-            btn.textContent = '? Saved!';
+
+            btn.textContent = '✅ Saved!';
             btn.style.background = '#4ade80';
             btn.style.color = 'white';
+            btn.disabled = false;
             setTimeout(() => {
-                btn.textContent = '? Save Product';
+                btn.textContent = '💾 Save Product';
                 btn.style.background = '';
                 btn.style.color = '';
-            }, 2000);
+            }, 2500);
         }
 
         async function deleteProduct(id) {
@@ -212,6 +287,3 @@
 </body>
 
 </html>
-
-
-
