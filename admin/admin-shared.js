@@ -184,3 +184,17 @@ async function syncAdminDataFromSupabase() {
 }
 
 
+// ========================
+// Admin Preloader Hide
+// ========================
+window.addEventListener('load', () => {
+  const preloader = document.getElementById('preloader');
+  if (preloader) {
+    setTimeout(() => {
+      preloader.classList.add('fade-out');
+      setTimeout(() => {
+        preloader.style.display = 'none';
+      }, 500);
+    }, 300);
+  }
+});
