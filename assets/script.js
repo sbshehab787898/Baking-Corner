@@ -430,12 +430,41 @@ let products = [
 ];
 
 async function syncProducts() {
-    if (!window.supabaseClient) return;
-    const { data, error } = await window.supabaseClient.from('products').select('*');
-    if (!error && data && data.length > 0) {
-        products = data;
+    if (!window.supabaseClient) {
         filterProducts();
+        return;
     }
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('products').select('*').order('created_at', { ascending: true });
+
+        if (!error && data && data.length > 0) {
+            // Supabase এ products আছে — সেটাই ব্যবহার করো
+            products = data;
+        } else if (!error && data && data.length === 0) {
+            // Supabase খালি — default products seed করো
+            const seedProducts = products.map(p => ({
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                category: p.category,
+                image: p.image,
+                description: p.description
+            }));
+            const { error: insertError } = await window.supabaseClient
+                .from('products').insert(seedProducts);
+            if (insertError) {
+                console.warn('Supabase seed failed, using local defaults:', insertError.message);
+            } else {
+                console.log('✅ Default products seeded to Supabase successfully!');
+            }
+        } else if (error) {
+            console.warn('Supabase products fetch error, using local defaults:', error.message);
+        }
+    } catch (err) {
+        console.warn('Supabase unavailable, using local defaults:', err);
+    }
+    filterProducts();
 }
 
 let activeFilter = 'all';
