@@ -418,16 +418,7 @@ function copyTemplate() {
 // ========================
 // Shop Filter & Search
 // ========================
-let products = [
-    { id: 1, name: 'Rose Velvet Dreams', price: 128, category: 'cakes', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=600', description: 'A symphony of red velvet layered with rose-infused cream cheese.' },
-    { id: 2, name: 'Gold Leaf Macarons', price: 86, category: 'macarons', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&q=80&w=600', description: 'Hand-piped shells filled with grand-cru chocolate ganache, adorned with 24k gold.' },
-    { id: 3, name: 'Midnight Obsidian Torte', price: 215, category: 'cakes', image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&q=80&w=600', description: 'Seven layers of dark chocolate sponge, cognac syrup, and mousse.' },
-    { id: 4, name: 'Ivory Lace Cake', price: 320, category: 'cakes', image: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&q=80&w=600', description: 'Handcrafted sugar lace adorns this almond-scented ivory masterpiece.' },
-    { id: 5, name: 'Champagne Choux', price: 72, category: 'pastries', image: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&q=80&w=600', description: 'Ethereal pâte à choux filled with Dom Pérignon-infused diplomat cream.' },
-    { id: 6, name: 'Bergamot Tart', price: 96, category: 'pastries', image: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&q=80&w=600', description: 'Earl grey custard in a Breton shell, finished with bergamot jelly glaze.' },
-    { id: 7, name: 'Pearl Truffle Collection', price: 145, category: 'chocolates', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&q=80&w=600', description: 'A curated box of 12 hand-rolled grand-cru truffles.' },
-    { id: 8, name: 'Saffron Cloud Cake', price: 265, category: 'cakes', image: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&q=80&w=600', description: 'Delicate sponge infused with Persian saffron, layered with clotted cream.' }
-];
+let products = []; // Populated from admin panel via Supabase only
 
 async function syncProducts() {
     if (!window.supabaseClient) {
@@ -438,31 +429,13 @@ async function syncProducts() {
         const { data, error } = await window.supabaseClient
             .from('products').select('*').order('created_at', { ascending: true });
 
-        if (!error && data && data.length > 0) {
-            // Supabase এ products আছে — সেটাই ব্যবহার করো
-            products = data;
-        } else if (!error && data && data.length === 0) {
-            // Supabase খালি — default products seed করো
-            const seedProducts = products.map(p => ({
-                id: p.id,
-                name: p.name,
-                price: p.price,
-                category: p.category,
-                image: p.image,
-                description: p.description
-            }));
-            const { error: insertError } = await window.supabaseClient
-                .from('products').insert(seedProducts);
-            if (insertError) {
-                console.warn('Supabase seed failed, using local defaults:', insertError.message);
-            } else {
-                console.log('✅ Default products seeded to Supabase successfully!');
-            }
+        if (!error && data) {
+            products = data; // Use whatever admin has added (may be empty)
         } else if (error) {
-            console.warn('Supabase products fetch error, using local defaults:', error.message);
+            console.warn('Supabase products fetch error:', error.message);
         }
     } catch (err) {
-        console.warn('Supabase unavailable, using local defaults:', err);
+        console.warn('Supabase unavailable:', err);
     }
     filterProducts();
 }

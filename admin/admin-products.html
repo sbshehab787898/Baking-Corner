@@ -10,6 +10,136 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../assets/supabase-client.js"></script>
+    <style>
+        /* ── Pound section styles ── */
+        .pound-section-card {
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            border: 1.5px solid #fdb9c8;
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.06);
+        }
+
+        .pound-section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #2D1E17;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pound-add-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .pound-add-row .admin-form-group {
+            margin-bottom: 0;
+            flex: 1;
+            min-width: 110px;
+        }
+
+        .pound-add-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #EC4899, #DB2777);
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            height: 46px;
+        }
+
+        .pound-add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(219, 39, 119, 0.3);
+        }
+
+        .pound-add-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pound-chips-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1.25rem;
+            min-height: 40px;
+        }
+
+        .pound-chip-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #FFF0F7;
+            border: 1.5px solid #fdb9c8;
+            color: #DB2777;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 0.45rem 0.9rem 0.45rem 1rem;
+            border-radius: 9999px;
+            transition: all 0.25s;
+        }
+
+        .pound-chip-tag:hover {
+            border-color: #EC4899;
+            background: #FFE4F3;
+        }
+
+        .pound-chip-del {
+            background: rgba(219, 39, 119, 0.12);
+            border: none;
+            color: #DB2777;
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .pound-chip-del:hover {
+            background: #EC4899;
+            color: white;
+            transform: scale(1.15);
+        }
+
+        .pound-empty-hint {
+            font-size: 11px;
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .pound-tip {
+            font-size: 10px;
+            color: #a87;
+            background: #FFFBF0;
+            border: 1px solid #F9D77E;
+            border-radius: 0.75rem;
+            padding: 0.65rem 1rem;
+            margin-top: 1rem;
+            line-height: 1.6;
+        }
+    </style>
 </head>
 
 <body class="admin-body">
@@ -31,56 +161,132 @@
 
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:2rem;align-items:start">
 
-            <!-- Add Product Form -->
-            <div class="admin-card" style="position:sticky;top:2rem">
-                <h2 class="admin-card-title">Add New Product</h2>
-                <form onsubmit="handleAddProduct(event)">
-                    <div class="admin-form-group">
-                        <label class="admin-label">Product Name</label>
-                        <input type="text" class="admin-input" id="pName" placeholder="e.g. Chocolate Cake" required />
-                    </div>
-                    <div class="admin-form-group">
-                        <label class="admin-label">Price</label>
-                        <input type="number" class="admin-input" id="pPrice" placeholder="0.00" step="0.01" min="0"
-                            required />
-                    </div>
-                    <div class="admin-form-group">
-                        <label class="admin-label">Category</label>
-                        <select class="admin-input" id="pCat">
-                            <option value="cakes">Cakes</option>
-                            <option value="pastries">Pastries</option>
-                            <option value="macarons">Macarons</option>
-                            <option value="chocolates">Chocolates</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="admin-form-group">
-                        <label class="admin-label">Product Photo</label>
-                        <div id="uploadBox"
-                            style="border:2px dashed #fdb9c8;border-radius:1.25rem;padding:1.5rem;text-align:center;cursor:pointer;background:#fff8fb;transition:all 0.3s;position:relative;"
-                            onclick="document.getElementById('pImg').click()">
-                            <img id="imgPreview" src="" alt=""
-                                style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:0.75rem;margin-bottom:0.75rem;" />
-                            <div id="uploadPrompt">
-                                <div style="font-size:2.5rem;margin-bottom:0.5rem;">📷</div>
+            <!-- Left Column: Add Product + Pound Management -->
+            <div>
+                <!-- Add Product Form -->
+                <div class="admin-card" style="position:sticky;top:2rem">
+                    <h2 class="admin-card-title">Add New Product</h2>
+                    <form onsubmit="handleAddProduct(event)">
+                        <div class="admin-form-group">
+                            <label class="admin-label">Product Name</label>
+                            <input type="text" class="admin-input" id="pName" placeholder="e.g. Chocolate Cake"
+                                required />
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Price</label>
+                            <input type="number" class="admin-input" id="pPrice" placeholder="0.00" step="0.01" min="0"
+                                required />
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Category</label>
+                            <select class="admin-input" id="pCat" style="font-style:normal">
+                                <option value="" disabled selected>লোড হচ্ছে...</option>
+                            </select>
+                        </div>
+                        <div class="admin-form-group">
+                            <label class="admin-label">Product Photos</label>
+
+                            <!-- Drop zone -->
+                            <div id="uploadBox"
+                                style="border:2px dashed #fdb9c8;border-radius:1.25rem;padding:1.2rem;text-align:center;cursor:pointer;background:#fff8fb;transition:all 0.3s;"
+                                onclick="document.getElementById('pImg').click()"
+                                ondragover="event.preventDefault();this.style.borderColor='#EC4899';"
+                                ondragleave="this.style.borderColor='#fdb9c8';"
+                                ondrop="event.preventDefault();this.style.borderColor='#fdb9c8';handleDroppedFiles(event.dataTransfer.files);">
+                                <div style="font-size:2rem;margin-bottom:0.3rem;">📷</div>
                                 <div
                                     style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;color:#EC4899;">
-                                    Click to Upload Photo</div>
-                                <div style="font-size:10px;color:#aaa;margin-top:0.3rem;">JPG, PNG, WEBP — Max 5MB</div>
+                                    Click or Drag to Upload Photos</div>
+                                <div style="font-size:10px;color:#aaa;margin-top:0.25rem;">JPG, PNG, WEBP — Multiple
+                                    allowed — Max 5MB each</div>
+                                <input type="file" id="pImg" accept="image/*" multiple style="display:none;"
+                                    onchange="previewImages(event.target.files)" />
                             </div>
-                            <input type="file" id="pImg" accept="image/*" style="display:none;"
-                                onchange="previewImage(event)" />
+
+                            <!-- Thumbnail grid -->
+                            <div id="photoGrid" style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:0.75rem;">
+                            </div>
+
+                            <div id="uploadStatus"
+                                style="font-size:11px;color:#aaa;margin-top:0.4rem;text-align:center;"></div>
                         </div>
-                        <div id="uploadStatus" style="font-size:11px;color:#aaa;margin-top:0.4rem;text-align:center;">
+                        <div class="admin-form-group">
+                            <label class="admin-label">Description</label>
+                            <textarea class="admin-input" id="pDesc" placeholder="Brief description..."
+                                style="min-height:80px;resize:vertical"></textarea>
+                        </div>
+                        <button type="submit" class="admin-submit-btn" id="saveProductBtn">💾 Save Product</button>
+                    </form>
+
+                    <!-- ⚖️ Pound Options Management — same page, below the form -->
+                    <div class="pound-section-card">
+                        <div class="pound-section-title">⚖️ পাউন্ড Options পরিচালনা</div>
+
+                        <div class="pound-add-row">
+                            <div class="admin-form-group">
+                                <label class="admin-label">পাউন্ড (সংখ্যা)</label>
+                                <input type="number" class="admin-input" id="poundValue" placeholder="e.g. 1, 1.5, 2"
+                                    step="0.25" min="0.25" />
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-label">মূল্য (টাকা)</label>
+                                <input type="number" class="admin-input" id="poundPrice" placeholder="e.g. 100, 200"
+                                    min="0" step="0.01" />
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-label">Label (ঐচ্ছিক)</label>
+                                <input type="text" class="admin-input" id="poundLabel" placeholder="e.g. ১ পাউন্ড" />
+                            </div>
+                            <button class="pound-add-btn" id="addPoundBtn" onclick="handleAddPound()">
+                                + Add
+                            </button>
+                        </div>
+
+                        <!-- Existing pound chips -->
+                        <div class="pound-chips-area" id="poundChipsArea">
+                            <span class="pound-empty-hint">কোনো পাউন্ড নেই — উপরে যোগ করুন</span>
+                        </div>
+                        <div id="poundCountBadge"
+                            style="font-size:10px;color:#aaa;margin-top:0.5rem;text-align:right;letter-spacing:0.1em">
+                        </div>
+
+                        <div class="pound-tip">
+                            💡 এখানে যোগ করা পাউন্ড options গুলো product page এ weight selector এ দেখা যাবে।
+                            Customer চাইলে "Custom" লিখেও order দিতে পারবে।
                         </div>
                     </div>
-                    <div class="admin-form-group">
-                        <label class="admin-label">Description</label>
-                        <textarea class="admin-input" id="pDesc" placeholder="Brief description..."
-                            style="min-height:80px;resize:vertical"></textarea>
+
+                    <!-- 🍓 Flavour Options Management -->
+                    <div class="pound-section-card" style="margin-top:1.25rem; border-color:#c4b5fd;">
+                        <div class="pound-section-title">🍓 Flavour Options পরিচালনা</div>
+
+                        <div class="pound-add-row">
+                            <div class="admin-form-group" style="flex:1">
+                                <label class="admin-label">Flavour নাম</label>
+                                <input type="text" class="admin-input" id="flavourName"
+                                    placeholder="e.g. Vanilla, Chocolate..."
+                                    onkeydown="if(event.key==='Enter'){event.preventDefault();handleAddFlavour();}" />
+                            </div>
+                            <button class="pound-add-btn" id="addFlavourBtn" onclick="handleAddFlavour()"
+                                style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">
+                                + Add
+                            </button>
+                        </div>
+
+                        <!-- Existing flavour chips -->
+                        <div class="pound-chips-area" id="flavourChipsArea" style="margin-top:1rem;">
+                            <span class="pound-empty-hint">কোনো flavour নেই — উপরে যোগ করুন</span>
+                        </div>
+                        <div id="flavourCountBadge"
+                            style="font-size:10px;color:#aaa;margin-top:0.5rem;text-align:right;letter-spacing:0.1em">
+                        </div>
+
+                        <div class="pound-tip" style="border-color:#ddd6fe; background:#faf5ff; color:#6d28d9;">
+                            💡 এখানে যোগ করা Flavour গুলো product page এ flavour selector এ দেখা যাবে।
+                            "Custom" option সবসময় শেষে থাকবে।
+                        </div>
                     </div>
-                    <button type="submit" class="admin-submit-btn">? Save Product</button>
-                </form>
+                </div>
             </div>
 
             <!-- Products List -->
@@ -90,7 +296,7 @@
                     style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap">
                     <div style="position:relative;flex:1;min-width:200px">
                         <span
-                            style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:#aaa">??</span>
+                            style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:#aaa">🔍</span>
                         <input type="text" id="productSearch" class="admin-input"
                             style="padding-left:3rem;border-radius:9999px" placeholder="Search products..." />
                     </div>
@@ -120,13 +326,29 @@
     <script>
         let data;
         let searchQuery = '';
+        let poundOptions = [];
+        let flavourOptions = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
             adminAuthGuard();
             renderAdminSidebar('products');
+
+            // Initialize data from cache first
+            data = getAdminData();
+
             await syncAdminDataFromSupabase();
+
+            // Re-fetch in case sync updated sessionStorage
             data = getAdminData();
             renderProducts();
+
+            // Load pound options
+            await loadPoundOptions();
+            renderPoundChips();
+
+            // Load flavour options
+            await loadFlavourOptions();
+            renderFlavourChips();
 
             document.getElementById('productSearch').addEventListener('input', (e) => {
                 searchQuery = e.target.value.toLowerCase();
@@ -134,9 +356,219 @@
             });
         });
 
+        // ══════════════════════════════════════
+        // POUND OPTIONS
+        // ══════════════════════════════════════
+        async function loadPoundOptions() {
+            if (window.supabaseClient) {
+                try {
+                    const { data: rows, error } = await window.supabaseClient
+                        .from('pound_options')
+                        .select('*')
+                        .order('value', { ascending: true });
+                    if (!error && rows) {
+                        poundOptions = rows;
+                        localStorage.setItem('poundOptions', JSON.stringify(rows));
+                        return;
+                    }
+                } catch (e) { /* fallthrough */ }
+            }
+            poundOptions = JSON.parse(localStorage.getItem('poundOptions') || '[]');
+        }
+
+        function renderPoundChips() {
+            const area = document.getElementById('poundChipsArea');
+            const badge = document.getElementById('poundCountBadge');
+            if (!poundOptions.length) {
+                area.innerHTML = '<span class="pound-empty-hint">কোনো পাউন্ড নেই — উপরে যোগ করুন</span>';
+                if (badge) badge.textContent = '';
+                return;
+            }
+            if (badge) badge.textContent = poundOptions.length + ' টি option সংরক্ষিত';
+            area.innerHTML = poundOptions.map(p => {
+                const priceStr = (p.price !== undefined && p.price !== null && p.price !== '')
+                    ? ` &nbsp;·&nbsp; ৳${parseFloat(p.price).toLocaleString('en-IN')}` : '';
+                return `
+                <div class="pound-chip-tag" id="pc-${p.id}">
+                    ⚖️ ${parseFloat(p.value)} পাউন্ড${priceStr}
+                    <button class="pound-chip-del" onclick="deletePound('${p.id}')" title="মুছুন">✕</button>
+                </div>`;
+            }).join('');
+        }
+
+        async function handleAddPound() {
+            const valRaw = document.getElementById('poundValue').value;
+            const val = parseFloat(valRaw);
+            const priceRaw = document.getElementById('poundPrice').value;
+            const price = priceRaw !== '' ? parseFloat(priceRaw) : null;
+            const label = document.getElementById('poundLabel').value.trim() || (val + ' পাউন্ড');
+            const btn = document.getElementById('addPoundBtn');
+
+            if (!val || val <= 0) {
+                alert('সঠিক পাউন্ড সংখ্যা দিন!');
+                return;
+            }
+            if (poundOptions.some(p => parseFloat(p.value) === val)) {
+                alert('এই পাউন্ড option টি আগেই আছে!');
+                return;
+            }
+
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            const newOpt = { id: 'po_' + Date.now(), value: val, label, price };
+
+            if (window.supabaseClient) {
+                try {
+                    const { data: inserted, error } = await window.supabaseClient
+                        .from('pound_options')
+                        .insert([{ id: newOpt.id, value: newOpt.value, label: newOpt.label, price: newOpt.price }])
+                        .select();
+                    if (!error && inserted && inserted[0]) newOpt.id = inserted[0].id;
+                } catch (e) { /* local fallback */ }
+            }
+
+            poundOptions.push(newOpt);
+            poundOptions.sort((a, b) => parseFloat(a.value) - parseFloat(b.value));
+            localStorage.setItem('poundOptions', JSON.stringify(poundOptions));
+
+            document.getElementById('poundValue').value = '';
+            document.getElementById('poundPrice').value = '';
+            document.getElementById('poundLabel').value = '';
+            renderPoundChips();
+
+            btn.textContent = '✅';
+            setTimeout(() => { btn.textContent = '+ Add'; btn.disabled = false; }, 1500);
+        }
+
+        async function deletePound(id) {
+            if (!confirm('এই পাউন্ড option মুছবেন?')) return;
+
+            if (window.supabaseClient) {
+                try {
+                    await window.supabaseClient.from('pound_options').delete().eq('id', id);
+                } catch (e) { /* local fallback */ }
+            }
+
+            poundOptions = poundOptions.filter(p => String(p.id) !== String(id));
+            localStorage.setItem('poundOptions', JSON.stringify(poundOptions));
+
+            const el = document.getElementById('pc-' + id);
+            if (el) {
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0.8)';
+                el.style.transition = 'all 0.25s';
+                setTimeout(() => renderPoundChips(), 260);
+            } else {
+                renderPoundChips();
+            }
+        }
+
+        // ══════════════════════════════════════
+        // FLAVOUR OPTIONS
+        // ══════════════════════════════════════
+        async function loadFlavourOptions() {
+            if (window.supabaseClient) {
+                try {
+                    const { data: rows, error } = await window.supabaseClient
+                        .from('flavour_options')
+                        .select('*')
+                        .order('created_at', { ascending: true });
+                    if (!error && rows) {
+                        flavourOptions = rows;
+                        localStorage.setItem('flavourOptions', JSON.stringify(rows));
+                        return;
+                    }
+                } catch (e) { /* fallthrough */ }
+            }
+            flavourOptions = JSON.parse(localStorage.getItem('flavourOptions') || '[]');
+        }
+
+        function renderFlavourChips() {
+            const area = document.getElementById('flavourChipsArea');
+            const badge = document.getElementById('flavourCountBadge');
+            if (!flavourOptions.length) {
+                area.innerHTML = '<span class="pound-empty-hint">কোনো flavour নেই — উপরে যোগ করুন</span>';
+                if (badge) badge.textContent = '';
+                return;
+            }
+            if (badge) badge.textContent = flavourOptions.length + ' টি flavour সংরক্ষিত';
+            area.innerHTML = flavourOptions.map(f => `
+                <div class="pound-chip-tag" id="fc-${f.id}"
+                    style="background:#faf5ff;border-color:#c4b5fd;color:#7c3aed;">
+                    🍓 ${f.name}
+                    <button class="pound-chip-del" onclick="deleteFlavour('${f.id}')"
+                        style="background:rgba(124,58,237,0.12);color:#7c3aed;"
+                        onmouseover="this.style.background='#7c3aed';this.style.color='white';"
+                        onmouseout="this.style.background='rgba(124,58,237,0.12)';this.style.color='#7c3aed';"
+                        title="মুছুন">✕</button>
+                </div>`).join('');
+        }
+
+        async function handleAddFlavour() {
+            const name = document.getElementById('flavourName').value.trim();
+            const btn = document.getElementById('addFlavourBtn');
+
+            if (!name) { alert('Flavour নাম দিন!'); return; }
+            if (flavourOptions.some(f => f.name.toLowerCase() === name.toLowerCase())) {
+                alert('এই flavour আগেই আছে!'); return;
+            }
+
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            const newF = { id: 'fl_' + Date.now(), name };
+
+            if (window.supabaseClient) {
+                try {
+                    const { data: inserted, error } = await window.supabaseClient
+                        .from('flavour_options')
+                        .insert([{ id: newF.id, name: newF.name }])
+                        .select();
+                    if (!error && inserted && inserted[0]) newF.id = inserted[0].id;
+                } catch (e) { /* local fallback */ }
+            }
+
+            flavourOptions.push(newF);
+            localStorage.setItem('flavourOptions', JSON.stringify(flavourOptions));
+
+            document.getElementById('flavourName').value = '';
+            renderFlavourChips();
+
+            btn.textContent = '✅';
+            setTimeout(() => { btn.textContent = '+ Add'; btn.disabled = false; }, 1500);
+        }
+
+        async function deleteFlavour(id) {
+            if (!confirm('এই flavour মুছবেন?')) return;
+
+            if (window.supabaseClient) {
+                try {
+                    await window.supabaseClient.from('flavour_options').delete().eq('id', id);
+                } catch (e) { /* local fallback */ }
+            }
+
+            flavourOptions = flavourOptions.filter(f => String(f.id) !== String(id));
+            localStorage.setItem('flavourOptions', JSON.stringify(flavourOptions));
+
+            const el = document.getElementById('fc-' + id);
+            if (el) {
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0.8)';
+                el.style.transition = 'all 0.25s';
+                setTimeout(() => renderFlavourChips(), 260);
+            } else {
+                renderFlavourChips();
+            }
+        }
+
+        // ══════════════════════════════════════
+        // PRODUCTS (unchanged)
+        // ══════════════════════════════════════
         function renderProducts() {
             const list = document.getElementById('productsList');
             const count = document.getElementById('productCount');
+            if (!data || !data.products) return;
             const filtered = data.products.filter(p =>
                 p.name.toLowerCase().includes(searchQuery) ||
                 (p.category || '').toLowerCase().includes(searchQuery)
@@ -144,16 +576,26 @@
 
             count.textContent = filtered.length + ' Items';
 
-            // Populate category dropdown
-            const catSelect = document.getElementById('pCat');
-            if (catSelect && data.corners) {
-                const currentVal = catSelect.value;
-                catSelect.innerHTML = data.corners.map(c => `<option value="${c.name.toLowerCase()}">${c.name}</option>`).join('') + '<option value="other">Other</option>';
-                if (currentVal) catSelect.value = currentVal;
+            // Populate category dropdown from admin-corners.html data
+            const catSel = document.getElementById('pCat');
+            if (catSel && data.corners && data.corners.length) {
+                const prev = catSel.value;
+                catSel.innerHTML = data.corners.map(c =>
+                    `<option value="${c.name.toLowerCase()}">${c.name}</option>`
+                ).join('') + '<option value="other">Other</option>';
+                if (prev) catSel.value = prev;
+            } else if (catSel && catSel.options.length <= 1) {
+                // Fallback defaults if no corners
+                catSel.innerHTML = `
+                    <option value="cakes">Cakes</option>
+                    <option value="pastries">Pastries</option>
+                    <option value="macarons">Macarons</option>
+                    <option value="chocolates">Chocolates</option>
+                    <option value="other">Other</option>`;
             }
 
             const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
-            const sym = settings.currencySymbol || '?';
+            const sym = settings.currencySymbol || '৳';
             const pos = settings.currencyPosition || 'before';
             const fmt = n => pos === 'after' ? n.toLocaleString('en-IN') + sym : sym + n.toLocaleString('en-IN');
 
@@ -172,25 +614,57 @@
           <div class="product-cat">${p.category || ''}</div>
         </div>
         <div class="product-price-cell">${fmt(parseFloat(p.price))}</div>
-        <button class="delete-btn" onclick="deleteProduct(${p.id})" title="Remove">??</button>
+        <button class="delete-btn" onclick="deleteProduct(${p.id})" title="Remove">🗑️</button>
       </div>
     `).join('');
         }
 
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const preview = document.getElementById('imgPreview');
-                const prompt = document.getElementById('uploadPrompt');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                prompt.style.display = 'none';
-                document.getElementById('uploadStatus').textContent = '✅ ' + file.name;
-                document.getElementById('uploadBox').style.borderColor = '#4ade80';
-            };
-            reader.readAsDataURL(file);
+        // ── Multi-photo state ──
+        let selectedFiles = []; // Array of File objects
+
+        function previewImages(files) {
+            Array.from(files).forEach(file => {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(file.name + ' is over 5MB and was skipped.');
+                    return;
+                }
+                if (selectedFiles.some(f => f.name === file.name && f.size === file.size)) return; // no duplicates
+                selectedFiles.push(file);
+            });
+            renderPhotoGrid();
+            // reset input so same file can be re-added after removal
+            document.getElementById('pImg').value = '';
+        }
+
+        function handleDroppedFiles(files) {
+            previewImages(files);
+        }
+
+        function renderPhotoGrid() {
+            const grid = document.getElementById('photoGrid');
+            const status = document.getElementById('uploadStatus');
+            if (!selectedFiles.length) {
+                grid.innerHTML = '';
+                status.textContent = '';
+                return;
+            }
+            status.textContent = selectedFiles.length + ' photo' + (selectedFiles.length > 1 ? 's' : '') + ' selected';
+            grid.innerHTML = selectedFiles.map((f, i) => {
+                const url = URL.createObjectURL(f);
+                const badge = i === 0 ? '<span style="position:absolute;top:4px;left:4px;background:#EC4899;color:white;font-size:8px;font-weight:900;letter-spacing:0.1em;padding:2px 5px;border-radius:99px;text-transform:uppercase;">Main</span>' : '';
+                return `
+                <div style="position:relative;width:74px;height:74px;border-radius:0.6rem;overflow:hidden;border:2px solid ${i === 0 ? '#EC4899' : '#fdb9c8'};flex-shrink:0;">
+                    <img src="${url}" style="width:100%;height:100%;object-fit:cover;display:block;" />
+                    ${badge}
+                    <button type="button" onclick="removePhoto(${i})"
+                        style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.55);color:white;border:none;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+                </div>`;
+            }).join('');
+        }
+
+        function removePhoto(index) {
+            selectedFiles.splice(index, 1);
+            renderPhotoGrid();
         }
 
         async function uploadImageToSupabase(file) {
@@ -214,32 +688,33 @@
 
         async function handleAddProduct(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('.admin-submit-btn');
-            const fileInput = document.getElementById('pImg');
-            const file = fileInput.files[0];
+            const btn = document.getElementById('saveProductBtn');
 
             btn.textContent = '⏳ Uploading...';
             btn.disabled = true;
-            document.getElementById('uploadStatus').textContent = file ? '⏳ Uploading photo...' : '';
 
-            // Photo upload করো Supabase Storage তে
-            let imageUrl = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600';
-            if (file) {
-                const uploaded = await uploadImageToSupabase(file);
-                if (uploaded) {
-                    imageUrl = uploaded;
-                    document.getElementById('uploadStatus').textContent = '✅ Photo uploaded!';
-                } else {
-                    document.getElementById('uploadStatus').textContent = '⚠️ Upload failed, using default image.';
+            let imageUrls = [];
+
+            if (selectedFiles.length) {
+                document.getElementById('uploadStatus').textContent = '⏳ Uploading ' + selectedFiles.length + ' photo(s)...';
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const url = await uploadImageToSupabase(selectedFiles[i]);
+                    if (url) imageUrls.push(url);
                 }
+                document.getElementById('uploadStatus').textContent =
+                    imageUrls.length + ' of ' + selectedFiles.length + ' photo(s) uploaded ✅';
             }
+
+            // First image is main, fallback to placeholder
+            const mainImage = imageUrls[0] || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600';
 
             const newProd = {
                 id: Date.now(),
                 name: document.getElementById('pName').value.trim(),
                 price: parseFloat(document.getElementById('pPrice').value),
                 category: document.getElementById('pCat').value,
-                image: imageUrl,
+                image: mainImage,
+                images: imageUrls,         // all photos stored here
                 description: document.getElementById('pDesc').value.trim()
             };
 
@@ -249,10 +724,9 @@
 
             // Reset form
             e.target.reset();
-            document.getElementById('imgPreview').style.display = 'none';
-            document.getElementById('uploadPrompt').style.display = 'block';
+            selectedFiles = [];
+            renderPhotoGrid();
             document.getElementById('uploadBox').style.borderColor = '#fdb9c8';
-            document.getElementById('uploadStatus').textContent = '';
 
             renderProducts();
 
@@ -272,7 +746,6 @@
             data.products = data.products.filter(p => p.id !== id);
             saveAdminData('adminProducts', data.products);
 
-            // Sync to DB
             await dbDeleteProduct(id);
 
             const el = document.getElementById('prod-' + id);

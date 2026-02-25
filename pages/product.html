@@ -806,6 +806,18 @@
                 font-size: 1.7rem;
             }
         }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -919,30 +931,73 @@
                     <div class="pd-option-group">
                         <span class="pd-option-label">Flavour:</span>
                         <div class="pd-chips" id="flavourChips">
-                            <button class="pd-chip selected" data-val="Vanilla"
-                                onclick="selectChip(this,'flavour')">Vanilla</button>
-                            <button class="pd-chip" data-val="Chocolate"
-                                onclick="selectChip(this,'flavour')">Chocolate</button>
-                            <button class="pd-chip" data-val="Strawberry"
-                                onclick="selectChip(this,'flavour')">Strawberry</button>
-                            <button class="pd-chip" data-val="Rasmalai"
-                                onclick="selectChip(this,'flavour')">Rasmalai</button>
-                            <button class="pd-chip" data-val="Custom"
-                                onclick="selectChip(this,'flavour')">Custom</button>
+                            <!-- Dynamically filled from admin flavour options -->
                         </div>
                     </div>
 
-                    <!-- Weight Selector -->
+                    <!-- Weight / Pound Selector -->
                     <div class="pd-option-group">
-                        <span class="pd-option-label">Cake Weight:</span>
+                        <span class="pd-option-label">Cake Weight (পাউন্ড):</span>
                         <div class="pd-chips" id="weightChips">
-                            <button class="pd-chip selected" data-val="1kg" onclick="selectChip(this,'weight')">1
-                                kg</button>
-                            <button class="pd-chip" data-val="2kg" onclick="selectChip(this,'weight')">2 kg</button>
-                            <button class="pd-chip" data-val="3kg" onclick="selectChip(this,'weight')">3 kg</button>
-                            <button class="pd-chip" data-val="4kg" onclick="selectChip(this,'weight')">4 kg</button>
-                            <button class="pd-chip" data-val="Custom"
-                                onclick="selectChip(this,'weight')">Custom</button>
+                            <!-- Dynamically filled from admin pound options -->
+                        </div>
+                        <!-- Custom pound input (hidden until Custom is selected) -->
+                        <div id="customPoundWrap" style="
+                            display: none;
+                            margin-top: 0.9rem;
+                            animation: fadeSlideIn 0.28s ease;
+                        ">
+                            <div
+                                style="display:flex; align-items:center; gap:0.6rem; background:#FFF0F7; border:1.5px solid #fdb9c8; border-radius:9999px; padding:0.35rem 0.35rem 0.35rem 1.1rem;">
+                                <span
+                                    style="font-size:11px; font-weight:700; color:#DB2777; white-space:nowrap; letter-spacing:0.05em;">⚖️</span>
+                                <input id="customPoundInput" type="text" placeholder="নিজের পাউন্ড লিখুন... e.g. 2.5"
+                                    oninput="calcCustomPrice(this.value)" style="
+                                        flex:1;
+                                        border:none;
+                                        background:transparent;
+                                        font-size:0.875rem;
+                                        font-weight:600;
+                                        font-family:'Inter',sans-serif;
+                                        color:#2D1E17;
+                                        outline:none;
+                                        padding: 0.45rem 0;
+                                    " />
+                                <button onclick="clearCustomPound()" style="
+                                    background:#fdb9c8;
+                                    border:none;
+                                    border-radius:9999px;
+                                    width:30px; height:30px;
+                                    font-size:0.8rem;
+                                    cursor:pointer;
+                                    color:#DB2777;
+                                    font-weight:900;
+                                    display:flex; align-items:center; justify-content:center;
+                                    transition:all 0.2s;
+                                    flex-shrink:0;
+                                " onmouseover="this.style.background='#EC4899';this.style.color='white';"
+                                    onmouseout="this.style.background='#fdb9c8';this.style.color='#DB2777';">✕</button>
+                            </div>
+                            <!-- Live price display for custom pound -->
+                            <div id="customPriceDisplay" style="
+                                display:none;
+                                margin-top:0.6rem;
+                                padding:0.55rem 1.1rem;
+                                background:linear-gradient(135deg,#FFF0F7,#FFE4EF);
+                                border-radius:0.85rem;
+                                border:1px solid #fdb9c8;
+                                font-family:'Outfit',sans-serif;
+                                font-size:1rem;
+                                font-weight:700;
+                                color:#DB2777;
+                                display:none;
+                                align-items:center;
+                                gap:0.4rem;
+                            ">
+                                মূল্য: <span id="customPriceValue" style="font-size:1.2rem;"></span>
+                            </div>
+                            <p style="font-size:10px; color:#aaa; margin:0.45rem 0 0 0.5rem; font-style:italic;">যেকোনো
+                                পাউন্ড পরিমাণ লিখতে পারবেন — আমরা আপনার সাথে যোগাযোগ করব</p>
                         </div>
                     </div>
 
@@ -1067,7 +1122,8 @@
         // ── State ──
         let currentProduct = null;
         let selectedFlavour = 'Vanilla';
-        let selectedWeight = '1kg';
+        let selectedWeight = '1 পাউন্ড';
+        let currentPoundPrice = null; // null মানে base product price ব্যবহার হবে
 
         // ── Load Product ──
         function loadProduct() {
@@ -1111,7 +1167,15 @@
             const sym = s.currencySymbol || '৳';
             const pos = s.currencyPosition || 'before';
             const fmt = n => pos === 'after' ? n + sym : sym + n;
-            document.getElementById('pdPrice').textContent = fmt(product.price.toLocaleString('en-IN') + '.00');
+            // Show price of first pound option if available, else product base price
+            const firstChip = document.querySelector('#weightChips .pd-chip.selected');
+            if (firstChip && firstChip.dataset.price && firstChip.dataset.price !== 'null') {
+                currentPoundPrice = parseFloat(firstChip.dataset.price);
+                document.getElementById('pdPrice').textContent = fmt(currentPoundPrice.toLocaleString('en-IN') + '.00');
+            } else {
+                currentPoundPrice = null;
+                document.getElementById('pdPrice').textContent = fmt(product.price.toLocaleString('en-IN') + '.00');
+            }
 
             // Description
             document.getElementById('pdDescTitle').textContent = product.name;
@@ -1175,7 +1239,124 @@
             container.querySelectorAll('.pd-chip').forEach(c => c.classList.remove('selected'));
             btn.classList.add('selected');
             if (group === 'flavour') selectedFlavour = btn.dataset.val;
-            if (group === 'weight') selectedWeight = btn.dataset.val;
+            if (group === 'weight') {
+                selectedWeight = btn.dataset.val;
+                // Show/hide custom input
+                const wrap = document.getElementById('customPoundWrap');
+                const inp = document.getElementById('customPoundInput');
+                if (btn.dataset.val === 'Custom') {
+                    wrap.style.display = 'block';
+                    inp.value = '';
+                    inp.focus();
+                    selectedWeight = 'Custom'; // will be overwritten as user types
+                } else {
+                    wrap.style.display = 'none';
+                    inp.value = '';
+                }
+                // Auto-update price display
+                if (!currentProduct) return;
+                const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+                const sym = s.currencySymbol || '৳';
+                const pos = s.currencyPosition || 'before';
+                const fmt = n => pos === 'after' ? n + sym : sym + n;
+                if (btn.dataset.price && btn.dataset.price !== 'null' && btn.dataset.val !== 'Custom') {
+                    currentPoundPrice = parseFloat(btn.dataset.price);
+                    document.getElementById('pdPrice').textContent = fmt(currentPoundPrice.toLocaleString('en-IN') + '.00');
+                } else {
+                    // Custom or no price set — revert to product base price
+                    currentPoundPrice = null;
+                    document.getElementById('pdPrice').textContent = fmt(currentProduct.price.toLocaleString('en-IN') + '.00');
+                }
+            }
+        }
+
+        function clearCustomPound() {
+            // Deselect Custom chip and go back to first chip
+            const firstChip = document.querySelector('#weightChips .pd-chip');
+            if (firstChip) selectChip(firstChip, 'weight');
+            document.getElementById('customPoundWrap').style.display = 'none';
+            document.getElementById('customPoundInput').value = '';
+            // Hide price display
+            document.getElementById('customPriceDisplay').style.display = 'none';
+        }
+
+        function calcCustomPrice(rawVal) {
+            const typedVal = rawVal.trim();
+            // Update selectedWeight
+            selectedWeight = typedVal ? (typedVal + ' পাউন্ড') : 'Custom';
+
+            const display = document.getElementById('customPriceDisplay');
+            const priceSpan = document.getElementById('customPriceValue');
+            const pdPriceEl = document.getElementById('pdPrice');
+
+            const customPounds = parseFloat(typedVal);
+            if (!typedVal || isNaN(customPounds) || customPounds <= 0) {
+                display.style.display = 'none';
+                // Revert to base product price when input is empty
+                if (currentProduct) {
+                    const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+                    const sym = s.currencySymbol || '৳';
+                    const pos = s.currencyPosition || 'before';
+                    const fmt = n => pos === 'after' ? n + sym : sym + n;
+                    currentPoundPrice = null;
+                    pdPriceEl.textContent = fmt(currentProduct.price.toLocaleString('en-IN') + '.00');
+                }
+                return;
+            }
+
+            // Calculate per-pound rate from admin options
+            let options = [];
+            try { options = JSON.parse(localStorage.getItem('poundOptions') || '[]'); } catch (e) { }
+            // Filter options that have a price set
+            const priced = options.filter(o => o.price !== null && o.price !== undefined && o.price !== '' && parseFloat(o.value) > 0);
+
+            let calculatedPrice = null;
+            if (priced.length > 0) {
+                // Use the closest option to derive rate, or average rate
+                // Sort by value
+                priced.sort((a, b) => parseFloat(a.value) - parseFloat(b.value));
+                // Find two bracketing options for interpolation
+                let lower = null, upper = null;
+                for (const o of priced) {
+                    if (parseFloat(o.value) <= customPounds) lower = o;
+                    if (parseFloat(o.value) >= customPounds && !upper) upper = o;
+                }
+                if (lower && upper && lower !== upper) {
+                    // Linear interpolation between lower and upper
+                    const lv = parseFloat(lower.value), lp = parseFloat(lower.price);
+                    const uv = parseFloat(upper.value), up = parseFloat(upper.price);
+                    const t = (customPounds - lv) / (uv - lv);
+                    calculatedPrice = lp + t * (up - lp);
+                } else if (lower) {
+                    // Extrapolate using lower's per-pound rate
+                    calculatedPrice = (parseFloat(lower.price) / parseFloat(lower.value)) * customPounds;
+                } else if (upper) {
+                    // Extrapolate using upper's per-pound rate
+                    calculatedPrice = (parseFloat(upper.price) / parseFloat(upper.value)) * customPounds;
+                }
+                calculatedPrice = Math.round(calculatedPrice);
+            }
+
+            // Update state and UI
+            const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            const sym = s.currencySymbol || '৳';
+            const pos = s.currencyPosition || 'before';
+            const fmt = n => pos === 'after' ? n + sym : sym + n;
+
+            if (calculatedPrice !== null) {
+                currentPoundPrice = calculatedPrice;
+                const formatted = fmt(calculatedPrice.toLocaleString('en-IN') + '.00');
+                // Update main price
+                pdPriceEl.textContent = formatted;
+                // Show inline price display
+                priceSpan.textContent = formatted;
+                display.style.display = 'flex';
+            } else {
+                // No priced options — just show base price
+                currentPoundPrice = null;
+                if (currentProduct) pdPriceEl.textContent = fmt(currentProduct.price.toLocaleString('en-IN') + '.00');
+                display.style.display = 'none';
+            }
         }
 
         function changeQtyLocal(d) {
@@ -1188,14 +1369,17 @@
         function addProductToCart() {
             if (!currentProduct) return;
             const qty = parseInt(document.getElementById('qtyInput').value) || 1;
+            // Use pound price if set, otherwise base product price
+            const activePrice = (currentPoundPrice !== null) ? currentPoundPrice : currentProduct.price;
             const existing = cart.find(i => i.id === currentProduct.id && i.flavour === selectedFlavour && i.weight === selectedWeight);
             if (existing) {
                 existing.qty += qty;
+                existing.price = activePrice; // update price if changed
             } else {
                 cart.push({
                     id: currentProduct.id,
                     name: `${currentProduct.name} (${selectedFlavour}, ${selectedWeight})`,
-                    price: currentProduct.price,
+                    price: activePrice,
                     image: currentProduct.image,
                     qty,
                     flavour: selectedFlavour,
@@ -1232,9 +1416,67 @@
             btn.classList.add('active');
         }
 
+        // ── Build Flavour Chips ──
+        function buildFlavourChips() {
+            const container = document.getElementById('flavourChips');
+            let options = [];
+            try { options = JSON.parse(localStorage.getItem('flavourOptions') || '[]'); } catch (e) { }
+
+            const defaults = ['Vanilla', 'Chocolate', 'Strawberry', 'Rasmalai'];
+            const names = options.length ? options.map(f => f.name) : defaults;
+
+            container.innerHTML = names.map((name, i) => {
+                if (i === 0) selectedFlavour = name;
+                return `<button class="pd-chip${i === 0 ? ' selected' : ''}" data-val="${name}" onclick="selectChip(this,'flavour')">${name}</button>`;
+            }).join('') + `<button class="pd-chip" data-val="Custom" onclick="selectChip(this,'flavour')">Custom</button>`;
+        }
+
+        // ── Build Pound Weight Chips ──
+        function buildWeightChips() {
+            const container = document.getElementById('weightChips');
+            const raw = localStorage.getItem('poundOptions');
+            let options = [];
+            try { options = JSON.parse(raw || '[]'); } catch (e) { }
+
+            // Sort by value
+            options.sort((a, b) => parseFloat(a.value) - parseFloat(b.value));
+
+            if (options.length) {
+                let chips = options.map((p, i) => {
+                    const display = p.label || (parseFloat(p.value) + ' পাউন্ড');
+                    const val = parseFloat(p.value) + ' পাউন্ড';
+                    const isFirst = i === 0;
+                    const priceAttr = (p.price !== undefined && p.price !== null && p.price !== '') ? p.price : 'null';
+                    if (isFirst) {
+                        selectedWeight = val;
+                        currentPoundPrice = (priceAttr !== 'null') ? parseFloat(priceAttr) : null;
+                    }
+                    const priceLabel = (priceAttr !== 'null') ? ` · ৳${parseFloat(priceAttr).toLocaleString('en-IN')}` : '';
+                    return `<button class="pd-chip${isFirst ? ' selected' : ''}" data-val="${val}" data-price="${priceAttr}" onclick="selectChip(this,'weight')">${display}${priceLabel}</button>`;
+                }).join('');
+                // Always append Custom at end (no price)
+                chips += `<button class="pd-chip" data-val="Custom" data-price="null" onclick="selectChip(this,'weight')">Custom</button>`;
+                container.innerHTML = chips;
+            } else {
+                // Fallback defaults (no price)
+                const defaults = [
+                    { val: '1 পাউন্ড', label: '1 পাউন্ড' },
+                    { val: '1.5 পাউন্ড', label: '1.5 পাউন্ড' },
+                    { val: '2 পাউন্ড', label: '2 পাউন্ড' },
+                    { val: '3 পাউন্ড', label: '3 পাউন্ড' }
+                ];
+                container.innerHTML = defaults.map((d, i) => {
+                    if (i === 0) { selectedWeight = d.val; currentPoundPrice = null; }
+                    return `<button class="pd-chip${i === 0 ? ' selected' : ''}" data-val="${d.val}" data-price="null" onclick="selectChip(this,'weight')">${d.label}</button>`;
+                }).join('') + `<button class="pd-chip" data-val="Custom" data-price="null" onclick="selectChip(this,'weight')">Custom</button>`;
+            }
+        }
+
         // ── Init ──
         document.addEventListener('DOMContentLoaded', async () => {
             applySiteCustomizations();
+            buildFlavourChips();
+            buildWeightChips();
             initNavbar();
             // Fallback: keep mobile menu working even if shared navbar init misses.
             const hb = document.getElementById('hamburger');

@@ -49,6 +49,16 @@
     </div>
 
     <script>
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                setTimeout(() => {
+                    preloader.classList.add('fade-out');
+                    setTimeout(() => { preloader.style.display = 'none'; }, 500);
+                }, 300);
+            }
+        });
+
         function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('loginUser').value.trim();
@@ -75,6 +85,3 @@
 </body>
 
 </html>
-
-
-

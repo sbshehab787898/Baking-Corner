@@ -270,7 +270,6 @@
                 <span class="page-overline">Shop Organization</span>
                 <h1 class="page-title">Categories</h1>
             </header>
-
             <div class="management-grid">
                 <!-- Add Form -->
                 <aside class="action-card">
@@ -281,17 +280,7 @@
                             <input type="text" class="lux-input" id="newCornerName" placeholder="e.g. Traditional Cakes"
                                 required />
                         </div>
-                        <div class="lux-group">
-                            <label class="lux-label">Category Description</label>
-                            <textarea class="lux-input lux-textarea" id="newCornerDesc"
-                                placeholder="What kind of items are in this category..." required></textarea>
-                        </div>
-                        <div class="lux-group">
-                            <label class="lux-label">Category Icon (Emoji)</label>
-                            <input type="text" class="lux-input" id="newCornerIcon" placeholder="e.g. ??"
-                                maxlength="4" />
-                        </div>
-                        <button type="submit" class="lux-submit">? Add Category</button>
+                        <button type="submit" class="lux-submit">✨ Add Category</button>
                     </form>
                 </aside>
 
@@ -299,7 +288,7 @@
                 <div id="cornersList" class="corners-container">
                     <!-- Dynamic Content -->
                     <div class="empty-state">
-                        <span style="font-size:3rem;display:block;margin-bottom:1rem">?</span>
+                        <span style="font-size:3rem;display:block;margin-bottom:1rem">🏬</span>
                         <p
                             style="color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;font-size:10px">
                             Summoning segments...</p>
@@ -315,14 +304,20 @@
         document.addEventListener('DOMContentLoaded', async () => {
             adminAuthGuard();
             renderAdminSidebar('corners');
+
+            // Initialize data from cache first to avoid race conditions with sync call
+            data = getAdminData();
+
             await syncAdminDataFromSupabase();
+
+            // Re-fetch in case sync updated sessionStorage
             data = getAdminData();
             renderCorners();
         });
 
         function renderCorners() {
             const list = document.getElementById('cornersList');
-            if (!data.corners || !data.corners.length) {
+            if (!data || !data.corners || !data.corners.length) {
                 list.innerHTML = `
                     <div class="empty-state" style="grid-column: 1/-1">
                         <span style="font-size:3rem;display:block;margin-bottom:1rem">??</span>
@@ -352,26 +347,20 @@
         async function handleAddCorner(e) {
             e.preventDefault();
             const name = document.getElementById('newCornerName').value.trim();
-            const desc = document.getElementById('newCornerDesc').value.trim();
-            const icon = document.getElementById('newCornerIcon').value.trim() || '??';
-
             if (!name) return;
 
-            // Generate unique ID
             const newCorner = {
                 id: Date.now(),
                 name,
-                description: desc,
-                icon
+                description: '',
+                icon: '🏬'
             };
 
-            // Sync to DB
             await dbAddCategory(newCorner);
 
             data.corners.push(newCorner);
             saveAdminData('adminCorners', data.corners);
 
-            // UI Feedback
             e.target.reset();
             renderCorners();
         }
@@ -399,6 +388,3 @@
 </body>
 
 </html>
-
-
-
