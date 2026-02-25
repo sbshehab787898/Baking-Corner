@@ -220,7 +220,13 @@
 
                     <!-- ⚖️ Pound Options Management — same page, below the form -->
                     <div class="pound-section-card">
-                        <div class="pound-section-title">⚖️ পাউন্ড Options পরিচালনা</div>
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+                            <div class="pound-section-title" style="margin-bottom:0">⚖️ পাউন্ড Options পরিচালনা</div>
+                            <button class="admin-submit-btn"
+                                style="width:auto; margin:0; font-size:10px; padding:0.4rem 1rem"
+                                onclick="loadGlobalPounds()">Load Global Defaults</button>
+                        </div>
 
                         <div class="pound-add-row">
                             <div class="admin-form-group">
@@ -237,7 +243,7 @@
                                 <label class="admin-label">Label (ঐচ্ছিক)</label>
                                 <input type="text" class="admin-input" id="poundLabel" placeholder="e.g. ১ পাউন্ড" />
                             </div>
-                            <button class="pound-add-btn" id="addPoundBtn" onclick="handleAddPound()">
+                            <button type="button" class="pound-add-btn" id="addPoundBtn" onclick="handleAddPound()">
                                 + Add
                             </button>
                         </div>
@@ -258,7 +264,13 @@
 
                     <!-- 🍓 Flavour Options Management -->
                     <div class="pound-section-card" style="margin-top:1.25rem; border-color:#c4b5fd;">
-                        <div class="pound-section-title">🍓 Flavour Options পরিচালনা</div>
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+                            <div class="pound-section-title" style="margin-bottom:0">🍓 Flavour Options পরিচালনা</div>
+                            <button class="admin-submit-btn"
+                                style="width:auto; margin:0; font-size:10px; padding:0.4rem 1rem; background:#7c3aed"
+                                onclick="loadGlobalFlavours()">Load Global Defaults</button>
+                        </div>
 
                         <div class="pound-add-row">
                             <div class="admin-form-group" style="flex:1">
@@ -267,7 +279,7 @@
                                     placeholder="e.g. Vanilla, Chocolate..."
                                     onkeydown="if(event.key==='Enter'){event.preventDefault();handleAddFlavour();}" />
                             </div>
-                            <button class="pound-add-btn" id="addFlavourBtn" onclick="handleAddFlavour()"
+                            <button type="button" class="pound-add-btn" id="addFlavourBtn" onclick="handleAddFlavour()"
                                 style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">
                                 + Add
                             </button>
@@ -326,8 +338,10 @@
     <script>
         let data;
         let searchQuery = '';
-        let poundOptions = [];
-        let flavourOptions = [];
+        let poundOptions = []; // Form state (local)
+        let flavourOptions = []; // Form state (local)
+        let selectedFiles = []; // Form state (photos)
+        let editingProductId = null; // null = add mode, number = edit mode
 
         document.addEventListener('DOMContentLoaded', async () => {
             adminAuthGuard();
@@ -335,20 +349,13 @@
 
             // Initialize data from cache first
             data = getAdminData();
+            renderProducts();
 
             await syncAdminDataFromSupabase();
 
             // Re-fetch in case sync updated sessionStorage
             data = getAdminData();
             renderProducts();
-
-            // Load pound options
-            await loadPoundOptions();
-            renderPoundChips();
-
-            // Load flavour options
-            await loadFlavourOptions();
-            renderFlavourChips();
 
             document.getElementById('productSearch').addEventListener('input', (e) => {
                 searchQuery = e.target.value.toLowerCase();
@@ -357,41 +364,24 @@
         });
 
         // ══════════════════════════════════════
-        // POUND OPTIONS
+        // POUND OPTIONS (LOCAL TO FORM)
         // ══════════════════════════════════════
-        async function loadPoundOptions() {
-            if (window.supabaseClient) {
-                try {
-                    const { data: rows, error } = await window.supabaseClient
-                        .from('pound_options')
-                        .select('*')
-                        .order('value', { ascending: true });
-                    if (!error && rows) {
-                        poundOptions = rows;
-                        localStorage.setItem('poundOptions', JSON.stringify(rows));
-                        return;
-                    }
-                } catch (e) { /* fallthrough */ }
-            }
-            poundOptions = JSON.parse(localStorage.getItem('poundOptions') || '[]');
-        }
-
         function renderPoundChips() {
             const area = document.getElementById('poundChipsArea');
             const badge = document.getElementById('poundCountBadge');
-            if (!poundOptions.length) {
-                area.innerHTML = '<span class="pound-empty-hint">কোনো পাউন্ড নেই — উপরে যোগ করুন</span>';
+            if (!poundOptions || !poundOptions.length) {
+                area.innerHTML = '<span class="pound-empty-hint">এই প্রোডাক্টের জন্য কোনো পাউন্ড নেই — উপরে যোগ করুন</span>';
                 if (badge) badge.textContent = '';
                 return;
             }
             if (badge) badge.textContent = poundOptions.length + ' টি option সংরক্ষিত';
-            area.innerHTML = poundOptions.map(p => {
+            area.innerHTML = poundOptions.map((p, idx) => {
                 const priceStr = (p.price !== undefined && p.price !== null && p.price !== '')
                     ? ` &nbsp;·&nbsp; ৳${parseFloat(p.price).toLocaleString('en-IN')}` : '';
                 return `
-                <div class="pound-chip-tag" id="pc-${p.id}">
+                <div class="pound-chip-tag">
                     ⚖️ ${parseFloat(p.value)} পাউন্ড${priceStr}
-                    <button class="pound-chip-del" onclick="deletePound('${p.id}')" title="মুছুন">✕</button>
+                    <button type="button" class="pound-chip-del" onclick="deletePound(${idx})" title="মুছুন">✕</button>
                 </div>`;
             }).join('');
         }
@@ -402,7 +392,6 @@
             const priceRaw = document.getElementById('poundPrice').value;
             const price = priceRaw !== '' ? parseFloat(priceRaw) : null;
             const label = document.getElementById('poundLabel').value.trim() || (val + ' পাউন্ড');
-            const btn = document.getElementById('addPoundBtn');
 
             if (!val || val <= 0) {
                 alert('সঠিক পাউন্ড সংখ্যা দিন!');
@@ -413,91 +402,38 @@
                 return;
             }
 
-            btn.textContent = '...';
-            btn.disabled = true;
-
-            const newOpt = { id: 'po_' + Date.now(), value: val, label, price };
-
-            if (window.supabaseClient) {
-                try {
-                    const { data: inserted, error } = await window.supabaseClient
-                        .from('pound_options')
-                        .insert([{ id: newOpt.id, value: newOpt.value, label: newOpt.label, price: newOpt.price }])
-                        .select();
-                    if (!error && inserted && inserted[0]) newOpt.id = inserted[0].id;
-                } catch (e) { /* local fallback */ }
-            }
-
+            const newOpt = { id: Date.now(), value: val, label, price };
             poundOptions.push(newOpt);
             poundOptions.sort((a, b) => parseFloat(a.value) - parseFloat(b.value));
-            localStorage.setItem('poundOptions', JSON.stringify(poundOptions));
 
             document.getElementById('poundValue').value = '';
             document.getElementById('poundPrice').value = '';
             document.getElementById('poundLabel').value = '';
             renderPoundChips();
-
-            btn.textContent = '✅';
-            setTimeout(() => { btn.textContent = '+ Add'; btn.disabled = false; }, 1500);
         }
 
-        async function deletePound(id) {
-            if (!confirm('এই পাউন্ড option মুছবেন?')) return;
-
-            if (window.supabaseClient) {
-                try {
-                    await window.supabaseClient.from('pound_options').delete().eq('id', id);
-                } catch (e) { /* local fallback */ }
-            }
-
-            poundOptions = poundOptions.filter(p => String(p.id) !== String(id));
-            localStorage.setItem('poundOptions', JSON.stringify(poundOptions));
-
-            const el = document.getElementById('pc-' + id);
-            if (el) {
-                el.style.opacity = '0';
-                el.style.transform = 'scale(0.8)';
-                el.style.transition = 'all 0.25s';
-                setTimeout(() => renderPoundChips(), 260);
-            } else {
-                renderPoundChips();
-            }
+        function deletePound(index) {
+            poundOptions.splice(index, 1);
+            renderPoundChips();
         }
 
         // ══════════════════════════════════════
-        // FLAVOUR OPTIONS
+        // FLAVOUR OPTIONS (LOCAL TO FORM)
         // ══════════════════════════════════════
-        async function loadFlavourOptions() {
-            if (window.supabaseClient) {
-                try {
-                    const { data: rows, error } = await window.supabaseClient
-                        .from('flavour_options')
-                        .select('*')
-                        .order('created_at', { ascending: true });
-                    if (!error && rows) {
-                        flavourOptions = rows;
-                        localStorage.setItem('flavourOptions', JSON.stringify(rows));
-                        return;
-                    }
-                } catch (e) { /* fallthrough */ }
-            }
-            flavourOptions = JSON.parse(localStorage.getItem('flavourOptions') || '[]');
-        }
-
         function renderFlavourChips() {
             const area = document.getElementById('flavourChipsArea');
             const badge = document.getElementById('flavourCountBadge');
-            if (!flavourOptions.length) {
+            if (!flavourOptions || !flavourOptions.length) {
                 area.innerHTML = '<span class="pound-empty-hint">কোনো flavour নেই — উপরে যোগ করুন</span>';
                 if (badge) badge.textContent = '';
                 return;
             }
             if (badge) badge.textContent = flavourOptions.length + ' টি flavour সংরক্ষিত';
-            area.innerHTML = flavourOptions.map(f => `
-                <div class="pound-chip-tag" id="fc-${f.id}"
+            area.innerHTML = flavourOptions.map((f, idx) => `
+                <div class="pound-chip-tag"
                     style="background:#faf5ff;border-color:#c4b5fd;color:#7c3aed;">
                     🍓 ${f.name}
-                    <button class="pound-chip-del" onclick="deleteFlavour('${f.id}')"
+                    <button type="button" class="pound-chip-del" onclick="deleteFlavour(${idx})"
                         style="background:rgba(124,58,237,0.12);color:#7c3aed;"
                         onmouseover="this.style.background='#7c3aed';this.style.color='white';"
                         onmouseout="this.style.background='rgba(124,58,237,0.12)';this.style.color='#7c3aed';"
@@ -507,132 +443,65 @@
 
         async function handleAddFlavour() {
             const name = document.getElementById('flavourName').value.trim();
-            const btn = document.getElementById('addFlavourBtn');
-
             if (!name) { alert('Flavour নাম দিন!'); return; }
             if (flavourOptions.some(f => f.name.toLowerCase() === name.toLowerCase())) {
                 alert('এই flavour আগেই আছে!'); return;
             }
-
-            btn.textContent = '...';
-            btn.disabled = true;
-
-            const newF = { id: 'fl_' + Date.now(), name };
-
-            if (window.supabaseClient) {
-                try {
-                    const { data: inserted, error } = await window.supabaseClient
-                        .from('flavour_options')
-                        .insert([{ id: newF.id, name: newF.name }])
-                        .select();
-                    if (!error && inserted && inserted[0]) newF.id = inserted[0].id;
-                } catch (e) { /* local fallback */ }
-            }
-
-            flavourOptions.push(newF);
-            localStorage.setItem('flavourOptions', JSON.stringify(flavourOptions));
-
+            flavourOptions.push({ name });
             document.getElementById('flavourName').value = '';
             renderFlavourChips();
-
-            btn.textContent = '✅';
-            setTimeout(() => { btn.textContent = '+ Add'; btn.disabled = false; }, 1500);
         }
 
-        async function deleteFlavour(id) {
-            if (!confirm('এই flavour মুছবেন?')) return;
-
-            if (window.supabaseClient) {
-                try {
-                    await window.supabaseClient.from('flavour_options').delete().eq('id', id);
-                } catch (e) { /* local fallback */ }
-            }
-
-            flavourOptions = flavourOptions.filter(f => String(f.id) !== String(id));
-            localStorage.setItem('flavourOptions', JSON.stringify(flavourOptions));
-
-            const el = document.getElementById('fc-' + id);
-            if (el) {
-                el.style.opacity = '0';
-                el.style.transform = 'scale(0.8)';
-                el.style.transition = 'all 0.25s';
-                setTimeout(() => renderFlavourChips(), 260);
-            } else {
-                renderFlavourChips();
-            }
+        function deleteFlavour(index) {
+            flavourOptions.splice(index, 1);
+            renderFlavourChips();
         }
 
-        // ══════════════════════════════════════
-        // PRODUCTS (unchanged)
-        // ══════════════════════════════════════
-        function renderProducts() {
-            const list = document.getElementById('productsList');
-            const count = document.getElementById('productCount');
-            if (!data || !data.products) return;
-            const filtered = data.products.filter(p =>
-                p.name.toLowerCase().includes(searchQuery) ||
-                (p.category || '').toLowerCase().includes(searchQuery)
-            );
-
-            count.textContent = filtered.length + ' Items';
-
-            // Populate category dropdown from admin-corners.html data
-            const catSel = document.getElementById('pCat');
-            if (catSel && data.corners && data.corners.length) {
-                const prev = catSel.value;
-                catSel.innerHTML = data.corners.map(c =>
-                    `<option value="${c.name.toLowerCase()}">${c.name}</option>`
-                ).join('') + '<option value="other">Other</option>';
-                if (prev) catSel.value = prev;
-            } else if (catSel && catSel.options.length <= 1) {
-                // Fallback defaults if no corners
-                catSel.innerHTML = `
-                    <option value="cakes">Cakes</option>
-                    <option value="pastries">Pastries</option>
-                    <option value="macarons">Macarons</option>
-                    <option value="chocolates">Chocolates</option>
-                    <option value="other">Other</option>`;
-            }
-
-            const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
-            const sym = settings.currencySymbol || '৳';
-            const pos = settings.currencyPosition || 'before';
-            const fmt = n => pos === 'after' ? n.toLocaleString('en-IN') + sym : sym + n.toLocaleString('en-IN');
-
-            if (!filtered.length) {
-                list.innerHTML = '<p style="color:#aaa;font-style:italic;text-align:center;padding:3rem">No products found.</p>';
+        async function loadGlobalPounds() {
+            const globals = JSON.parse(localStorage.getItem('poundOptions') || '[]');
+            if (!globals.length) {
+                alert('সিস্টেম সেটিংসে কোনো গ্লোবাল পাউন্ড অপশন পাওয়া যায়নি।');
                 return;
             }
-
-            list.innerHTML = filtered.map(p => `
-      <div class="product-row" id="prod-${p.id}">
-        <img src="${p.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=100'}"
-             class="product-thumb" alt="${p.name}"
-             onerror="this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=100'"/>
-        <div class="product-info">
-          <div class="product-name">${p.name}</div>
-          <div class="product-cat">${p.category || ''}</div>
-        </div>
-        <div class="product-price-cell">${fmt(parseFloat(p.price))}</div>
-        <button class="delete-btn" onclick="deleteProduct(${p.id})" title="Remove">🗑️</button>
-      </div>
-    `).join('');
+            globals.forEach(g => {
+                if (!poundOptions.some(p => parseFloat(p.value) === parseFloat(g.value))) {
+                    poundOptions.push({ ...g, id: Date.now() + Math.random() });
+                }
+            });
+            poundOptions.sort((a, b) => parseFloat(a.value) - parseFloat(b.value));
+            renderPoundChips();
         }
 
-        // ── Multi-photo state ──
-        let selectedFiles = []; // Array of File objects
+        async function loadGlobalFlavours() {
+            const globals = JSON.parse(localStorage.getItem('flavourOptions') || '[]');
+            if (!globals.length) {
+                alert('সিস্টেম সেটিংসে কোনো গ্লোবাল ফ্লেভার অপশন পাওয়া যায়নি।');
+                return;
+            }
+            globals.forEach(g => {
+                if (!flavourOptions.some(f => f.name.toLowerCase() === g.name.toLowerCase())) {
+                    flavourOptions.push({ ...g, id: Date.now() + Math.random() });
+                }
+            });
+            renderFlavourChips();
+        }
 
+        // ══════════════════════════════════════
+        // PHOTO HANDLING
+        // ══════════════════════════════════════
         function previewImages(files) {
             Array.from(files).forEach(file => {
                 if (file.size > 5 * 1024 * 1024) {
                     alert(file.name + ' is over 5MB and was skipped.');
                     return;
                 }
-                if (selectedFiles.some(f => f.name === file.name && f.size === file.size)) return; // no duplicates
-                selectedFiles.push(file);
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    selectedFiles.push({ file: file, url: e.target.result });
+                    renderPhotoGrid();
+                };
+                reader.readAsDataURL(file);
             });
-            renderPhotoGrid();
-            // reset input so same file can be re-added after removal
             document.getElementById('pImg').value = '';
         }
 
@@ -648,9 +517,9 @@
                 status.textContent = '';
                 return;
             }
-            status.textContent = selectedFiles.length + ' photo' + (selectedFiles.length > 1 ? 's' : '') + ' selected';
+            status.textContent = selectedFiles.length + ' photo(s) selected';
             grid.innerHTML = selectedFiles.map((f, i) => {
-                const url = URL.createObjectURL(f);
+                const url = f.url;
                 const badge = i === 0 ? '<span style="position:absolute;top:4px;left:4px;background:#EC4899;color:white;font-size:8px;font-weight:900;letter-spacing:0.1em;padding:2px 5px;border-radius:99px;text-transform:uppercase;">Main</span>' : '';
                 return `
                 <div style="position:relative;width:74px;height:74px;border-radius:0.6rem;overflow:hidden;border:2px solid ${i === 0 ? '#EC4899' : '#fdb9c8'};flex-shrink:0;">
@@ -670,7 +539,7 @@
         async function uploadImageToSupabase(file) {
             if (!window.supabaseClient || !file) return null;
             const ext = file.name.split('.').pop();
-            const fileName = 'product_' + Date.now() + '.' + ext;
+            const fileName = 'product_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7) + '.' + ext;
             const { data: uploadData, error } = await window.supabaseClient
                 .storage
                 .from('product-images')
@@ -686,75 +555,190 @@
             return urlData.publicUrl || null;
         }
 
+        // ══════════════════════════════════════
+        // PRODUCT SAVE / UPDATE
+        // ══════════════════════════════════════
         async function handleAddProduct(e) {
             e.preventDefault();
             const btn = document.getElementById('saveProductBtn');
+            const originalText = editingProductId ? '💾 Update Product' : '💾 Save Product';
 
-            btn.textContent = '⏳ Uploading...';
+            btn.textContent = '⏳ Processing...';
             btn.disabled = true;
 
-            let imageUrls = [];
+            let finalImageUrls = [];
 
-            if (selectedFiles.length) {
-                document.getElementById('uploadStatus').textContent = '⏳ Uploading ' + selectedFiles.length + ' photo(s)...';
-                for (let i = 0; i < selectedFiles.length; i++) {
-                    const url = await uploadImageToSupabase(selectedFiles[i]);
-                    if (url) imageUrls.push(url);
+            // Handle Photos: separate existing URLs from new File objects
+            for (let f of selectedFiles) {
+                if (f.file) {
+                    // New upload
+                    const url = await uploadImageToSupabase(f.file);
+                    if (url) finalImageUrls.push(url);
+                } else {
+                    // Existing URL
+                    finalImageUrls.push(f.url);
                 }
-                document.getElementById('uploadStatus').textContent =
-                    imageUrls.length + ' of ' + selectedFiles.length + ' photo(s) uploaded ✅';
             }
 
-            // First image is main, fallback to placeholder
-            const mainImage = imageUrls[0] || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600';
+            const mainImage = finalImageUrls[0] || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600';
 
-            const newProd = {
-                id: Date.now(),
+            const prodData = {
+                id: Date.now(), // Generate unique ID in frontend
                 name: document.getElementById('pName').value.trim(),
                 price: parseFloat(document.getElementById('pPrice').value),
                 category: document.getElementById('pCat').value,
                 image: mainImage,
-                images: imageUrls,         // all photos stored here
-                description: document.getElementById('pDesc').value.trim()
+                images: finalImageUrls,
+                description: document.getElementById('pDesc').value.trim(),
+                pound_options: poundOptions,
+                flavour_options: flavourOptions
             };
 
-            await dbAddProduct(newProd);
-            data.products.unshift(newProd);
+            if (editingProductId) {
+                // UPDATE
+                const { data: updatedProd, error } = await dbUpdateProduct(editingProductId, prodData);
+                if (error) {
+                    alert('Error updating product: ' + error.message);
+                    btn.textContent = '❌ Failed';
+                    btn.style.background = '#ef4444';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.background = '';
+                        btn.disabled = false;
+                    }, 3000);
+                    return;
+                }
+                const idx = data.products.findIndex(p => p.id === editingProductId);
+                if (idx !== -1) data.products[idx] = updatedProd || { ...data.products[idx], ...prodData };
+            } else {
+                // CREATE
+                const { data: newProd, error } = await dbAddProduct(prodData);
+                if (error) {
+                    alert('Error adding product: ' + error.message);
+                    btn.textContent = '❌ Failed';
+                    btn.style.background = '#ef4444';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.background = '';
+                        btn.disabled = false;
+                    }, 3000);
+                    return;
+                }
+                data.products.unshift(newProd || { ...prodData, id: Date.now() });
+            }
+
             saveAdminData('adminProducts', data.products);
 
-            // Reset form
-            e.target.reset();
-            selectedFiles = [];
-            renderPhotoGrid();
-            document.getElementById('uploadBox').style.borderColor = '#fdb9c8';
-
+            // Reset and UI Refresh
+            resetForm();
             renderProducts();
 
-            btn.textContent = '✅ Saved!';
+            btn.textContent = '✅ Success!';
             btn.style.background = '#4ade80';
-            btn.style.color = 'white';
-            btn.disabled = false;
             setTimeout(() => {
-                btn.textContent = '💾 Save Product';
+                btn.textContent = originalText;
                 btn.style.background = '';
-                btn.style.color = '';
-            }, 2500);
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        function resetForm() {
+            editingProductId = null;
+            document.querySelector('.admin-card-title').textContent = 'Add New Product';
+            document.getElementById('saveProductBtn').textContent = '💾 Save Product';
+            document.getElementById('pName').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pDesc').value = '';
+            selectedFiles = [];
+            poundOptions = [];
+            flavourOptions = [];
+            renderPhotoGrid();
+            renderPoundChips();
+            renderFlavourChips();
+            document.getElementById('uploadStatus').textContent = '';
+        }
+
+        function editProduct(id) {
+            const p = data.products.find(x => x.id === id);
+            if (!p) return;
+
+            editingProductId = id;
+            document.querySelector('.admin-card-title').textContent = 'Edit Product';
+            document.getElementById('saveProductBtn').textContent = '💾 Update Product';
+
+            document.getElementById('pName').value = p.name;
+            document.getElementById('pPrice').value = p.price;
+            document.getElementById('pCat').value = p.category;
+            document.getElementById('pDesc').value = p.description || '';
+
+            // Map existing images to selectedFiles format (no 'file' object)
+            selectedFiles = (p.images || [p.image]).filter(src => src).map(src => ({ file: null, url: src }));
+
+            poundOptions = p.pound_options || [];
+            flavourOptions = p.flavour_options || [];
+
+            renderPhotoGrid();
+            renderPoundChips();
+            renderFlavourChips();
+
+            // Scroll to form
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function deleteProduct(id) {
             if (!confirm('Are you sure you want to delete this product?')) return;
             data.products = data.products.filter(p => p.id !== id);
             saveAdminData('adminProducts', data.products);
-
             await dbDeleteProduct(id);
+            renderProducts();
+        }
 
-            const el = document.getElementById('prod-' + id);
-            if (el) {
-                el.style.opacity = '0';
-                el.style.transform = 'translateX(20px)';
-                el.style.transition = 'all 0.3s';
-                setTimeout(() => renderProducts(), 300);
+        function renderProducts() {
+            const list = document.getElementById('productsList');
+            const count = document.getElementById('productCount');
+            if (!data || !data.products) return;
+            const filtered = data.products.filter(p =>
+                p.name.toLowerCase().includes(searchQuery) ||
+                (p.category || '').toLowerCase().includes(searchQuery)
+            );
+
+            count.textContent = filtered.length + ' Items';
+
+            // Populate category dropdown
+            const catSel = document.getElementById('pCat');
+            if (catSel && data.corners && data.corners.length) {
+                const prev = catSel.value;
+                catSel.innerHTML = data.corners.map(c =>
+                    `<option value="${c.name.toLowerCase()}">${c.name}</option>`
+                ).join('') + '<option value="other">Other</option>';
+                if (prev) catSel.value = prev;
             }
+
+            const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            const sym = settings.currencySymbol || '৳';
+            const pos = settings.currencyPosition || 'before';
+            const fmt = n => pos === 'after' ? n.toLocaleString('en-IN') + sym : sym + n.toLocaleString('en-IN');
+
+            if (!filtered.length) {
+                list.innerHTML = '<p style="color:#aaa;font-style:italic;text-align:center;padding:3rem">No products found.</p>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(p => `
+      <div class="product-row" id="prod-${p.id}">
+        <img src="${p.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=100'}"
+             class="product-thumb" alt="${p.name}" />
+        <div class="product-info">
+          <div class="product-name">${p.name}</div>
+          <div class="product-cat">${p.category || ''}</div>
+        </div>
+        <div class="product-price-cell">${fmt(parseFloat(p.price))}</div>
+        <div style="display:flex; gap:0.5rem;">
+            <button class="delete-btn" onclick="editProduct(${p.id})" style="background:#f0f9ff; color:#0ea5e9; border-color:#e0f2fe; width:36px;" title="Edit">✏️</button>
+            <button class="delete-btn" onclick="deleteProduct(${p.id})" title="Remove" style="width:36px;">🗑️</button>
+        </div>
+      </div>
+    `).join('');
         }
     </script>
 </body>

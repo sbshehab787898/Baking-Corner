@@ -1136,6 +1136,10 @@
             }
             currentProduct = product;
 
+            // Build chips from product-specific data if available
+            buildFlavourChips();
+            buildWeightChips();
+
             // Breadcrumb
             const catMapBn = { cakes: 'কেক', pastries: 'পেস্ট্রি', macarons: 'ম্যাকারন', chocolates: 'চকলেট' };
             document.getElementById('breadcrumbCategory').textContent =
@@ -1150,9 +1154,10 @@
             img.src = product.image;
             img.alt = product.name;
 
-            // Thumbnails (use same image for demo)
+            // Thumbnails (show actual gallery if available)
             const thumbs = document.getElementById('pdThumbnails');
-            thumbs.innerHTML = [product.image, product.image, product.image].map((src, i) =>
+            const gallery = (product.images && Array.isArray(product.images) && product.images.length) ? product.images : [product.image];
+            thumbs.innerHTML = gallery.map((src, i) =>
                 `<img src="${src}" alt="View ${i + 1}" class="pd-thumb ${i === 0 ? 'active' : ''}" onclick="switchImg(this,'${src}')">`
             ).join('');
 
@@ -1304,9 +1309,14 @@
                 return;
             }
 
-            // Calculate per-pound rate from admin options
-            let options = [];
-            try { options = JSON.parse(localStorage.getItem('poundOptions') || '[]'); } catch (e) { }
+            // Calculate per-pound rate from product-specific options or global
+            let options = (currentProduct && currentProduct.pound_options && currentProduct.pound_options.length)
+                ? currentProduct.pound_options
+                : [];
+
+            if (!options.length) {
+                try { options = JSON.parse(localStorage.getItem('poundOptions') || '[]'); } catch (e) { }
+            }
             // Filter options that have a price set
             const priced = options.filter(o => o.price !== null && o.price !== undefined && o.price !== '' && parseFloat(o.value) > 0);
 
@@ -1335,6 +1345,9 @@
                     calculatedPrice = (parseFloat(upper.price) / parseFloat(upper.value)) * customPounds;
                 }
                 calculatedPrice = Math.round(calculatedPrice);
+            } else if (currentProduct) {
+                // No priced options — use base price as rate for 1 pound fallback
+                calculatedPrice = Math.round(currentProduct.price * customPounds);
             }
 
             // Update state and UI
@@ -1352,7 +1365,7 @@
                 priceSpan.textContent = formatted;
                 display.style.display = 'flex';
             } else {
-                // No priced options — just show base price
+                // Fallback reached but failed? Revert
                 currentPoundPrice = null;
                 if (currentProduct) pdPriceEl.textContent = fmt(currentProduct.price.toLocaleString('en-IN') + '.00');
                 display.style.display = 'none';
@@ -1419,8 +1432,13 @@
         // ── Build Flavour Chips ──
         function buildFlavourChips() {
             const container = document.getElementById('flavourChips');
-            let options = [];
-            try { options = JSON.parse(localStorage.getItem('flavourOptions') || '[]'); } catch (e) { }
+            let options = (currentProduct && currentProduct.flavour_options && currentProduct.flavour_options.length)
+                ? currentProduct.flavour_options
+                : [];
+
+            if (!options.length) {
+                try { options = JSON.parse(localStorage.getItem('flavourOptions') || '[]'); } catch (e) { }
+            }
 
             const defaults = ['Vanilla', 'Chocolate', 'Strawberry', 'Rasmalai'];
             const names = options.length ? options.map(f => f.name) : defaults;
@@ -1434,9 +1452,14 @@
         // ── Build Pound Weight Chips ──
         function buildWeightChips() {
             const container = document.getElementById('weightChips');
-            const raw = localStorage.getItem('poundOptions');
-            let options = [];
-            try { options = JSON.parse(raw || '[]'); } catch (e) { }
+            let options = (currentProduct && currentProduct.pound_options && currentProduct.pound_options.length)
+                ? currentProduct.pound_options
+                : [];
+
+            if (!options.length) {
+                const raw = localStorage.getItem('poundOptions');
+                try { options = JSON.parse(raw || '[]'); } catch (e) { }
+            }
 
             // Sort by value
             options.sort((a, b) => parseFloat(a.value) - parseFloat(b.value));

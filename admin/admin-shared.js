@@ -101,9 +101,41 @@ async function saveAdminData(type, data) {
 }
 
 async function dbAddProduct(product) {
-  if (!window.supabaseClient) return;
-  const { error } = await window.supabaseClient.from('products').insert([product]);
+  if (!window.supabaseClient) return { error: 'Supabase client not initialized' };
+  let { data, error } = await window.supabaseClient.from('products').insert([product]).select();
+
+  // Handle missing columns error by retrying without options
+  if (error && (error.message.includes('flavour_options') || error.message.includes('pound_options'))) {
+    console.warn('Columns flavour_options/pound_options not found, retrying without them...');
+    const safeProduct = { ...product };
+    delete safeProduct.flavour_options;
+    delete safeProduct.pound_options;
+    const retry = await window.supabaseClient.from('products').insert([safeProduct]).select();
+    data = retry.data;
+    error = retry.error;
+  }
+
   if (error) console.error('Supabase Product Add Error:', error);
+  return { data: data ? data[0] : null, error };
+}
+
+async function dbUpdateProduct(id, product) {
+  if (!window.supabaseClient) return { error: 'Supabase client not initialized' };
+  let { data, error } = await window.supabaseClient.from('products').update(product).eq('id', id).select();
+
+  // Handle missing columns error by retrying without options
+  if (error && (error.message.includes('flavour_options') || error.message.includes('pound_options'))) {
+    console.warn('Columns flavour_options/pound_options not found, retrying update without them...');
+    const safeProduct = { ...product };
+    delete safeProduct.flavour_options;
+    delete safeProduct.pound_options;
+    const retry = await window.supabaseClient.from('products').update(safeProduct).eq('id', id).select();
+    data = retry.data;
+    error = retry.error;
+  }
+
+  if (error) console.error('Supabase Product Update Error:', error);
+  return { data: data ? data[0] : null, error };
 }
 
 async function dbDeleteProduct(id) {
@@ -169,9 +201,20 @@ async function syncAdminDataFromSupabase() {
         }
       }));
       localStorage.setItem('siteOrders', JSON.stringify(formattedOrders));
-    } else if (oError) {
-      console.error('Supabase Sync Orders Error:', oError.message);
     }
+
+    // Sync Global Pound Options
+    const { data: pOpts, error: poError } = await window.supabaseClient.from('pound_options').select('*').order('value', { ascending: true });
+    if (!poError && pOpts) {
+      localStorage.setItem('poundOptions', JSON.stringify(pOpts));
+    }
+
+    // Sync Global Flavour Options
+    const { data: fOpts, error: foError } = await window.supabaseClient.from('flavour_options').select('*').order('name', { ascending: true });
+    if (!foError && fOpts) {
+      localStorage.setItem('flavourOptions', JSON.stringify(fOpts));
+    }
+
   } catch (err) {
     console.error('Sync process failed:', err);
   }
@@ -181,6 +224,31 @@ async function syncAdminDataFromSupabase() {
   if (typeof renderProducts === 'function') renderProducts();
   if (typeof renderCorners === 'function') renderCorners();
   if (typeof renderStats === 'function') renderStats();
+  if (typeof renderGlobalOptions === 'function') renderGlobalOptions();
+}
+
+async function dbAddGlobalPound(option) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('pound_options').insert([option]);
+  return { error };
+}
+
+async function dbDeleteGlobalPound(id) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('pound_options').delete().eq('id', id);
+  return { error };
+}
+
+async function dbAddGlobalFlavour(option) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('flavour_options').insert([option]);
+  return { error };
+}
+
+async function dbDeleteGlobalFlavour(id) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('flavour_options').delete().eq('id', id);
+  return { error };
 }
 
 

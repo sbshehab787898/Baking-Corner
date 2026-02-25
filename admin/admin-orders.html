@@ -548,7 +548,7 @@
                         <div>
                             <span class="section-label">Customer Details</span>
                             <div class="info-row"><strong>Name</strong><span>${order.customer.name}</span></div>
-                            <div class="info-row"><strong>Phone</strong><span>${order.customer.phone}</span></div>
+                            <div class="info-row"><strong>Phone</strong><span><a href="tel:${order.customer.phone}" style="color:inherit;text-decoration:none">${order.customer.phone}</a></span></div>
                             <div class="info-row"><strong>Address</strong><span>${order.customer.address}</span></div>
                             <div class="info-row"><strong>Delivery</strong><span>${deliveryDate}</span></div>
                             <div class="info-row"><strong>Payment</strong><span>${order.customer.payment}${order.customer.paymentNo ? ' (' + order.customer.paymentNo + ')' : ''}</span></div>
@@ -616,6 +616,3 @@
 </body>
 
 </html>
-
-
-

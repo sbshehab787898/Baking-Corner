@@ -101,7 +101,8 @@
                         <div class="admin-form-group">
                             <label class="admin-label">Full Address</label>
                             <input type="text" class="admin-input" id="storeAddress"
-                                value="Nangalkot Bottol Square, Cumilla" />
+                                value="বেকিং কর্ণার, মোজাম্মেল প্লাজা, বটতলা সংলগ্ন, শ্রীফুলিয়া রোড/টিএন্ডটি রোড, নাঙ্গলকোট, কুমিল্লা।" />
+
                         </div>
                     </div>
                     <button class="admin-submit-btn" onclick="saveStoreInfo()">? Save Information</button>
@@ -171,6 +172,41 @@
             </div>
         </div>
 
+        <!-- Global Shop Options -->
+        <div class="admin-card" style="margin-top:2rem">
+            <h2 class="admin-card-title">Global Shop Options (Defaults)</h2>
+            <div class="settings-grid">
+                <!-- Global Pounds -->
+                <div>
+                    <h3
+                        style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;color:var(--accent)">
+                        ⚖️ Global Pound Options</h3>
+                    <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+                        <input type="number" step="0.1" id="gPoundVal" placeholder="Pound (e.g. 1.5)"
+                            class="admin-input" style="flex:1">
+                        <input type="number" id="gPoundPrice" placeholder="Price (Optional)" class="admin-input"
+                            style="flex:1">
+                        <button class="admin-submit-btn" style="width:auto;margin:0" onclick="addGPound()">Add</button>
+                    </div>
+                    <div id="gPoundList" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+                </div>
+
+                <!-- Global Flavours -->
+                <div>
+                    <h3
+                        style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;color:#7c3aed">
+                        🍓 Global Flavour Options</h3>
+                    <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+                        <input type="text" id="gFlavourName" placeholder="Flavour Name" class="admin-input"
+                            style="flex:1">
+                        <button class="admin-submit-btn" style="width:auto;margin:0;background:#7c3aed"
+                            onclick="addGFlavour()">Add</button>
+                    </div>
+                    <div id="gFlavourList" style="display:flex;flex-wrap:wrap;gap:0.5rem"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Danger Zone -->
         <div class="admin-card" style="margin-top:2rem; border:1px solid #ffe8e8">
             <h2 class="admin-card-title" style="color:#ef4444">Danger Zone</h2>
@@ -189,11 +225,72 @@
 
     <script src="admin-shared.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             adminAuthGuard();
             renderAdminSidebar('settings');
             loadSettings();
+            await syncAdminDataFromSupabase();
+            renderGlobalOptions();
         });
+
+        function renderGlobalOptions() {
+            const pounds = JSON.parse(localStorage.getItem('poundOptions') || '[]');
+            const flavours = JSON.parse(localStorage.getItem('flavourOptions') || '[]');
+
+            const pList = document.getElementById('gPoundList');
+            pList.innerHTML = pounds.map(p => `
+                <div class="pound-chip-tag" style="padding:0.5rem 1rem">
+                    ⚖️ ${p.value} - ৳${p.price || 0}
+                    <button type="button" class="pound-chip-del" onclick="delGPound('${p.id}')">✕</button>
+                </div>
+            `).join('');
+
+            const fList = document.getElementById('gFlavourList');
+            fList.innerHTML = flavours.map(f => `
+                <div class="pound-chip-tag" style="background:#faf5ff;border-color:#c4b5fd;color:#7c3aed;padding:0.5rem 1rem">
+                    🍓 ${f.name}
+                    <button type="button" class="pound-chip-del" style="color:#7c3aed" onclick="delGFlavour('${f.id}')">✕</button>
+                </div>
+            `).join('');
+        }
+
+        async function addGPound() {
+            const val = parseFloat(document.getElementById('gPoundVal').value);
+            const price = parseFloat(document.getElementById('gPoundPrice').value) || 0;
+            if (!val) return alert('Enter pound value');
+
+            const btn = event.target;
+            btn.disabled = true;
+            await dbAddGlobalPound({ id: 'P' + Date.now(), value: val, price, label: val + ' পাউন্ড' });
+            await syncAdminDataFromSupabase();
+            document.getElementById('gPoundVal').value = '';
+            document.getElementById('gPoundPrice').value = '';
+            btn.disabled = false;
+        }
+
+        async function delGPound(id) {
+            if (!confirm('Delete this option?')) return;
+            await dbDeleteGlobalPound(id);
+            await syncAdminDataFromSupabase();
+        }
+
+        async function addGFlavour() {
+            const name = document.getElementById('gFlavourName').value.trim();
+            if (!name) return alert('Enter flavour name');
+
+            const btn = event.target;
+            btn.disabled = true;
+            await dbAddGlobalFlavour({ id: 'F' + Date.now(), name });
+            await syncAdminDataFromSupabase();
+            document.getElementById('gFlavourName').value = '';
+            btn.disabled = false;
+        }
+
+        async function delGFlavour(id) {
+            if (!confirm('Delete this flavour?')) return;
+            await dbDeleteGlobalFlavour(id);
+            await syncAdminDataFromSupabase();
+        }
 
         function loadSettings() {
             const s = JSON.parse(localStorage.getItem('siteSettings') || '{}');
@@ -277,6 +374,3 @@
 </body>
 
 </html>
-
-
-

@@ -17,7 +17,7 @@ const translations = {
         reserveItem: 'Order Now',
         orderInfoHeader: 'Order Form', orderNote: 'Confirmation',
         priceListHeader: 'Price List',
-        deliveryPointHeader: 'Location', deliveryPoint: 'Nangalkot Bottol Square, Cumilla',
+        deliveryPointHeader: 'Location', deliveryPoint: 'বেকিং কর্ণার, মোজাম্মেল প্লাজা, বটতলা সংলগ্ন, শ্রীফুলিয়া রোড/টিএন্ডটি রোড, নাঙ্গলকোট, কুমিল্লা।',
         whatsappContact: 'Order via WhatsApp', contactUs: 'Contact Us',
         aboutHeroOverline: 'Our History', ancientMethods: 'Quality Since Day One.',
         rareOrigins: 'Pure Ingredients', wholeness: 'Baking Love',
@@ -59,7 +59,7 @@ const translations = {
         reserveItem: 'অর্ডার করুন',
         orderInfoHeader: 'অর্ডার ফর্ম', orderNote: 'নিশ্চিতকরণ',
         priceListHeader: 'মূল্য তালিকা',
-        deliveryPointHeader: 'অবস্থান', deliveryPoint: 'নাঙ্গলকোট বটতল চত্বর, কুমিল্লা',
+        deliveryPointHeader: 'অবস্থান', deliveryPoint: 'বেকিং কর্ণার, মোজাম্মেল প্লাজা, বটতলা সংলগ্ন, শ্রীফুলিয়া রোড/টিএন্ডটি রোড, নাঙ্গলকোট, কুমিল্লা।',
         whatsappContact: 'হোয়াটসঅ্যাপ অর্ডার', contactUs: 'যোগাযোগ করুন',
         aboutHeroOverline: 'ইতিহাস', ancientMethods: 'শুরু থেকেই মানসম্মত।',
         rareOrigins: 'বিশুদ্ধ উপাদান', wholeness: 'ভালোবাসার বেকিং',
@@ -430,9 +430,24 @@ async function syncProducts() {
             .from('products').select('*').order('created_at', { ascending: true });
 
         if (!error && data) {
-            products = data; // Use whatever admin has added (may be empty)
+            products = data;
         } else if (error) {
             console.warn('Supabase products fetch error:', error.message);
+        }
+
+        // Fetch Dynamic Categories for Shop Filters
+        const chipContainer = document.getElementById('categoryFilterChips');
+        if (chipContainer) {
+            const { data: catData, error: catError } = await window.supabaseClient
+                .from('categories').select('*').order('name', { ascending: true });
+
+            if (!catError && catData && catData.length > 0) {
+                const chips = catData.map(c =>
+                    `<button class="chip" data-filter="${c.name.toLowerCase()}">${c.name}</button>`
+                ).join('');
+                chipContainer.innerHTML = `<button class="chip active" data-filter="all" data-t="all">All</button>` + chips;
+                applyTranslations(); // Translate the new "All" button
+            }
         }
     } catch (err) {
         console.warn('Supabase unavailable:', err);
@@ -447,7 +462,7 @@ function filterProducts() {
     const grid = document.getElementById('productsGrid');
     if (!grid) return;
     const filtered = products.filter(p => {
-        const matchCat = activeFilter === 'all' || p.category === activeFilter;
+        const matchCat = activeFilter === 'all' || (p.category || '').toLowerCase() === activeFilter.toLowerCase();
         const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchCat && matchSearch;
     });
@@ -477,14 +492,19 @@ function filterProducts() {
 }
 
 function initShopFilters() {
-    document.querySelectorAll('.chip').forEach(chip => {
-        chip.addEventListener('click', () => {
+    const chipContainer = document.getElementById('categoryFilterChips');
+    if (chipContainer) {
+        chipContainer.addEventListener('click', (e) => {
+            const chip = e.target.closest('.chip');
+            if (!chip) return;
+
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             activeFilter = chip.getAttribute('data-filter');
             filterProducts();
         });
-    });
+    }
+
     const searchInput = document.getElementById('shopSearch');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
