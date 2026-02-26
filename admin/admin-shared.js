@@ -222,6 +222,18 @@ async function syncAdminDataFromSupabase() {
       localStorage.setItem('flavourOptions', JSON.stringify(fOpts));
     }
 
+    // Sync Payment Methods
+    const { data: pMethods, error: pmError } = await window.supabaseClient.from('payment_methods').select('*').order('name', { ascending: true });
+    if (!pmError && pMethods) {
+      localStorage.setItem('paymentMethods', JSON.stringify(pMethods));
+    }
+
+    // Sync Price List
+    const { data: pListItems, error: pliError } = await window.supabaseClient.from('price_list').select('*').order('created_at', { ascending: true });
+    if (!pliError && pListItems) {
+      localStorage.setItem('priceListSynced', JSON.stringify(pListItems));
+    }
+
   } catch (err) {
     console.error('Sync process failed:', err);
   }
@@ -275,6 +287,39 @@ async function dbDeleteGlobalFlavour(id) {
   if (!window.supabaseClient) return;
   const { error } = await window.supabaseClient.from('flavour_options').delete().eq('id', id);
   return { error };
+}
+
+async function dbAddPaymentMethod(method) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('payment_methods').insert([method]);
+  return { error };
+}
+
+async function dbDeletePaymentMethod(id) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('payment_methods').delete().eq('id', id);
+  return { error };
+}
+
+async function dbAddPriceItem(item) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('price_list').insert([item]);
+  return { error };
+}
+
+async function dbDeletePriceItem(id) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('price_list').delete().eq('id', id);
+  return { error };
+}
+
+function copyText(text) {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Copied to clipboard: ' + text);
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
 }
 
 

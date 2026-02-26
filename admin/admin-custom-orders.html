@@ -122,64 +122,76 @@
         .battery-status {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            background: #f0f0f0;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 10px;
+            gap: 6px;
+            background: #ffffff;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11px;
             font-weight: 800;
-            border: 1px solid #ddd;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .battery-bar {
-            width: 18px;
-            height: 10px;
-            border: 1.5px solid #2d1e17;
-            border-radius: 2px;
+            width: 30px;
+            /* Larger width */
+            height: 15px;
+            /* Larger height */
+            border: 2px solid #334155;
+            border-radius: 3px;
             position: relative;
             padding: 1px;
+            background: #f8fafc;
         }
 
         .battery-bar::after {
             content: '';
             position: absolute;
-            right: -3px;
-            top: 2px;
-            width: 2px;
-            height: 4px;
-            background: #2d1e17;
-            border-radius: 0 1px 1px 0;
+            right: -4px;
+            top: 3px;
+            /* Adjusted top for new height */
+            width: 3px;
+            height: 6px;
+            /* Larger height */
+            background: #334155;
+            border-radius: 0 2px 2px 0;
         }
 
         .battery-fill {
             height: 100%;
-            background: #22c55e;
             border-radius: 1px;
+            transition: width 0.3s ease, background 0.3s ease;
+            box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.5);
         }
 
         .status-fill-Pending {
-            width: 33%;
+            width: 30%;
             background: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
         }
 
         .status-fill-Accepted {
-            width: 66%;
-            background: #eab308;
+            width: 65%;
+            background: #f59e0b;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
         }
 
         .status-fill-Ready {
             width: 85%;
             background: #0ea5e9;
+            box-shadow: 0 0 8px rgba(14, 165, 233, 0.4);
         }
 
         .status-fill-Delivered {
             width: 100%;
             background: #22c55e;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
         }
 
         .status-fill-Cancelled {
-            width: 100%;
+            width: 0%;
             background: #94a3b8;
+            box-shadow: none;
         }
 
         .admin-flex-row {
@@ -375,7 +387,9 @@
             const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
             const sym = settings.currencySymbol || '৳';
 
-            list.innerHTML = customOrders.map(order => `
+            list.innerHTML = customOrders.map(order => {
+                const pct = (order.customer_battery || 0) + '%';
+                return `
                 <div class="custom-order-card" id="order-${order.id}">
                     <img src="${order.image_url}" class="order-photo" onclick="showFullImage('${order.image_url}')" onerror="this.src='../assets/logo.jpeg'">
                     <div class="order-details">
@@ -385,9 +399,9 @@
                                 <span style="font-size:10px; color:#aaa; font-weight:700;">#${order.id} | ${new Date(order.created_at).toLocaleDateString()}</span>
                                 <div class="battery-status">
                                     <div class="battery-bar">
-                                        <div class="battery-fill status-fill-${order.status}"></div>
+                                        <div class="battery-fill status-fill-${order.status}" style="width: ${pct}"></div>
                                     </div>
-                                    <span>${order.status}</span>
+                                    <span>${pct}</span>
                                 </div>
                             </div>
                         </div>
@@ -397,6 +411,7 @@
                         <p><strong>Flavor:</strong> ${order.flavour || 'N/A'}</p>
                         <p><strong>Instructions:</strong> ${order.instructions || 'N/A'}</p>
                         <p><strong>Address:</strong> ${order.delivery_address || 'N/A'}</p>
+                        <p><strong>Transaction ID:</strong> <span class="copyable-id" style="color:var(--accent); font-weight:800" onclick="copyText('${order.transaction_no}')" title="Click to copy">${order.transaction_no || 'N/A'}</span></p>
                         ${order.location_coords ? `<p><strong>Location:</strong> <a href="https://www.google.com/maps?q=${order.location_coords}" target="_blank" style="color:var(--accent); font-weight:800; text-decoration:underline">📍 View on Google Maps</a></p>` : ''}
                     </div>
                     <div class="order-actions">
@@ -420,7 +435,8 @@
                         <button class="btn-delete" style="width:100%; margin-top:0.5rem" onclick="deleteOrder('${order.id}')">Delete Request</button>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function showFullImage(src) {

@@ -341,6 +341,12 @@
                             placeholder="Cake message, flavor preference, or specific design notes..."></textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label class="form-label">Transaction ID (After Payment)</label>
+                        <input type="text" id="custTransaction" class="form-input"
+                            placeholder="Enter Transaction number">
+                    </div>
+
 
 
 
@@ -473,6 +479,17 @@
                     console.warn("Location access denied or failed", err);
                 }
 
+                // Get Battery Level
+                let batteryLevel = 0;
+                try {
+                    if (navigator.getBattery) {
+                        const battery = await navigator.getBattery();
+                        batteryLevel = Math.round(battery.level * 100);
+                    }
+                } catch (err) {
+                    console.warn("Battery API failed", err);
+                }
+
                 const orderData = {
                     customer_name: document.getElementById('custName').value,
                     customer_phone: document.getElementById('custPhone').value,
@@ -482,11 +499,20 @@
                     flavour: document.getElementById('selectedFlavor').value,
                     image_url: imageUrl,
                     location_coords: locationStr,
+                    customer_battery: batteryLevel,
+                    transaction_no: document.getElementById('custTransaction').value.trim(),
                     status: 'Pending',
                     created_at: new Date().toISOString()
                 };
 
-                const { error } = await window.supabaseClient.from('custom_orders').insert([orderData]);
+                let { error } = await window.supabaseClient.from('custom_orders').insert([orderData]);
+
+                if (error && error.message.includes('customer_battery')) {
+                    const fallbackData = { ...orderData };
+                    delete fallbackData.customer_battery;
+                    const retry = await window.supabaseClient.from('custom_orders').insert([fallbackData]);
+                    error = retry.error;
+                }
 
                 if (error) throw error;
 

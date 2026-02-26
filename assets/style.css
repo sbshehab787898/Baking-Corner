@@ -2347,3 +2347,14 @@ select.cf-input {
         width: 100%
     }
 }
+
+.copyable-id {
+    cursor: pointer;
+    text-decoration: underline dotted;
+    transition: color 0.3s;
+}
+
+.copyable-id:hover {
+    color: var(--accent);
+    background: rgba(219, 39, 119, 0.05);
+}

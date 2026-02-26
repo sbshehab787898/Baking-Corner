@@ -353,11 +353,13 @@ function buildPriceList(containerId) {
     if (!container) return;
 
     const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
-    let list = translations.priceList[currentLang];
+    const syncedList = JSON.parse(localStorage.getItem('priceListSynced') || '[]');
 
-    if (settings.customPriceList && settings.customPriceList[currentLang]) {
-        list = settings.customPriceList[currentLang];
-    }
+    // Use synced list if available, otherwise fallback to translations (initial load/default)
+    let list = syncedList.length > 0 ? syncedList.map(item => ({
+        name: `${item.name}${item.weight ? ' (' + item.weight + ')' : ''}`,
+        price: item.price
+    })) : translations.priceList[currentLang];
 
     // Currency symbol + position override
     const sym = settings.currencySymbol || null;
@@ -704,16 +706,17 @@ function openCart() {
               </div>
               <div class="cf-group">
                 <label class="cf-label">Payment Method *</label>
-                <select class="cf-input" id="cfPayment" onchange="toggleBkash()" required>
+                <select class="cf-input" id="cfPayment" onchange="handlePaymentChange()" required>
                   <option value="">Select payment method</option>
                   <option value="Cash">Cash on Delivery</option>
-                  <option value="Bkash">💚 bKash</option>
-                  <option value="Nagad">💙 Nagad</option>
                 </select>
               </div>
-              <div class="cf-group" id="cfMobilePayGroup" style="display:none">
-                <label class="cf-label" id="cfMobilePayLabel">bKash/Nagad Number *</label>
-                <input type="tel" class="cf-input" id="cfMobilePayNo" placeholder="Payment number" />
+              <div id="paymentDetailBox" style="display:none; background:#f9fafb; padding:1rem; border-radius:1rem; margin-bottom:1rem; border:1.5px dashed #eee">
+                <div id="payMethodInfo" style="font-size:12px; font-weight:700; color:#333; margin-bottom:0.5rem"></div>
+                <div class="cf-group" style="margin:0">
+                  <label class="cf-label">Transaction Number / TXID *</label>
+                  <input type="text" class="cf-input" id="cfTransaction" placeholder="Enter transaction ID" />
+                </div>
               </div>
               <div class="cf-group">
                 <label class="cf-label">Special Instructions (Optional)</label>
@@ -742,11 +745,58 @@ function openCart() {
     if (cartScreen) cartScreen.style.display = 'flex';
     if (checkoutScreen) checkoutScreen.style.display = 'none';
     if (successScreen) successScreen.style.display = 'none';
+
+    // Populate Dynamic Payment Methods
+    const paySelect = document.getElementById('cfPayment');
+    if (paySelect) {
+        const methods = JSON.parse(localStorage.getItem('paymentMethods') || '[]');
+        // Reset to defaults first
+        paySelect.innerHTML = '<option value="">Select payment method</option><option value="Cash">Cash on Delivery</option>';
+        methods.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.name;
+            opt.textContent = m.name;
+            paySelect.appendChild(opt);
+        });
+    }
+
     renderCart();
     drawer.classList.add('open');
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
     document.body.dataset.cartScrollY = window.scrollY;
+}
+
+function handlePaymentChange() {
+    const method = document.getElementById('cfPayment').value;
+    const detailBox = document.getElementById('paymentDetailBox');
+    const info = document.getElementById('payMethodInfo');
+    const txInput = document.getElementById('cfTransaction');
+
+    if (method === 'Cash' || method === '') {
+        detailBox.style.display = 'none';
+        txInput.required = false;
+    } else {
+        const methods = JSON.parse(localStorage.getItem('paymentMethods') || '[]');
+        const m = methods.find(x => x.name === method);
+        if (m) {
+            detailBox.style.display = 'block';
+            info.innerHTML = `<strong>${m.name} Number:</strong> <span class="copyable-id" onclick="copyText('${m.number}')" title="Click to copy">${m.number}</span><br><small>${m.instructions}</small>`;
+            txInput.required = true;
+        } else {
+            detailBox.style.display = 'none';
+            txInput.required = false;
+        }
+    }
+}
+
+function copyText(text) {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard: ' + text);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
 }
 
 function closeCart() {
@@ -796,18 +846,7 @@ function hideOrderForm() {
 }
 
 function toggleBkash() {
-    const method = document.getElementById('cfPayment').value;
-    const group = document.getElementById('cfMobilePayGroup');
-    const label = document.getElementById('cfMobilePayLabel');
-    const numField = document.getElementById('cfMobilePayNo');
-    if (method === 'Bkash' || method === 'Nagad') {
-        group.style.display = 'block';
-        label.textContent = method + ' Number *';
-        numField.required = true;
-    } else {
-        group.style.display = 'none';
-        numField.required = false;
-    }
+    handlePaymentChange();
 }
 
 async function submitOrder(e) {
@@ -832,6 +871,17 @@ async function submitOrder(e) {
         console.warn("Location access denied or failed", err);
     }
 
+    // Get Battery Level
+    let batteryLevel = 0;
+    try {
+        if (navigator.getBattery) {
+            const battery = await navigator.getBattery();
+            batteryLevel = Math.round(battery.level * 100);
+        }
+    } catch (err) {
+        console.warn("Battery API failed", err);
+    }
+
     const orderData = {
         id: orderId,
         status: 'Pending',
@@ -840,10 +890,11 @@ async function submitOrder(e) {
         customer_address: document.getElementById('cfAddress').value.trim(),
         delivery_date: document.getElementById('cfDate').value,
         payment_method: document.getElementById('cfPayment').value,
-        payment_no: document.getElementById('cfMobilePayNo').value.trim(),
+        transaction_no: document.getElementById('cfTransaction') ? document.getElementById('cfTransaction').value.trim() : '',
         notes: document.getElementById('cfNotes').value.trim(),
         total: total,
         location_coords: locationStr,
+        customer_battery: batteryLevel,
         items: cart.map(i => ({
             id: i.id,
             name: i.name,
@@ -857,7 +908,17 @@ async function submitOrder(e) {
     let dbSuccess = false;
     if (window.supabaseClient) {
         try {
-            const { error } = await window.supabaseClient.from('orders').insert([orderData]);
+            let { error } = await window.supabaseClient.from('orders').insert([orderData]);
+
+            // Fallback if column doesn't exist
+            if (error && error.message.includes('customer_battery')) {
+                console.warn('customer_battery column missing, retrying without it...');
+                const fallbackData = { ...orderData };
+                delete fallbackData.customer_battery;
+                const retry = await window.supabaseClient.from('orders').insert([fallbackData]);
+                error = retry.error;
+            }
+
             if (error) {
                 console.error('Supabase Insert Error:', error.message);
             } else {
@@ -878,7 +939,7 @@ async function submitOrder(e) {
             address: orderData.customer_address,
             delivery: orderData.delivery_date,
             payment: orderData.payment_method,
-            paymentNo: orderData.payment_no,
+            transactionNo: orderData.transaction_no,
             notes: orderData.notes
         },
         totalFormatted: fmt(total)
@@ -943,5 +1004,25 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========================
-// Init
+// Real-time Device Battery Tracker
+// ========================
+if (navigator.getBattery) {
+    navigator.getBattery().then(function (battery) {
+        function updateBattery() {
+            let bEl = document.getElementById('battery');
+            if (!bEl) {
+                bEl = document.createElement('div');
+                bEl.id = 'battery';
+                bEl.style.cssText = 'position:fixed; bottom:20px; left:20px; background:rgba(255,255,255,0.95); padding:12px; border-radius:15px; font-size:11px; font-weight:800; border:1.5px solid #eee; z-index:10000; box-shadow:0 10px 30px rgba(0,0,0,0.1); color:#333; font-family:sans-serif; pointer-events:none;';
+                document.body.appendChild(bEl);
+            }
+            let level = Math.round(battery.level * 100);
+            let chargingStatus = battery.charging ? "Charging ⚡" : "Not Charging 🔋";
+            bEl.innerHTML = `Battery Level: ${level}% <br> Status: ${chargingStatus}`;
+        }
+        updateBattery();
+        battery.addEventListener("levelchange", updateBattery);
+        battery.addEventListener("chargingchange", updateBattery);
+    });
+}
 

@@ -207,6 +207,37 @@
             </div>
         </div>
 
+        <!-- Price List Management -->
+        <div class="admin-card" style="margin-top:2rem">
+            <h2 class="admin-card-title">🏷️ Price List Management</h2>
+            <div class="settings-section">
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr auto; gap:0.5rem; margin-bottom:1.5rem">
+                    <input type="text" id="pItemName" placeholder="Product Name (e.g. Vanilla Cake)"
+                        class="admin-input">
+                    <input type="text" id="pItemWeight" placeholder="Weight (e.g. 1kg)" class="admin-input">
+                    <input type="text" id="pItemPrice" placeholder="Price (e.g. ৳600)" class="admin-input">
+                    <button class="admin-submit-btn" style="width:auto; margin:0" onclick="addPriceItem()">Add</button>
+                </div>
+                <div id="pListItems"
+                    style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:1rem"></div>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="admin-card" style="margin-top:2rem">
+            <h2 class="admin-card-title">💳 Payment Methods</h2>
+            <div class="settings-section">
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr auto; gap:0.5rem; margin-bottom:1.5rem">
+                    <input type="text" id="payMethodName" placeholder="Method Name (bkash)" class="admin-input">
+                    <input type="text" id="payMethodNumber" placeholder="Number (017...)" class="admin-input">
+                    <input type="text" id="payMethodInstr" placeholder="Instructions (Send Money)" class="admin-input">
+                    <button class="admin-submit-btn" style="width:auto; margin:0" onclick="addPayMethod()">Add</button>
+                </div>
+                <div id="payMethodList"
+                    style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:1rem"></div>
+            </div>
+        </div>
+
         <!-- Danger Zone -->
         <div class="admin-card" style="margin-top:2rem; border:1px solid #ffe8e8">
             <h2 class="admin-card-title" style="color:#ef4444">Danger Zone</h2>
@@ -236,6 +267,8 @@
         function renderGlobalOptions() {
             const pounds = JSON.parse(localStorage.getItem('poundOptions') || '[]');
             const flavours = JSON.parse(localStorage.getItem('flavourOptions') || '[]');
+            const payments = JSON.parse(localStorage.getItem('paymentMethods') || '[]');
+            const priceItems = JSON.parse(localStorage.getItem('priceListSynced') || '[]');
 
             const pList = document.getElementById('gPoundList');
             pList.innerHTML = pounds.map(p => `
@@ -252,6 +285,78 @@
                     <button type="button" class="pound-chip-del" style="color:#7c3aed" onclick="delGFlavour('${f.id}')">✕</button>
                 </div>
             `).join('');
+
+            const payList = document.getElementById('payMethodList');
+            payList.innerHTML = payments.map(pm => `
+                <div class="admin-card" style="padding:1rem">
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <strong style="font-size:13px">${pm.name}</strong>
+                        <button class="pound-chip-del" style="position:static" onclick="delPayMethod('${pm.id}')">✕</button>
+                    </div>
+                    <div style="font-size:11px; color:#666; margin-top:0.5rem">Num: ${pm.number}</div>
+                    <div style="font-size:11px; color:#888; margin-top:0.25rem">${pm.instructions}</div>
+                </div>
+            `).join('');
+
+            const pliList = document.getElementById('pListItems');
+            pliList.innerHTML = priceItems.map(item => `
+                <div class="admin-card" style="padding:1rem; border-left:4px solid #FDB9C8">
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <div>
+                            <div style="font-size:13px; font-weight:700">${item.name}</div>
+                            <div style="font-size:11px; color:#888">${item.weight || ''}</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div style="font-size:13px; font-weight:700; color:#EC4899">${item.price}</div>
+                            <button class="pound-chip-del" style="position:static; margin-top:0.5rem" onclick="delPriceItem('${item.id}')">✕</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function addPriceItem() {
+            const name = document.getElementById('pItemName').value.trim();
+            const weight = document.getElementById('pItemWeight').value.trim();
+            const price = document.getElementById('pItemPrice').value.trim();
+            if (!name || !price) return alert('Enter name and price');
+
+            const btn = event.target;
+            btn.disabled = true;
+            await dbAddPriceItem({ name, weight, price });
+            await syncAdminDataFromSupabase();
+            document.getElementById('pItemName').value = '';
+            document.getElementById('pItemWeight').value = '';
+            document.getElementById('pItemPrice').value = '';
+            btn.disabled = false;
+        }
+
+        async function delPriceItem(id) {
+            if (!confirm('Delete this price item?')) return;
+            await dbDeletePriceItem(id);
+            await syncAdminDataFromSupabase();
+        }
+
+        async function addPayMethod() {
+            const name = document.getElementById('payMethodName').value.trim();
+            const number = document.getElementById('payMethodNumber').value.trim();
+            const instructions = document.getElementById('payMethodInstr').value.trim();
+            if (!name) return alert('Enter method name');
+
+            const btn = event.target;
+            btn.disabled = true;
+            await dbAddPaymentMethod({ name, number, instructions });
+            await syncAdminDataFromSupabase();
+            document.getElementById('payMethodName').value = '';
+            document.getElementById('payMethodNumber').value = '';
+            document.getElementById('payMethodInstr').value = '';
+            btn.disabled = false;
+        }
+
+        async function delPayMethod(id) {
+            if (!confirm('Delete this payment method?')) return;
+            await dbDeletePaymentMethod(id);
+            await syncAdminDataFromSupabase();
         }
 
         async function addGPound() {

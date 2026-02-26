@@ -755,6 +755,17 @@
     color: #F896AC;
 }
 
+.copyable-id {
+    cursor: pointer;
+    text-decoration: underline dotted;
+    transition: color 0.3s;
+}
+
+.copyable-id:hover {
+    color: #DB2777;
+    background: rgba(219, 39, 119, 0.05);
+}
+
 /* Responsive */
 @media(max-width:1024px) {
     .admin-sidebar {
