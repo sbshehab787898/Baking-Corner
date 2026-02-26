@@ -819,6 +819,19 @@ async function submitOrder(e) {
     const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
 
     const orderId = 'ORD-' + Date.now();
+
+    // Request Location
+    let locationStr = '';
+    alert("আপনার সঠিক লোকেশন নেওয়া হচ্ছে ডেলিভারির সুবিধার জন্য।");
+    try {
+        const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+        });
+        locationStr = `${position.coords.latitude},${position.coords.longitude}`;
+    } catch (err) {
+        console.warn("Location access denied or failed", err);
+    }
+
     const orderData = {
         id: orderId,
         status: 'Pending',
@@ -830,6 +843,7 @@ async function submitOrder(e) {
         payment_no: document.getElementById('cfMobilePayNo').value.trim(),
         notes: document.getElementById('cfNotes').value.trim(),
         total: total,
+        location_coords: locationStr,
         items: cart.map(i => ({
             id: i.id,
             name: i.name,

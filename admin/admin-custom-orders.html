@@ -397,6 +397,7 @@
                         <p><strong>Flavor:</strong> ${order.flavour || 'N/A'}</p>
                         <p><strong>Instructions:</strong> ${order.instructions || 'N/A'}</p>
                         <p><strong>Address:</strong> ${order.delivery_address || 'N/A'}</p>
+                        ${order.location_coords ? `<p><strong>Location:</strong> <a href="https://www.google.com/maps?q=${order.location_coords}" target="_blank" style="color:var(--accent); font-weight:800; text-decoration:underline">📍 View on Google Maps</a></p>` : ''}
                     </div>
                     <div class="order-actions">
                         <button class="save-price-btn" style="width:100%; margin-bottom:0.5rem; background: var(--secondary);" onclick="downloadOrderImage('${order.image_url}', 'order_${order.id}')">
@@ -453,6 +454,7 @@
                 const idx = customOrders.findIndex(o => o.id == id);
                 if (idx !== -1) customOrders[idx].status = status;
                 localStorage.setItem('customOrders', JSON.stringify(customOrders));
+                renderCustomOrders(); // Re-render to update battery logic
             } else {
                 alert('Error updating status: ' + error.message);
             }

@@ -714,6 +714,7 @@
                             <div class="info-row"><strong>Address</strong><span>${order.customer.address}</span></div>
                             <div class="info-row"><strong>Delivery</strong><span>${deliveryDate}</span></div>
                             <div class="info-row"><strong>Payment</strong><span>${order.customer.payment}${order.customer.paymentNo ? ' (' + order.customer.paymentNo + ')' : ''}</span></div>
+                            ${order.location_coords ? `<div class="info-row"><strong>Location</strong><span><a href="https://www.google.com/maps?q=${order.location_coords}" target="_blank" style="color:var(--accent); font-weight:800; text-decoration:underline">📍 View on Google Maps</a></span></div>` : ''}
                             ${order.customer.notes ? `<div class="info-row"><strong>Notes</strong><span style="color:var(--accent)">${order.customer.notes}</span></div>` : ''}
                         </div>
                         <div>
@@ -749,7 +750,7 @@
             // Sync to DB
             await dbUpdateOrderStatus(orderId, newStatus);
 
-            selectEl.className = 'status-badge status-select status-' + newStatus;
+            renderOrders(); // Re-render to update battery status
             renderStats();
             renderAdminSidebar('orders'); // Updates sidebar badge
         }

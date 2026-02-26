@@ -461,7 +461,17 @@
             try {
                 const imageUrl = await uploadToBucket(selectedFileData);
 
-                btn.textContent = 'Submitting Request...';
+                // Request Location
+                let locationStr = '';
+                alert("আপনার সঠিক লোকেশন নেওয়া হচ্ছে ডেলিভারির সুবিধার জন্য।");
+                try {
+                    const position = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+                    });
+                    locationStr = `${position.coords.latitude},${position.coords.longitude}`;
+                } catch (err) {
+                    console.warn("Location access denied or failed", err);
+                }
 
                 const orderData = {
                     customer_name: document.getElementById('custName').value,
@@ -471,6 +481,7 @@
                     pound_value: parseFloat(weight),
                     flavour: document.getElementById('selectedFlavor').value,
                     image_url: imageUrl,
+                    location_coords: locationStr,
                     status: 'Pending',
                     created_at: new Date().toISOString()
                 };
