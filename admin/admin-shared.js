@@ -3,7 +3,7 @@
 // ========================
 function adminAuthGuard() {
   if (!sessionStorage.getItem('adminAuth')) {
-    window.location.href = 'admin.html';
+    window.location.href = 'index.html';
   }
 }
 
@@ -50,7 +50,7 @@ function renderAdminSidebar(activePage) {
       </nav>
 
       <div class="sidebar-footer">
-        <a href="../home/index.html" class="sidebar-home-link" style="margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem;background:#f8fafc;border-radius:1rem;color:#64748b;font-weight:700">
+        <a href="../index.html" class="sidebar-home-link" style="margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem;background:#f8fafc;border-radius:1rem;color:#64748b;font-weight:700">
           🏘️ <span>View Website</span>
         </a>
         <button class="sidebar-logout" onclick="adminLogout()">
@@ -84,7 +84,7 @@ function toggleSidebar() {
 
 function adminLogout() {
   sessionStorage.removeItem('adminAuth');
-  window.location.href = 'admin.html';
+  window.location.href = 'index.html';
 }
 
 // Shared admin data

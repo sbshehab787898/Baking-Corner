@@ -267,10 +267,15 @@
             </button>
         </form>
 
-        <a href="../home/index.html" class="login-back-link">← Back to Website</a>
+        <a href="../index.html" class="login-back-link">← Back to Website</a>
     </div>
 
     <script>
+        // Redirect if already logged in
+        if (sessionStorage.getItem('adminAuth')) {
+            window.location.href = 'admin-dashboard.html';
+        }
+
         window.addEventListener('load', () => {
             const preloader = document.getElementById('preloader');
             if (preloader) {
