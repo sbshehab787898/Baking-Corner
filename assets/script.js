@@ -1013,6 +1013,17 @@ window.addEventListener('load', () => {
     }
 });
 
+// ========================
+// Auto Footer Year
+// ========================
+function updateFooterYear() {
+    const currentYear = new Date().getFullYear().toString();
+    // Update all text nodes that contain the hardcoded year
+    document.querySelectorAll('.footer-copy span, .mobile-copyright').forEach(el => {
+        el.innerHTML = el.innerHTML.replace(/\b20\d{2}\b/, currentYear);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     applySiteCustomizations();
     initNavbar();
@@ -1022,28 +1033,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initShopFilters();
     updateCartCount();
     syncProducts(); // Supabase Sync
+    updateFooterYear(); // Auto update copyright year
 });
 
-// ========================
-// Real-time Device Battery Tracker
-// ========================
-if (navigator.getBattery) {
-    navigator.getBattery().then(function (battery) {
-        function updateBattery() {
-            let bEl = document.getElementById('battery');
-            if (!bEl) {
-                bEl = document.createElement('div');
-                bEl.id = 'battery';
-                bEl.style.cssText = 'position:fixed; bottom:20px; left:20px; background:rgba(255,255,255,0.95); padding:12px; border-radius:15px; font-size:11px; font-weight:800; border:1.5px solid #eee; z-index:10000; box-shadow:0 10px 30px rgba(0,0,0,0.1); color:#333; font-family:sans-serif; pointer-events:none;';
-                document.body.appendChild(bEl);
-            }
-            let level = Math.round(battery.level * 100);
-            let chargingStatus = battery.charging ? "Charging ⚡" : "Not Charging 🔋";
-            bEl.innerHTML = `Battery Level: ${level}% <br> Status: ${chargingStatus}`;
-        }
-        updateBattery();
-        battery.addEventListener("levelchange", updateBattery);
-        battery.addEventListener("chargingchange", updateBattery);
-    });
-}
+
 

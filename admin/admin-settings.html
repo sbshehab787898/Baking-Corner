@@ -238,20 +238,7 @@
             </div>
         </div>
 
-        <!-- Danger Zone -->
-        <div class="admin-card" style="margin-top:2rem; border:1px solid #ffe8e8">
-            <h2 class="admin-card-title" style="color:#ef4444">Danger Zone</h2>
-            <div class="settings-section">
-                <div class="settings-row">
-                    <div>
-                        <div class="settings-label">Factory Reset</div>
-                        <div class="settings-desc">Delete all site data and start fresh</div>
-                    </div>
-                    <button onclick="factoryReset()" class="admin-submit-btn"
-                        style="width:auto; background:#ef4444; color:white; padding:0.5rem 2rem">Reset All</button>
-                </div>
-            </div>
-        </div>
+
     </main>
 
     <script src="admin-shared.js"></script>
@@ -469,12 +456,7 @@
             }, 2000);
         }
 
-        function factoryReset() {
-            if (!confirm('This will wipe ALL data. Continue?')) return;
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = 'admin.html';
-        }
+
     </script>
 </body>
 

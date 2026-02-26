@@ -342,9 +342,22 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Transaction ID (After Payment)</label>
-                        <input type="text" id="custTransaction" class="form-input"
-                            placeholder="Enter Transaction number">
+                        <label class="form-label">PAYMENT METHOD *</label>
+                        <select id="custPaymentMethod" class="form-input" required onchange="handlePaymentChange()"
+                            style="border-color: var(--primary);">
+                            <option value="">Select Payment Method</option>
+                        </select>
+                    </div>
+
+                    <div id="paymentDetailBox"
+                        style="display:none; background:#f8f9fa; padding:2rem; border-radius:1.5rem; margin-bottom:2rem; border:1px solid #eee;">
+                        <div id="payMethodInfo"
+                            style="font-size:14px; font-weight:800; color:#333; margin-bottom:1.5rem;"></div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">TRANSACTION NUMBER / TXID *</label>
+                            <input type="text" id="custTransaction" class="form-input"
+                                placeholder="Enter transaction ID">
+                        </div>
                     </div>
 
 
@@ -388,6 +401,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             loadRates();
             loadFlavors();
+            loadPaymentMethods();
 
             document.getElementById('selectedWeight').addEventListener('input', function () {
                 const weight = parseFloat(this.value) || 0;
@@ -405,6 +419,61 @@
                 }
             });
         });
+
+        let paymentMethodsData = [];
+
+        async function loadPaymentMethods() {
+            try {
+                const { data, error } = await window.supabaseClient.from('payment_methods').select('*').order('name');
+                if (!error && data) {
+                    paymentMethodsData = data;
+                    localStorage.setItem('paymentMethods', JSON.stringify(data));
+                } else {
+                    paymentMethodsData = JSON.parse(localStorage.getItem('paymentMethods') || '[]');
+                }
+            } catch (e) {
+                paymentMethodsData = JSON.parse(localStorage.getItem('paymentMethods') || '[]');
+            }
+
+            const select = document.getElementById('custPaymentMethod');
+            if (paymentMethodsData.length > 0) {
+                select.innerHTML = '<option value="">Select Payment Method</option>' +
+                    paymentMethodsData.map(m => `<option value="${m.name}">${m.name}</option>`).join('') +
+                    '<option value="Cash">Cash on Delivery</option>';
+            } else {
+                select.innerHTML = '<option value="">Select Payment Method</option><option value="Cash">Cash on Delivery</option>';
+            }
+        }
+
+        function handlePaymentChange() {
+            const method = document.getElementById('custPaymentMethod').value;
+            const detailBox = document.getElementById('paymentDetailBox');
+            const info = document.getElementById('payMethodInfo');
+            const txInput = document.getElementById('custTransaction');
+
+            if (method === '' || method === 'Cash') {
+                detailBox.style.display = 'none';
+                txInput.required = false;
+            } else {
+                detailBox.style.display = 'block';
+
+                // Use global data or fallback to localStorage
+                const allMethods = paymentMethodsData.length > 0
+                    ? paymentMethodsData
+                    : JSON.parse(localStorage.getItem('paymentMethods') || '[]');
+
+                const m = allMethods.find(x => x.name === method);
+                if (m) {
+                    info.innerHTML = `
+                        <div style="font-size:1.1rem; color:#000; margin-bottom:5px;">${m.name} Number: <span style="text-decoration: underline dotted; color:#EC4899;">${m.number}</span></div>
+                        <div style="font-size:0.85rem; color:#666; font-weight:normal; margin-bottom:15px;">Send the money to this number and enter the TXID below. (টাকা পাঠিয়ে নিচে ট্রানজেকশন আইডি দিন।)</div>
+                    `;
+                } else {
+                    info.innerHTML = `<div style="font-size:0.85rem; color:#666; font-weight:normal; margin-bottom:15px;">Please send the money to our ${method} account and enter the TXID below. (টাকা পাঠিয়ে নিচে TXID দিন।)</div>`;
+                }
+                txInput.required = true;
+            }
+        }
 
         async function loadRates() {
             const { data, error } = await window.supabaseClient.from('pound_options').select('*');
@@ -500,6 +569,7 @@
                     image_url: imageUrl,
                     location_coords: locationStr,
                     customer_battery: batteryLevel,
+                    payment_method: document.getElementById('custPaymentMethod').value,
                     transaction_no: document.getElementById('custTransaction').value.trim(),
                     status: 'Pending',
                     created_at: new Date().toISOString()
