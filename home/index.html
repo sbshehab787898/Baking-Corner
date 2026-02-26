@@ -78,7 +78,7 @@
 
             <button class="lang-btn lang-toggle" style="margin-bottom:1.5rem;width:100%;justify-content:center"><span
                     class="lang-btn-text">বাংলা</span></button>
-            <p class="mobile-copyright">Baking Corner Luxury Confectionery © 2026</p>
+            <p class="mobile-copyright">Baking Corner Luxury Confectionery &copy; 2026</p>
         </div>
     </div>
 
@@ -257,7 +257,7 @@
                                 <span class="product-price">${fmt(p.price)}</span>
                             </div>
                             <p class="product-desc">"${p.description}"</p>
-                            <button class="product-btn" onclick="addToCart(1)" data-t="reserveItem">Reserve Item</button>
+                            <button class="product-btn" onclick="location.href='../pages/product.html?id=${p.id}'" data-t="reserveItem">Reserve Item</button>
                         </div>
                     </div>
                 `).join('');

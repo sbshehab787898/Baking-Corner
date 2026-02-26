@@ -8,6 +8,13 @@
     min-height: 100vh;
     background: #FFF5FB;
     font-family: 'Inter', 'Outfit', sans-serif;
+    overflow-x: hidden;
+}
+
+body.no-scroll {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
 }
 
 /* Sidebar */
@@ -25,10 +32,12 @@
     top: 0;
     left: 0;
     height: 100vh;
-    z-index: 1000;
+    height: 100dvh; /* Modern mobile height */
+    z-index: 2100; /* Higher than toggle */
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     box-shadow: 10px 0 50px rgba(45, 30, 23, 0.03);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-brand {

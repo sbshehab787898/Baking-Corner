@@ -4,13 +4,238 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baking Corner</title>
+    <title>Admin Login — Baking Corner</title>
     <link rel="stylesheet" href="../assets/style.css" />
     <link rel="stylesheet" href="admin-style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/supabase-client.js"></script>
+    <script src="admin-shared.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #2D1E17 0%, #1a0f0b 50%, #3D1F2E 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Floating orbs */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -20%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 10s ease-in-out infinite reverse;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateY(-30px) scale(1.05);
+            }
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            padding: 3.5rem;
+            border-radius: 3rem;
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .login-logo-wrap {
+            width: 90px;
+            height: 90px;
+            border-radius: 2rem;
+            overflow: hidden;
+            margin: 0 auto 2rem;
+            border: 2px solid rgba(253, 185, 200, 0.3);
+            box-shadow: 0 20px 50px rgba(236, 72, 153, 0.2);
+        }
+
+        .login-logo-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .login-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.4rem;
+            color: white;
+        }
+
+        .login-sub {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 2.5rem;
+            display: block;
+        }
+
+        .login-field {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        .login-field label {
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            color: rgba(212, 175, 55, 0.8);
+            display: block;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+        }
+
+        .login-field input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border-radius: 1.25rem;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            outline: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .login-field input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .login-field input:focus {
+            border-color: rgba(253, 185, 200, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(253, 185, 200, 0.1);
+        }
+
+        .login-error {
+            color: #fca5a5;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-style: italic;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 1rem;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            display: none;
+        }
+
+        .login-submit-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #EC4899, #DB2777);
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            border: none;
+            cursor: pointer;
+            color: white;
+            transition: all 0.4s;
+            margin-top: 0.5rem;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 12px 30px rgba(236, 72, 153, 0.3);
+        }
+
+        .login-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 50px rgba(236, 72, 153, 0.5);
+            background: linear-gradient(135deg, #F472B6, #EC4899);
+        }
+
+        .login-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-back-link {
+            display: block;
+            margin-top: 2rem;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: rgba(255, 255, 255, 0.2);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .login-back-link:hover {
+            color: rgba(253, 185, 200, 0.8);
+        }
+
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: #1a0f0b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        #preloader.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 2.5rem 1.5rem;
+            }
+        }
+    </style>
 </head>
 
-<body
-    style="background:var(--secondary);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem">
+<body>
 
     <div id="preloader">
         <img src="../assets/logo.jpeg" alt="Logo" class="loader-logo">
@@ -20,32 +245,29 @@
     </div>
 
     <div class="login-card">
-        <div class="login-icon-wrap">⚙️</div>
+        <div class="login-logo-wrap">
+            <img src="../assets/logo.jpeg" alt="Baking Corner Logo" />
+        </div>
         <h2 class="login-title">Admin Portal</h2>
-        <p class="login-sub">Secure Cryptographic Access Required</p>
+        <span class="login-sub">Secure Access Required</span>
 
         <form id="loginForm" onsubmit="handleLogin(event)">
             <div class="login-field">
-                <label class="admin-label">Identifier</label>
-                <input type="text" id="loginUser" class="admin-input" placeholder="Username" required
-                    autocomplete="username" />
+                <label>Username</label>
+                <input type="text" id="loginUser" placeholder="Enter username" required autocomplete="username" />
             </div>
             <div class="login-field">
-                <label class="admin-label">Passcode</label>
-                <input type="password" id="loginPass" class="admin-input" placeholder="Password" required
+                <label>Password</label>
+                <input type="password" id="loginPass" placeholder="Enter password" required
                     autocomplete="current-password" />
             </div>
-            <p id="loginError" class="login-error" style="display:none">Identity Verification Failed. Try again.</p>
+            <p id="loginError" class="login-error">Incorrect credentials. Please try again.</p>
             <button type="submit" class="login-submit-btn" id="loginBtn">
-                INITIALIZE ADMIN SESSION
+                Login to Admin Panel
             </button>
         </form>
 
-        <div class="login-hint">
-            <p>Dev Hint: Identifier <strong>admin</strong> | Passcode <strong>admin</strong></p>
-        </div>
-
-        <a href="../home/index.html" class="login-back-link">← Back to Site</a>
+        <a href="../home/index.html" class="login-back-link">← Back to Website</a>
     </div>
 
     <script>
@@ -59,7 +281,7 @@
             }
         });
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('loginUser').value.trim();
             const p = document.getElementById('loginPass').value.trim();
@@ -68,18 +290,32 @@
 
             btn.textContent = 'Verifying...';
             btn.style.opacity = '0.7';
+            err.style.display = 'none';
+
+            // Read credentials from Supabase
+            const creds = await getAdminCreds();
 
             setTimeout(() => {
-                if (u === 'admin' && p === 'admin') {
-                    sessionStorage.setItem('adminAuth', '1');
-                    window.location.href = 'admin-dashboard.html';
+                if (u === creds.username && p === creds.password) {
+                    btn.textContent = '✓ Access Granted';
+                    btn.style.background = 'linear-gradient(135deg, #4ade80, #16a34a)';
+                    setTimeout(() => {
+                        sessionStorage.setItem('adminAuth', '1');
+                        window.location.href = 'admin-dashboard.html';
+                    }, 600);
                 } else {
                     err.style.display = 'block';
-                    btn.textContent = 'INITIALIZE ADMIN SESSION';
+                    btn.textContent = 'Login to Admin Panel';
                     btn.style.opacity = '1';
                     document.getElementById('loginPass').value = '';
+                    // Shake animation
+                    const card = document.querySelector('.login-card');
+                    card.style.transform = 'translateX(8px)';
+                    setTimeout(() => { card.style.transform = 'translateX(-8px)'; }, 100);
+                    setTimeout(() => { card.style.transform = 'translateX(4px)'; }, 200);
+                    setTimeout(() => { card.style.transform = 'translateX(0)'; }, 300);
                 }
-            }, 600);
+            }, 400);
         }
     </script>
 </body>

@@ -230,10 +230,19 @@
                             <input type="text" class="admin-input" id="pName" placeholder="e.g. Chocolate Cake"
                                 required />
                         </div>
-                        <div class="admin-form-group">
-                            <label class="admin-label">Price</label>
-                            <input type="number" class="admin-input" id="pPrice" placeholder="0.00" step="0.01" min="0"
-                                required />
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                            <div class="admin-form-group">
+                                <label class="admin-label">Price</label>
+                                <input type="number" class="admin-input" id="pPrice" placeholder="0.00" step="0.01"
+                                    min="0" required />
+                            </div>
+                            <div class="admin-form-group">
+                                <label class="admin-label">Availability</label>
+                                <select class="admin-input" id="pStatus" style="font-style:normal">
+                                    <option value="in-stock">In Stock</option>
+                                    <option value="out-of-stock">Out of Stock</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="admin-form-group">
                             <label class="admin-label">Category</label>
@@ -641,10 +650,11 @@
             const mainImage = finalImageUrls[0] || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600';
 
             const prodData = {
-                id: Date.now(), // Generate unique ID in frontend
+                id: editingProductId || Date.now(),
                 name: document.getElementById('pName').value.trim(),
                 price: parseFloat(document.getElementById('pPrice').value),
                 category: document.getElementById('pCat').value,
+                status: document.getElementById('pStatus').value,
                 image: mainImage,
                 images: finalImageUrls,
                 description: document.getElementById('pDesc').value.trim(),
@@ -706,6 +716,7 @@
             document.getElementById('saveProductBtn').textContent = '💾 Save Product';
             document.getElementById('pName').value = '';
             document.getElementById('pPrice').value = '';
+            document.getElementById('pStatus').value = 'in-stock';
             document.getElementById('pDesc').value = '';
             selectedFiles = [];
             poundOptions = [];
@@ -727,6 +738,7 @@
             document.getElementById('pName').value = p.name;
             document.getElementById('pPrice').value = p.price;
             document.getElementById('pCat').value = p.category;
+            document.getElementById('pStatus').value = p.status || 'in-stock';
             document.getElementById('pDesc').value = p.description || '';
 
             // Map existing images to selectedFiles format (no 'file' object)
@@ -782,21 +794,28 @@
                 return;
             }
 
-            list.innerHTML = filtered.map(p => `
-      <div class="product-row" id="prod-${p.id}">
-        <img src="${p.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=100'}"
-             class="product-thumb" alt="${p.name}" />
+            list.innerHTML = filtered.map(p => {
+                const isOutOfStock = p.status === 'out-of-stock';
+                const priceHtml = fmt(parseFloat(p.price));
+
+                return `
+      <div class="product-row" id="prod-${p.id}" style="${isOutOfStock ? 'opacity:0.6;' : ''}">
+        <div style="position:relative">
+            <img src="${p.image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=100'}"
+                 class="product-thumb" alt="${p.name}" />
+            ${isOutOfStock ? '<span style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); color:white; font-size:7px; text-transform:uppercase; padding:2px; text-align:center;">Out of Stock</span>' : ''}
+        </div>
         <div class="product-info">
           <div class="product-name">${p.name}</div>
           <div class="product-cat">${p.category || ''}</div>
         </div>
-        <div class="product-price-cell">${fmt(parseFloat(p.price))}</div>
+        <div class="product-price-cell">${priceHtml}</div>
         <div style="display:flex; gap:0.5rem;">
             <button class="delete-btn" onclick="editProduct(${p.id})" style="background:#f0f9ff; color:#0ea5e9; border-color:#e0f2fe; width:36px;" title="Edit">✏️</button>
             <button class="delete-btn" onclick="deleteProduct(${p.id})" title="Remove" style="width:36px;">🗑️</button>
         </div>
       </div>
-    `).join('');
+    `}).join('');
         }
     </script>
 </body>

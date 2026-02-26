@@ -73,6 +73,13 @@ function toggleSidebar() {
   const overlay = document.getElementById('sidebarOverlay');
   sidebar.classList.toggle('open');
   overlay.classList.toggle('open');
+
+  // Prevent body scroll when menu is open on mobile
+  if (sidebar.classList.contains('open')) {
+    document.body.classList.add('no-scroll');
+  } else {
+    document.body.classList.remove('no-scroll');
+  }
 }
 
 function adminLogout() {
@@ -105,12 +112,13 @@ async function dbAddProduct(product) {
   if (!window.supabaseClient) return { error: 'Supabase client not initialized' };
   let { data, error } = await window.supabaseClient.from('products').insert([product]).select();
 
-  // Handle missing columns error by retrying without options
-  if (error && (error.message.includes('flavour_options') || error.message.includes('pound_options'))) {
-    console.warn('Columns flavour_options/pound_options not found, retrying without them...');
+  // Handle missing columns error by retrying without non-standard columns
+  if (error && (error.message.includes('flavour_options') || error.message.includes('pound_options') || error.message.includes('status'))) {
+    console.warn('Some columns (status/flavour/pound) not found, retrying without them...');
     const safeProduct = { ...product };
     delete safeProduct.flavour_options;
     delete safeProduct.pound_options;
+    delete safeProduct.status;
     const retry = await window.supabaseClient.from('products').insert([safeProduct]).select();
     data = retry.data;
     error = retry.error;
@@ -124,12 +132,13 @@ async function dbUpdateProduct(id, product) {
   if (!window.supabaseClient) return { error: 'Supabase client not initialized' };
   let { data, error } = await window.supabaseClient.from('products').update(product).eq('id', id).select();
 
-  // Handle missing columns error by retrying without options
-  if (error && (error.message.includes('flavour_options') || error.message.includes('pound_options'))) {
-    console.warn('Columns flavour_options/pound_options not found, retrying update without them...');
+  // Handle missing columns error by retrying without non-standard columns
+  if (error && (error.message.includes('flavour_options') || error.message.includes('pound_options') || error.message.includes('status'))) {
+    console.warn('Some columns (status/flavour/pound) not found, retrying update without them...');
     const safeProduct = { ...product };
     delete safeProduct.flavour_options;
     delete safeProduct.pound_options;
+    delete safeProduct.status;
     const retry = await window.supabaseClient.from('products').update(safeProduct).eq('id', id).select();
     data = retry.data;
     error = retry.error;
@@ -155,6 +164,13 @@ async function dbDeleteCategory(id) {
   if (!window.supabaseClient) return;
   const { error } = await window.supabaseClient.from('categories').delete().eq('id', id);
   if (error) console.error('Supabase Category Delete Error:', error);
+}
+
+async function dbUpdateCategory(id, updates) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('categories').update(updates).eq('id', id);
+  if (error) console.error('Supabase Category Update Error:', error);
+  return { error };
 }
 
 async function dbUpdateOrderStatus(id, status) {
@@ -312,6 +328,25 @@ async function dbDeletePriceItem(id) {
   const { error } = await window.supabaseClient.from('price_list').delete().eq('id', id);
   return { error };
 }
+
+// Admin Credentials DB Ops
+async function getAdminCreds() {
+  if (!window.supabaseClient) return { username: 'admin', password: 'admin' };
+  try {
+    const { data, error } = await window.supabaseClient.from('admin_settings').select('*').eq('id', 'main_admin').single();
+    if (error) return { username: 'admin', password: 'admin' };
+    return data;
+  } catch (e) {
+    return { username: 'admin', password: 'admin' };
+  }
+}
+
+async function updateAdminCreds(newCreds) {
+  if (!window.supabaseClient) return { error: 'Supabase client not initialized' };
+  const { error } = await window.supabaseClient.from('admin_settings').update(newCreds).eq('id', 'main_admin');
+  return { error };
+}
+
 
 function copyText(text) {
   if (!text) return;

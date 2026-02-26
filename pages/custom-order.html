@@ -272,7 +272,7 @@
                 <span>Staff Portal</span>
                 <i class="fa-solid fa-arrow-right"></i>
             </a>
-            <p class="mobile-copyright">© 2024 Baking Corner</p>
+            <p class="mobile-copyright">&copy; 2026 Baking Corner</p>
         </div>
     </div>
 
@@ -322,6 +322,11 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="form-label">Preferred Delivery Date & Time</label>
+                        <input type="datetime-local" id="custDate" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label">Weight (Pound)</label>
                         <input type="number" step="0.1" id="selectedWeight" class="form-input" placeholder="e.g. 1.5"
                             required>
@@ -343,8 +348,8 @@
 
                     <div class="form-group">
                         <label class="form-label">PAYMENT METHOD *</label>
-                        <select id="custPaymentMethod" class="form-input" required onchange="handlePaymentChange()"
-                            style="border-color: var(--primary);">
+                        <select id="custPaymentMethod" class="form-input" required
+                            onchange="handleCustomOrderPaymentChange()" style="border-color: var(--primary);">
                             <option value="">Select Payment Method</option>
                         </select>
                     </div>
@@ -388,7 +393,7 @@
             </div>
             <p
                 style="text-align: center; opacity: 0.5; font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase;">
-                © 2024 Baking Corner. Handcrafted with Love.</p>
+                &copy; 2026 Baking Corner. Handcrafted with Love.</p>
         </div>
     </footer>
 
@@ -445,34 +450,105 @@
             }
         }
 
-        function handlePaymentChange() {
-            const method = document.getElementById('custPaymentMethod').value;
+        function handleCustomOrderPaymentChange() {
+            const select = document.getElementById('custPaymentMethod');
+            const method = select ? select.value : '';
             const detailBox = document.getElementById('paymentDetailBox');
             const info = document.getElementById('payMethodInfo');
             const txInput = document.getElementById('custTransaction');
 
-            if (method === '' || method === 'Cash') {
+            if (!detailBox) return;
+
+            // Log for debugging
+            console.log('Payment method changed to:', method);
+
+            if (!method || method === '' || method === 'Cash') {
                 detailBox.style.display = 'none';
-                txInput.required = false;
+                if (txInput) {
+                    txInput.required = false;
+                    txInput.value = '';
+                }
             } else {
                 detailBox.style.display = 'block';
 
+                // Ensure instructions are reset/updated
+                info.innerHTML = `<div style="font-size:0.85rem; color:#666; font-weight:normal; margin-bottom:15px;">Loading instructions for ${method}...</div>`;
+
                 // Use global data or fallback to localStorage
-                const allMethods = paymentMethodsData.length > 0
-                    ? paymentMethodsData
-                    : JSON.parse(localStorage.getItem('paymentMethods') || '[]');
+                let allMethods = [];
+                if (typeof paymentMethodsData !== 'undefined' && Array.isArray(paymentMethodsData) && paymentMethodsData.length > 0) {
+                    allMethods = paymentMethodsData;
+                } else {
+                    try {
+                        allMethods = JSON.parse(localStorage.getItem('paymentMethods') || '[]');
+                    } catch (e) { allMethods = []; }
+                }
 
                 const m = allMethods.find(x => x.name === method);
                 if (m) {
                     info.innerHTML = `
-                        <div style="font-size:1.1rem; color:#000; margin-bottom:5px;">${m.name} Number: <span style="text-decoration: underline dotted; color:#EC4899;">${m.number}</span></div>
-                        <div style="font-size:0.85rem; color:#666; font-weight:normal; margin-bottom:15px;">Send the money to this number and enter the TXID below. (টাকা পাঠিয়ে নিচে ট্রানজেকশন আইডি দিন।)</div>
+                        <div style="font-size:1.1rem; color:#000; margin-bottom:10px; display:flex; align-items:center; gap:10px;">
+                            <span>${m.name} Number: <span style="font-weight:bold; color:#EC4899;">${m.number}</span></span>
+                            <button type="button" onclick="copyToClipboard('${m.number}')" 
+                                style="background:#EC4899; color:white; border:none; padding:4px 10px; border-radius:8px; font-size:12px; cursor:pointer; font-weight:600;">Copy</button>
+                        </div>
+                        <div style="font-size:0.85rem; color:#666; font-weight:normal; margin-bottom:15px;">এই নম্বরে টাকা পাঠিয়ে নিচে ট্রানজেকশন আইডি দিন।</div>
                     `;
                 } else {
-                    info.innerHTML = `<div style="font-size:0.85rem; color:#666; font-weight:normal; margin-bottom:15px;">Please send the money to our ${method} account and enter the TXID below. (টাকা পাঠিয়ে নিচে TXID দিন।)</div>`;
+                    info.innerHTML = `<div style="font-size:0.85rem; color:#666; font-weight:normal; margin-bottom:15px;">Please send the money to our ${method} account and enter the TXID below. (টাকা পাঠিয়ে নিচে TXID দিন।)</div>`;
                 }
-                txInput.required = true;
+
+                if (txInput) txInput.required = true;
             }
+        }
+
+        function downloadReceipt(order) {
+            const date = new Date(order.created_at).toLocaleString();
+            const deliveryDate = order.delivery_date ? new Date(order.delivery_date).toLocaleString() : 'N/A';
+            const receiptText = `
+------------------------------------------
+          BAKING CORNER RECEIPT
+------------------------------------------
+Order Date: ${date}
+
+CUSTOMER DETAILS:
+Name:    ${order.customer_name}
+Phone:   ${order.customer_phone}
+Address: ${order.delivery_address}
+Delivery: ${deliveryDate}
+
+ORDER DETAILS:
+Flavor:  ${order.flavour}
+Weight:  ${order.pound_value} Pound
+Instructions: ${order.instructions || 'N/A'}
+
+PAYMENT INFO:
+Method:  ${order.payment_method}
+Trx ID:  ${order.transaction_no || 'N/A'}
+
+Status:  Pending Confirmation
+------------------------------------------
+আপনার রিকুয়েস্টটি গ্রহণ করা হয়েছে। 
+শিঘ্রই আপনার সাথে যোগাযোগ করা হবে।
+------------------------------------------`;
+
+            const blob = new Blob([receiptText], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Receipt_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Number copied: ' + text);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
         }
 
         async function loadRates() {
@@ -563,6 +639,7 @@
                     customer_name: document.getElementById('custName').value,
                     customer_phone: document.getElementById('custPhone').value,
                     delivery_address: document.getElementById('custAddress').value,
+                    delivery_date: document.getElementById('custDate').value,
                     instructions: document.getElementById('custNotes').value,
                     pound_value: parseFloat(weight),
                     flavour: document.getElementById('selectedFlavor').value,
@@ -575,18 +652,32 @@
                     created_at: new Date().toISOString()
                 };
 
-                let { error } = await window.supabaseClient.from('custom_orders').insert([orderData]);
+                const submitToSupabase = async (payload) => {
+                    let { error } = await window.supabaseClient.from('custom_orders').insert([payload]);
+                    if (error) {
+                        const msg = error.message.toLowerCase();
+                        // If columns are missing, strip them and retry
+                        if (msg.includes('payment_method') || msg.includes('transaction_no') || msg.includes('customer_battery') || msg.includes('location_coords') || msg.includes('delivery_date')) {
+                            console.warn("Retrying without missing columns:", error.message);
+                            const fallback = { ...payload };
+                            if (msg.includes('payment_method')) delete fallback.payment_method;
+                            if (msg.includes('transaction_no')) delete fallback.transaction_no;
+                            if (msg.includes('customer_battery')) delete fallback.customer_battery;
+                            if (msg.includes('location_coords')) delete fallback.location_coords;
+                            if (msg.includes('delivery_date')) delete fallback.delivery_date;
+                            return submitToSupabase(fallback);
+                        }
+                        throw error;
+                    }
+                    return true;
+                };
 
-                if (error && error.message.includes('customer_battery')) {
-                    const fallbackData = { ...orderData };
-                    delete fallbackData.customer_battery;
-                    const retry = await window.supabaseClient.from('custom_orders').insert([fallbackData]);
-                    error = retry.error;
-                }
+                await submitToSupabase(orderData);
 
-                if (error) throw error;
+                // Download Receipt
+                downloadReceipt(orderData);
 
-                alert('Request submitted successfully! We will contact you soon.');
+                alert('আপনার অর্ডার রিকুয়েস্টটি সফলভাবে গ্রহণ করা হয়েছে। শিঘ্রই আপনার সাথে যোগাযোগ করা হবে।');
                 window.location.href = '../home/index.html';
 
             } catch (err) {

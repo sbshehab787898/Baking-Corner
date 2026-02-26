@@ -975,6 +975,9 @@ async function submitOrder(e) {
     saveCart();
     updateCartCount();
 
+    // Download Receipt
+    downloadOrderReceipt(orderData, fmt(total));
+
     // Show success screen
     document.getElementById('checkoutScreen').style.display = 'none';
     document.getElementById('successScreen').style.display = 'flex';
@@ -982,7 +985,7 @@ async function submitOrder(e) {
     // Update success message text
     const successMsg = document.querySelector('#successScreen .success-msg');
     if (successMsg) {
-        successMsg.textContent = 'Your order has been received. Redirecting to shop...';
+        successMsg.textContent = 'আপনার অর্ডার রিকুয়েস্টটি সফলভাবে গ্রহণ করা হয়েছে। শিঘ্রই আপনার সাথে যোগাযোগ করা হবে।';
     }
 
     // Redirect to shop page after 3 seconds
@@ -996,6 +999,49 @@ async function submitOrder(e) {
         }
         window.location.href = prefix + 'shop.html';
     }, 3000);
+}
+
+function downloadOrderReceipt(order, totalFormatted) {
+    const date = new Date().toLocaleString();
+    const itemsText = order.items.map(i => `- ${i.name} (x${i.qty})`).join('\n');
+    const receiptLines = [
+        "------------------------------------------",
+        "          BAKING CORNER RECEIPT",
+        "------------------------------------------",
+        `Order ID:   ${order.id}`,
+        `Order Date: ${date}`,
+        "",
+        "CUSTOMER DETAILS:",
+        `Name:    ${order.customer_name}`,
+        `Phone:   ${order.customer_phone}`,
+        `Address: ${order.customer_address}`,
+        `Delivery: ${new Date(order.delivery_date).toLocaleString()}`,
+        "",
+        "ORDER SUMMARY:",
+        itemsText,
+        "",
+        `Total:   ${totalFormatted}`,
+        "",
+        "PAYMENT INFO:",
+        `Method:  ${order.payment_method}`,
+        `Trx ID:  ${order.transaction_no || 'N/A'}`,
+        "",
+        "Status:  Pending Confirmation",
+        "------------------------------------------",
+        "আপনার রিকুয়েস্টটি গ্রহণ করা হয়েছে।",
+        "শিঘ্রই আপনার সাথে যোগাযোগ করা হবে।",
+        "------------------------------------------"
+    ].join('\n');
+
+    const blob = new Blob([receiptLines], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Receipt_${order.id}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 }
 
 // ========================

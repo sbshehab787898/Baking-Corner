@@ -238,6 +238,30 @@
             </div>
         </div>
 
+        <!-- Admin Credentials -->
+        <div class="admin-card" style="margin-top:2rem; border: 2px solid #fdb9c8;">
+            <h2 class="admin-card-title">🔐 Change Admin Password</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                <div class="admin-form-group">
+                    <label class="admin-label">Username</label>
+                    <input type="text" class="admin-input" id="newAdminUser" placeholder="e.g. admin"
+                        autocomplete="off" />
+                </div>
+                <div class="admin-form-group">
+                    <label class="admin-label">New Password</label>
+                    <input type="password" class="admin-input" id="newAdminPass" placeholder="Enter new password"
+                        autocomplete="new-password" />
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label class="admin-label">Confirm New Password</label>
+                <input type="password" class="admin-input" id="confirmAdminPass" placeholder="Re-enter new password"
+                    autocomplete="new-password" />
+            </div>
+            <button class="admin-submit-btn" onclick="saveAdminCredentials(event)"
+                style="background: linear-gradient(135deg, #EC4899, #DB2777); color: white;">🔒 Save New
+                Password</button>
+        </div>
 
     </main>
 
@@ -247,6 +271,7 @@
             adminAuthGuard();
             renderAdminSidebar('settings');
             loadSettings();
+            loadCredentials();
             await syncAdminDataFromSupabase();
             renderGlobalOptions();
         });
@@ -446,7 +471,7 @@
 
         function flashButton(btn) {
             const oldText = btn.textContent;
-            btn.textContent = '? Saved!';
+            btn.textContent = '✅ Saved!';
             btn.style.background = '#4ade80';
             btn.style.color = 'white';
             setTimeout(() => {
@@ -456,6 +481,35 @@
             }, 2000);
         }
 
+        async function saveAdminCredentials(e) {
+            const user = document.getElementById('newAdminUser').value.trim();
+            const pass = document.getElementById('newAdminPass').value.trim();
+            const confirm = document.getElementById('confirmAdminPass').value.trim();
+
+            if (!user || !pass) return alert('Username এবং Password উভয়ই দিন!');
+            if (pass !== confirm) return alert('Password দুটি মিলছে না!');
+            if (pass.length < 4) return alert('Password কমপক্ষে ৪ অক্ষরের হতে হবে!');
+
+            const btn = e.target;
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            const { error } = await updateAdminCreds({ username: user, password: pass });
+
+            if (error) {
+                alert('পাসওয়ার্ড আপডেট করতে সমস্যা হয়েছে!');
+            } else {
+                document.getElementById('newAdminPass').value = '';
+                document.getElementById('confirmAdminPass').value = '';
+                flashButton(btn);
+            }
+            btn.disabled = false;
+        }
+
+        async function loadCredentials() {
+            const creds = await getAdminCreds();
+            document.getElementById('newAdminUser').value = creds.username;
+        }
 
     </script>
 </body>

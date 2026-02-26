@@ -411,6 +411,7 @@
                         <p><strong>Flavor:</strong> ${order.flavour || 'N/A'}</p>
                         <p><strong>Instructions:</strong> ${order.instructions || 'N/A'}</p>
                         <p><strong>Address:</strong> ${order.delivery_address || 'N/A'}</p>
+                        <p><strong>Preferred Delivery:</strong> ${order.delivery_date ? new Date(order.delivery_date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}</p>
                         <p><strong>Transaction ID:</strong> <span class="copyable-id" style="color:var(--accent); font-weight:800" onclick="copyText('${order.transaction_no}')" title="Click to copy">${order.transaction_no || 'N/A'}</span></p>
                         ${order.location_coords ? `<p><strong>Location:</strong> <a href="https://www.google.com/maps?q=${order.location_coords}" target="_blank" style="color:var(--accent); font-weight:800; text-decoration:underline">📍 View on Google Maps</a></p>` : ''}
                     </div>

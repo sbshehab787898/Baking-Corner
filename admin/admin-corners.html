@@ -160,39 +160,64 @@
         /* -- Corner Items List -- */
         .corners-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
         }
 
         .corner-card {
             background: white;
-            border-radius: 2rem;
-            padding: 2rem;
-            border: 1px solid #f5f5f5;
-            box-shadow: 0 8px 24px rgba(45, 30, 23, 0.05);
+            border-radius: 2.2rem;
+            padding: 1.75rem;
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            transition: all 0.5s;
+            gap: 1.25rem;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            overflow: hidden;
+        }
+
+        .corner-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #FDB9C8, #F896AC);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .corner-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 50px rgba(45, 30, 23, 0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 45px rgba(212, 175, 55, 0.12);
+            border-color: #fce7f3;
+        }
+
+        .corner-card:hover::after {
+            opacity: 1;
+        }
+
+        .corner-header {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
         }
 
         .corner-icon-box {
-            width: 56px;
-            height: 56px;
-            background: #FFFDD0;
-            border-radius: 1.2rem;
+            width: 52px;
+            height: 52px;
+            background: #fffafa;
+            border-radius: 1.1rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.1);
+            border: 1px solid #fce7f3;
+            box-shadow: inset 0 0 10px rgba(253, 185, 200, 0.05);
         }
 
         .corner-info {
@@ -200,56 +225,208 @@
         }
 
         .corner-name {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 0.2rem;
+            font-weight: 800;
+            margin-bottom: 0.15rem;
             color: #2D1E17;
+            letter-spacing: -0.02em;
+        }
+
+        .corner-label {
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.3em;
+            color: #db2777;
+            text-transform: uppercase;
+            opacity: 0.6;
         }
 
         .corner-desc {
             font-size: 0.85rem;
             color: #8E7D72;
-            line-height: 1.6;
-            margin-bottom: 1rem;
+            line-height: 1.5;
             font-style: italic;
+            opacity: 0.75;
         }
 
         .corner-actions {
             display: flex;
-            justify-content: flex-end;
-            padding-top: 1.5rem;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.25rem;
             border-top: 1px solid #f9f9f9;
         }
 
-        .delete-btn {
-            padding: 0.75rem 1.5rem;
+        .btn-premium {
+            padding: 0.6rem 1.1rem;
             border-radius: 9999px;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+        }
+
+        .edit-btn {
+            background: #fff;
+            color: #1a1a1a;
+            border: 1px solid #e5e7eb;
+        }
+
+        .edit-btn:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            transform: scale(1.05);
+        }
+
+        .delete-btn {
             background: #fff5f5;
             color: #ef4444;
             border: 1px solid #ffebeb;
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            cursor: pointer;
-            transition: all 0.3s;
         }
 
         .delete-btn:hover {
             background: #ef4444;
             color: white;
             border-color: #ef4444;
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
 
-        /* -- Empty State -- */
-        .empty-state {
-            text-align: center;
-            padding: 6rem 2rem;
-            background: var(--glass-white);
-            border-radius: 3rem;
-            border: 1px dotted #ccc;
+        /* Modal Styles */
+        .lux-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 30, 23, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        .lux-modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: translateY(20px);
+            animation: slideUp 0.4s forwards cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2d1e17;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #ccc;
+            transition: 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #db2777;
+            transform: rotate(90deg);
+        }
+
+        @media (max-width: 600px) {
+            .management-grid {
+                gap: 1.5rem;
+            }
+
+            .action-card {
+                padding: 1.5rem;
+                position: relative;
+                top: 0;
+                border-radius: 1.8rem;
+            }
+
+            .corners-container {
+                grid-template-columns: 1fr;
+            }
+
+            .corner-card {
+                padding: 1.25rem;
+                border-radius: 1.8rem;
+            }
+
+            .corner-actions {
+                gap: 0.5rem;
+            }
+
+            .btn-premium {
+                padding: 0.5rem 0.8rem;
+                font-size: 8px;
+            }
+
+            .lux-modal-content {
+                width: 92%;
+                padding: 1.75rem;
+                border-radius: 1.8rem;
+            }
+
+            .modal-title {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .corner-header {
+                gap: 1rem;
+            }
+
+            .corner-icon-box {
+                width: 44px;
+                height: 44px;
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
@@ -287,15 +464,27 @@
                 <!-- List Area -->
                 <div id="cornersList" class="corners-container">
                     <!-- Dynamic Content -->
-                    <div class="empty-state">
-                        <span style="font-size:3rem;display:block;margin-bottom:1rem">🏬</span>
-                        <p
-                            style="color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;font-size:10px">
-                            Summoning segments...</p>
-                    </div>
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="lux-modal">
+        <div class="lux-modal-content">
+            <span class="modal-close" onclick="closeEditModal()">&times;</span>
+            <div class="modal-header">
+                <h2 class="modal-title">✨ Edit Category</h2>
+            </div>
+            <form id="editForm" onsubmit="handleUpdateCategory(event)">
+                <input type="hidden" id="editCategoryId">
+                <div class="lux-group" style="margin-bottom: 1.5rem;">
+                    <label class="lux-label">Category Name</label>
+                    <input type="text" id="editCategoryName" class="lux-input" required>
+                </div>
+                <button type="submit" class="lux-submit" id="updateBtn">💾 Save Changes</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -329,16 +518,17 @@
 
             list.innerHTML = data.corners.map(c => `
                 <div class="corner-card" id="corner-${c.id}">
-                    <div style="display:flex; align-items:center; gap:1.5rem">
-                        <div class="corner-icon-box">${c.icon || '??'}</div>
+                    <div class="corner-header">
+                        <div class="corner-icon-box">${c.icon || '🏬'}</div>
                         <div class="corner-info">
                             <h3 class="corner-name">${c.name}</h3>
-                            <div style="font-size:9px; font-weight:900; letter-spacing:0.2em; color:#D4AF37; text-transform:uppercase">Shop Category</div>
+                            <div class="corner-label">Shop Category</div>
                         </div>
                     </div>
                     <p class="corner-desc">"${c.description || 'A unique collection of artisanal products.'}"</p>
                     <div class="corner-actions">
-                        <button class="delete-btn" onclick="deleteCorner(${c.id})">?? Delete</button>
+                        <button class="btn-premium edit-btn" onclick="openEditModal(${c.id}, '${c.name.replace(/'/g, "\\'")}')">✏️ Edit</button>
+                        <button class="btn-premium delete-btn" onclick="deleteCorner(${c.id})">🗑️ Delete</button>
                     </div>
                 </div>
             `).join('');
@@ -346,8 +536,12 @@
 
         async function handleAddCorner(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('button');
             const name = document.getElementById('newCornerName').value.trim();
             if (!name) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Wait...';
 
             const newCorner = {
                 id: Date.now(),
@@ -357,16 +551,51 @@
             };
 
             await dbAddCategory(newCorner);
+            await syncAdminDataFromSupabase();
+            data = getAdminData();
 
-            data.corners.push(newCorner);
-            saveAdminData('adminCorners', data.corners);
-
+            btn.disabled = false;
+            btn.textContent = '✨ Add Category';
             e.target.reset();
             renderCorners();
         }
 
+        function openEditModal(id, name) {
+            document.getElementById('editCategoryId').value = id;
+            document.getElementById('editCategoryName').value = name;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function handleUpdateCategory(e) {
+            e.preventDefault();
+            const id = document.getElementById('editCategoryId').value;
+            const name = document.getElementById('editCategoryName').value.trim();
+            const btn = document.getElementById('updateBtn');
+
+            if (!name) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            const { error } = await dbUpdateCategory(id, { name });
+            if (!error) {
+                await syncAdminDataFromSupabase();
+                data = getAdminData();
+                closeEditModal();
+                renderCorners();
+            } else {
+                alert('Update failed: ' + error.message);
+            }
+            btn.disabled = false;
+            btn.textContent = '💾 Save Changes';
+        }
+
         async function deleteCorner(id) {
-            if (!confirm('Permanentely remove this segment from the boutique? All associated records will be archived.')) return;
+            if (!confirm('Permanently remove this category from the shop?')) return;
 
             data.corners = data.corners.filter(c => c.id !== id);
             saveAdminData('adminCorners', data.corners);
