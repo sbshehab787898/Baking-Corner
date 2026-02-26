@@ -255,12 +255,69 @@
             font-size: 10px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 0.1rem;
-            padding: 0.5rem 1.2rem;
-            border-radius: 9999px;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
             border: none;
             cursor: pointer;
-            outline: none;
+        }
+
+        /* Battery Status Style */
+        .battery-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            border: 1px solid #ddd;
+        }
+
+        .battery-bar {
+            width: 18px;
+            height: 10px;
+            border: 1.5px solid #2d1e17;
+            border-radius: 2px;
+            position: relative;
+            padding: 1px;
+        }
+
+        .battery-bar::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 2px;
+            width: 2px;
+            height: 4px;
+            background: #2d1e17;
+            border-radius: 0 1px 1px 0;
+        }
+
+        .battery-fill {
+            height: 100%;
+            background: #22c55e;
+            border-radius: 1px;
+        }
+
+        .status-fill-Pending {
+            width: 33%;
+            background: #ef4444;
+        }
+
+        .status-fill-Processing {
+            width: 66%;
+            background: #eab308;
+        }
+
+        .status-fill-Delivered {
+            width: 100%;
+            background: #22c55e;
+        }
+
+        .status-fill-Cancelled {
+            width: 100%;
+            background: #94a3b8;
         }
 
         .status-select {
@@ -633,12 +690,20 @@
                             <div class="order-ref">REF: ${order.id}</div>
                             <div class="order-time">${dateStr} • ${timeStr}</div>
                         </div>
-                        <select class="status-badge status-select status-${order.status}" onchange="updateStatus('${order.id}', this.value, this)">
-                            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                            <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
-                            <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                            <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                        </select>
+                        <div style="display:flex; align-items:center; gap:0.75rem">
+                             <div class="battery-status">
+                                <div class="battery-bar">
+                                    <div class="battery-fill status-fill-${order.status}"></div>
+                                </div>
+                                <span>${order.status}</span>
+                            </div>
+                            <select class="status-badge status-select status-${order.status}" onchange="updateStatus('${order.id}', this.value, this)">
+                                <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="order-grid-inner">
@@ -665,7 +730,10 @@
                     </div>
 
                     <div class="order-card-footer">
-                        <div class="total-amount">${fmt(order.total)}</div>
+                        <div class="total-amount" style="background: #FFF5FB; padding: 0.75rem 1.5rem; border-radius: 1rem; border: 1.5px solid #f9a8d4; color: #db2777;">
+                            <span style="font-size: 10px; display:block; color: #aaa; margin-bottom: 2px;">TOTAL CHARGE</span>
+                            ${fmt(order.total)}
+                        </div>
                         <button class="btn-delete" onclick="deleteOrder('${order.id}')">Delete Order</button>
                     </div>
                 </div>`;

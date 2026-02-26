@@ -118,6 +118,70 @@
             border-radius: 0.5rem;
         }
 
+        /* Battery Status Style */
+        .battery-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            border: 1px solid #ddd;
+        }
+
+        .battery-bar {
+            width: 18px;
+            height: 10px;
+            border: 1.5px solid #2d1e17;
+            border-radius: 2px;
+            position: relative;
+            padding: 1px;
+        }
+
+        .battery-bar::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 2px;
+            width: 2px;
+            height: 4px;
+            background: #2d1e17;
+            border-radius: 0 1px 1px 0;
+        }
+
+        .battery-fill {
+            height: 100%;
+            background: #22c55e;
+            border-radius: 1px;
+        }
+
+        .status-fill-Pending {
+            width: 33%;
+            background: #ef4444;
+        }
+
+        .status-fill-Accepted {
+            width: 66%;
+            background: #eab308;
+        }
+
+        .status-fill-Ready {
+            width: 85%;
+            background: #0ea5e9;
+        }
+
+        .status-fill-Delivered {
+            width: 100%;
+            background: #22c55e;
+        }
+
+        .status-fill-Cancelled {
+            width: 100%;
+            background: #94a3b8;
+        }
+
         .admin-flex-row {
             display: flex;
             gap: 0.5rem;
@@ -317,7 +381,15 @@
                     <div class="order-details">
                         <div style="display:flex; justify-content:space-between; align-items:start">
                             <h3>Order Preview</h3>
-                            <span style="font-size:10px; color:#aaa; font-weight:700;">#${order.id} | ${new Date(order.created_at).toLocaleDateString()}</span>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px">
+                                <span style="font-size:10px; color:#aaa; font-weight:700;">#${order.id} | ${new Date(order.created_at).toLocaleDateString()}</span>
+                                <div class="battery-status">
+                                    <div class="battery-bar">
+                                        <div class="battery-fill status-fill-${order.status}"></div>
+                                    </div>
+                                    <span>${order.status}</span>
+                                </div>
+                            </div>
                         </div>
                         <p><strong>Customer:</strong> ${order.customer_name}</p>
                         <p><strong>Phone:</strong> <a href="tel:${order.customer_phone}">${order.customer_phone}</a></p>
@@ -330,6 +402,11 @@
                         <button class="save-price-btn" style="width:100%; margin-bottom:0.5rem; background: var(--secondary);" onclick="downloadOrderImage('${order.image_url}', 'order_${order.id}')">
                             <i class="fa-solid fa-download"></i> Download Photo
                         </button>
+                        
+                        <div style="background: #FFF5FB; padding: 0.6rem; border-radius: 0.75rem; border: 1px solid #f9a8d4; margin-bottom: 0.75rem;">
+                            <span style="font-size: 9px; display:block; color: #aaa; margin-bottom: 2px;">ESTIMATED CHARGE</span>
+                            <strong style="color: #db2777; font-size: 1.1rem;">${sym} ${(order.pound_value * 500).toLocaleString()}</strong>
+                        </div>
 
                         <label class="admin-label">Status</label>
                         <select class="status-select" onchange="updateCustomStatus('${order.id}', this.value)">
