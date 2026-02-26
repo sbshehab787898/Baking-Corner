@@ -445,6 +445,27 @@ async function syncProducts() {
             console.warn('Supabase products fetch error:', error.message);
         }
 
+        // Sync Payment Methods for public side
+        const { data: pMethods, error: pmError } = await window.supabaseClient.from('payment_methods').select('*').order('name', { ascending: true });
+        if (!pmError && pMethods) {
+            localStorage.setItem('paymentMethods', JSON.stringify(pMethods));
+        }
+
+        // Sync Global Pound/Flavour Options for custom orders
+        const { data: pOpts } = await window.supabaseClient.from('pound_options').select('*').order('value', { ascending: true });
+        if (pOpts) localStorage.setItem('poundOptions', JSON.stringify(pOpts));
+
+        const { data: fOpts } = await window.supabaseClient.from('flavour_options').select('*').order('name', { ascending: true });
+        if (fOpts) localStorage.setItem('flavourOptions', JSON.stringify(fOpts));
+
+        // Sync Price List for public side
+        const { data: pListItems, error: pliError } = await window.supabaseClient.from('price_list').select('*').order('created_at', { ascending: true });
+        if (!pliError && pListItems) {
+            localStorage.setItem('priceListSynced', JSON.stringify(pListItems));
+            // Rebuild price list if container exists
+            buildDynamicContent();
+        }
+
         // Fetch Dynamic Categories for Shop Filters
         const chipContainer = document.getElementById('categoryFilterChips');
         if (chipContainer) {
