@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baking Corner - Custom Orders</title>
+    <link rel="stylesheet" href="../assets/style.css" />
+    <link rel="stylesheet" href="admin-style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/supabase-client.js"></script>
+    <script src="admin-shared.js"></script>
+    <style>
+        .custom-order-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            display: grid;
+            grid-template-columns: 200px 1fr 200px;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .custom-order-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .order-photo {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 1rem;
+            cursor: zoom-in;
+            border: 1.5px solid #f9a8d4;
+        }
+
+        .order-details h3 {
+            margin-bottom: 0.5rem;
+            color: #2d1e17;
+        }
+
+        .order-details p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .order-details strong {
+            color: #2d1e17;
+        }
+
+        .order-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .status-select {
+            padding: 0.6rem;
+            border-radius: 0.5rem;
+            border: 1px solid #ddd;
+            width: 100%;
+            font-weight: 700;
+        }
+
+        .price-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #fff0f7;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #f9a8d4;
+        }
+
+        .price-input-group input {
+            border: none;
+            background: transparent;
+            width: 100px;
+            font-weight: 800;
+            color: #db2777;
+            outline: none;
+        }
+
+        .save-price-btn {
+            background: #db2777;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+
+<body class="admin-body">
+    <div id="preloader">
+        <img src="../assets/logo.jpeg" alt="Logo" class="loader-logo">
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+
+    <div id="adminSidebarMount"></div>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <span class="admin-page-overline">Requests</span>
+            <h1 class="admin-page-title">Custom Cake Orders</h1>
+        </div>
+
+        <div class="admin-card" style="margin-bottom: 2rem;">
+            <h2 class="admin-card-title">⚖️ Set Weight-Based Pricing</h2>
+            <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">Set prices for specific weights. These will
+                be shown to customers when they enter the weight.</p>
+            <div style="display:flex; gap:0.5rem; margin-bottom:1rem">
+                <input type="number" step="0.1" id="gPoundVal" placeholder="Pound (e.g. 1)" class="admin-input"
+                    style="flex:1">
+                <input type="number" id="gPoundPrice" placeholder="Price (e.g. 500)" class="admin-input" style="flex:1">
+                <button class="save-price-btn" style="width:auto; height: 42px;" onclick="addCustomPound()">Add /
+                    Update</button>
+            </div>
+            <div id="gPoundList" style="display:flex; flex-wrap:wrap; gap:0.5rem"></div>
+        </div>
+
+        <div class="admin-card" style="margin-bottom: 2rem;">
+            <h2 class="admin-card-title">🍰 Manage Flavors</h2>
+            <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">Add flavors that customers can choose from
+                for custom orders.</p>
+            <div style="display:flex; gap:0.5rem; margin-bottom:1rem">
+                <input type="text" id="gFlavorName" placeholder="Flavor Name (e.g. Vanilla)" class="admin-input"
+                    style="flex:1">
+                <button class="save-price-btn" style="width:auto; height: 42px; background: #9c27b0;"
+                    onclick="addCustomFlavor()">Add Flavor</button>
+            </div>
+            <div id="gFlavorList" style="display:flex; flex-wrap:wrap; gap:0.5rem"></div>
+        </div>
+
+        <div id="customOrdersList">
+            <p style="text-align:center; padding: 3rem; color: #999;">Loading custom orders...</p>
+        </div>
+    </main>
+
+    <div id="imageModal" class="image-modal" onclick="this.style.display='none'">
+        <img id="modalImg" src="" alt="Full view">
+    </div>
+
+    <script>
+        let customOrders = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            adminAuthGuard();
+            renderAdminSidebar('custom-orders');
+            await syncAdminDataFromSupabase();
+            loadCustomOrders();
+            renderPoundRates();
+            renderFlavorOptions();
+        });
+
+        async function addCustomFlavor() {
+            const name = document.getElementById('gFlavorName').value;
+            if (!name) return alert('Enter flavor name');
+
+            const { error } = await dbAddGlobalFlavour({ name });
+            if (!error) {
+                await syncAdminDataFromSupabase();
+                renderFlavorOptions();
+                document.getElementById('gFlavorName').value = '';
+            } else {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function renderFlavorOptions() {
+            const flavors = JSON.parse(localStorage.getItem('flavourOptions') || '[]');
+            const list = document.getElementById('gFlavorList');
+            list.innerHTML = flavors.map(f => `
+                <div class="flavor-chip-tag" style="background:#f3e5f5; border: 1px solid #ce93d8; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 700; color: #7b1fa2;">
+                    ${f.name}
+                    <button onclick="deleteFlavorOption('${f.id}')" style="margin-left: 10px; cursor: pointer; border: none; background: none; color: #999;">✕</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteFlavorOption(id) {
+            const { error } = await dbDeleteGlobalFlavour(id);
+            if (!error) {
+                await syncAdminDataFromSupabase();
+                renderFlavorOptions();
+            }
+        }
+
+        async function addCustomPound() {
+            const val = document.getElementById('gPoundVal').value;
+            const price = document.getElementById('gPoundPrice').value;
+            if (!val || !price) return alert('Enter both pound and price');
+
+            // No need to send 'id' anymore, Supabase will handle it via IDENTITY column
+            const { data, error } = await window.supabaseClient
+                .from('pound_options')
+                .upsert([{
+                    value: parseFloat(val),
+                    price: parseFloat(price)
+                }], { onConflict: 'value' })
+                .select();
+
+            if (!error) {
+                await syncAdminDataFromSupabase();
+                renderPoundRates();
+                document.getElementById('gPoundVal').value = '';
+                document.getElementById('gPoundPrice').value = '';
+            } else {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function renderPoundRates() {
+            const pounds = JSON.parse(localStorage.getItem('poundOptions') || '[]');
+            const list = document.getElementById('gPoundList');
+            list.innerHTML = pounds.map(p => `
+                <div class="pound-chip-tag" style="background:#fff0f7; border: 1px solid #f9a8d4; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 700; color: #db2777;">
+                    ${p.value} Lb - ৳${p.price}
+                    <button onclick="deletePoundRate('${p.id}')" style="margin-left: 10px; cursor: pointer; border: none; background: none; color: #999;">✕</button>
+                </div>
+            `).join('');
+        }
+
+        async function deletePoundRate(id) {
+            const { error } = await window.supabaseClient.from('pound_options').delete().eq('id', id);
+            if (!error) {
+                await syncAdminDataFromSupabase();
+                renderPoundRates();
+            }
+        }
+
+
+
+        function loadCustomOrders() {
+            customOrders = JSON.parse(localStorage.getItem('customOrders') || '[]');
+            renderCustomOrders();
+        }
+
+        function renderCustomOrders() {
+            const list = document.getElementById('customOrdersList');
+            if (customOrders.length === 0) {
+                list.innerHTML = '<div class="admin-card" style="text-align:center; padding: 4rem;"><h3>No custom orders yet.</h3><p>Orders from the custom design page will appear here.</p></div>';
+                return;
+            }
+
+            const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+            const sym = settings.currencySymbol || '৳';
+
+            list.innerHTML = customOrders.map(order => `
+                <div class="custom-order-card" id="order-${order.id}">
+                    <img src="${order.image_url}" class="order-photo" onclick="showFullImage('${order.image_url}')" onerror="this.src='../assets/logo.jpeg'">
+                    <div class="order-details">
+                        <div style="display:flex; justify-content:space-between; align-items:start">
+                            <h3>Order Preview</h3>
+                            <span style="font-size:10px; color:#aaa; font-weight:700;">#${order.id} | ${new Date(order.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <p><strong>Customer:</strong> ${order.customer_name}</p>
+                        <p><strong>Phone:</strong> <a href="tel:${order.customer_phone}">${order.customer_phone}</a></p>
+                        <p><strong>Pound:</strong> ${order.pound_value} Pound</p>
+                        <p><strong>Flavor:</strong> ${order.flavour || 'N/A'}</p>
+                        <p><strong>Instructions:</strong> ${order.instructions || 'N/A'}</p>
+                        <p><strong>Address:</strong> ${order.delivery_address || 'N/A'}</p>
+                    </div>
+                    <div class="order-actions">
+                        <button class="save-price-btn" style="width:100%; margin-bottom:0.5rem; background: var(--secondary);" onclick="downloadOrderImage('${order.image_url}', 'order_${order.id}')">
+                            <i class="fa-solid fa-download"></i> Download Photo
+                        </button>
+
+                        <label class="admin-label">Status</label>
+                        <select class="status-select" onchange="updateCustomStatus('${order.id}', this.value)">
+                            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Accepted" ${order.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
+                            <option value="Ready" ${order.status === 'Ready' ? 'selected' : ''}>Ready</option>
+                            <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                        <button class="btn-delete" style="width:100%; margin-top:0.5rem" onclick="deleteOrder('${order.id}')">Delete Request</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showFullImage(src) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('imageModal').style.display = 'flex';
+        }
+
+        async function downloadOrderImage(url, filename) {
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = blobUrl;
+                a.download = filename + '.jpg';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(blobUrl);
+            } catch (err) {
+                console.error('Download failed', err);
+                window.open(url, '_blank');
+            }
+        }
+
+
+
+        async function updateCustomStatus(id, status) {
+            const { error } = await dbUpdateCustomOrder(id, { status });
+            if (!error) {
+                const idx = customOrders.findIndex(o => o.id == id);
+                if (idx !== -1) customOrders[idx].status = status;
+                localStorage.setItem('customOrders', JSON.stringify(customOrders));
+            } else {
+                alert('Error updating status: ' + error.message);
+            }
+        }
+
+        async function deleteOrder(id) {
+            if (!confirm('Are you sure you want to delete this custom order request?')) return;
+            const { error } = await dbDeleteCustomOrder(id);
+            if (!error) {
+                customOrders = customOrders.filter(o => o.id != id);
+                localStorage.setItem('customOrders', JSON.stringify(customOrders));
+                renderCustomOrders();
+            } else {
+                alert('Error deleting order: ' + error.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Order - Baking Corner</title>
+    <link rel="stylesheet" href="../assets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/supabase-client.js"></script>
+    <script src="../assets/script.js" defer></script>
+    <style>
+        .custom-hero {
+            padding: 180px 0 100px;
+            background: linear-gradient(145deg, #FFF0F7 0%, #ffffff 100%);
+            text-align: center;
+        }
+
+        .custom-form-section {
+            padding: 80px 0;
+            background: #fff;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 3rem;
+            padding: 3.5rem;
+            box-shadow: 0 40px 100px rgba(45, 30, 23, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        @media(max-width: 768px) {
+            .form-container {
+                padding: 2rem;
+                border-radius: 2rem;
+            }
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary);
+            background: var(--primary-light);
+            border-radius: 2rem;
+            padding: 3.5rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s;
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: #fff;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(236, 72, 153, 0.1);
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 1.5rem;
+            display: none;
+            margin-top: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2rem;
+            color: var(--text-muted);
+            margin-bottom: 0.8rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1.2rem 1.8rem;
+            border-radius: 9999px;
+            border: 1.5px solid #f0f0f0;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 10px 25px rgba(249, 168, 212, 0.15);
+        }
+
+        .weight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .weight-option {
+            background: #fafafa;
+            border: 1.5px solid #f0f0f0;
+            border-radius: 1.25rem;
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .weight-option.active {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.1);
+        }
+
+        .weight-option span {
+            display: block;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        .weight-option em {
+            font-style: normal;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+
+
+
+
+        .price-display {
+            background: linear-gradient(135deg, var(--text-dark), #452E23);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .price-display::after {
+            content: '✨';
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .price-val {
+            font-size: 3rem;
+            font-weight: 900;
+            font-family: var(--font-serif);
+            display: block;
+            line-height: 1;
+        }
+
+        .price-lbl {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            opacity: 0.6;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 9999px;
+            background: var(--accent);
+            color: white;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-size: 12px;
+            box-shadow: 0 20px 40px rgba(219, 39, 119, 0.25);
+            transition: all 0.4s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(219, 39, 119, 0.35);
+            background: var(--accent-dark);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="../home/index.html" class="nav-logo">
+                <img src="../assets/logo.jpeg" alt="Baking Corner" class="nav-logo-img">
+                <div class="nav-logo-text">
+                    <span>Baking <em>Corner</em></span>
+                    <span style="font-size: 9px; letter-spacing: 0.3em; color: var(--accent); margin-top: 3px;">PREMIUM
+                        BAKERY</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="../home/index.html" data-t="atelier">Home</a>
+                <a href="shop.html" data-t="collection">Shop</a>
+                <a href="custom-order.html" class="active">Custom Order</a>
+                <a href="about.html" data-t="legacy">Our Story</a>
+                <a href="contact.html" data-t="concierge">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="lang-btn lang-toggle">
+                    <span class="lang-btn-text">বাংলা</span>
+                </button>
+                <div class="cart-btn" onclick="openCart()">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="cart-count">0</span>
+                </div>
+            </div>
+            <button class="hamburger" id="hamburger">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <a href="../home/index.html" class="nav-logo">
+                <img src="../assets/logo.jpeg" alt="Baking Corner" class="nav-logo-img" style="height: 50px;">
+            </a>
+            <button class="nav-icon-btn" id="closeMenu">✕</button>
+        </div>
+        <div class="mobile-nav-links">
+            <a href="../home/index.html">Home</a>
+            <a href="shop.html">Shop</a>
+            <a href="custom-order.html" class="active">Custom Order</a>
+            <a href="about.html">Our Story</a>
+            <a href="contact.html">Contact</a>
+        </div>
+        <div class="mobile-menu-footer">
+            <a href="../admin/admin.html" class="mobile-admin-link">
+                <span>Staff Portal</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <p class="mobile-copyright">© 2024 Baking Corner</p>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <header class="custom-hero">
+        <div class="container">
+            <span class="overline" data-reveal>One-of-a-Kind</span>
+            <h1 class="serif" data-reveal>Design Your Masterpiece</h1>
+            <p class="hero-desc" data-reveal>Upload your design, choose your details, and let us bring your vision to
+                life.</p>
+        </div>
+    </header>
+
+    <!-- Form Section -->
+    <section class="custom-form-section">
+        <div class="container">
+            <div class="form-container">
+                <form id="customOrderForm">
+                    <div class="upload-area" id="dropArea" onclick="document.getElementById('imageInput').click()">
+                        <div id="uploadPlaceholder">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                            <h3 class="serif">Upload Inspiration</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Click or drag your cake photo here
+                            </p>
+                        </div>
+                        <img id="previewImg" class="preview-img">
+                        <input type="file" id="imageInput" accept="image/*" required
+                            onchange="handleImage(this.files[0])">
+                    </div>
+
+                    <div class="grid-2"
+                        style="gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="custName" class="form-input" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mobile Number</label>
+                            <input type="tel" id="custPhone" class="form-input" placeholder="01XXXXXXXXX" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Delivery Address</label>
+                        <input type="text" id="custAddress" class="form-input" placeholder="Full address for delivery"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Weight (Pound)</label>
+                        <input type="number" step="0.1" id="selectedWeight" class="form-input" placeholder="e.g. 1.5"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Select Flavor</label>
+                        <select id="selectedFlavor" class="form-input" required>
+                            <option value="">Loading flavors...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Special Instructions</label>
+                        <textarea id="custNotes" class="form-input"
+                            style="border-radius: 1.5rem; min-height: 120px; resize: vertical;"
+                            placeholder="Cake message, flavor preference, or specific design notes..."></textarea>
+                    </div>
+
+
+
+
+
+                    <div class="price-display">
+                        <span class="price-lbl">Estimated Price</span>
+                        <span class="price-val" id="priceValue">৳ 0.00</span>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">Submit Design Request</button>
+                    <p style="text-align: center; font-size: 0.75rem; color: #999; margin-top: 1.5rem;">Our team will
+                        review your request and contact you for final price confirmation.</p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer"
+        style="background: #000; color: #fff; padding: 100px 0 50px; border-top-left-radius: 5rem; border-top-right-radius: 5rem;">
+        <div class="container">
+            <div class="footer-brand">
+                <img src="../assets/logo.jpeg" alt="Logo" class="footer-logo-img" style="border-radius: 1rem;">
+                <h2 class="serif">Baking Corner</h2>
+                <div class="premium-divider"></div>
+            </div>
+            <p
+                style="text-align: center; opacity: 0.5; font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase;">
+                © 2024 Baking Corner. Handcrafted with Love.</p>
+        </div>
+    </footer>
+
+    <script>
+        let selectedFileData = null;
+        let pOpts = [];
+
+        let poundRates = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            loadRates();
+            loadFlavors();
+
+            document.getElementById('selectedWeight').addEventListener('input', function () {
+                const weight = parseFloat(this.value) || 0;
+                // Find base rate (preferably for 1lb, else first available)
+                const baseRate = poundRates.find(r => r.value === 1) || poundRates[0];
+
+                const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
+                const sym = settings.currencySymbol || '৳';
+
+                if (baseRate && weight > 0) {
+                    const totalPrice = weight * baseRate.price;
+                    document.getElementById('priceValue').textContent = sym + ' ' + totalPrice.toLocaleString();
+                } else {
+                    document.getElementById('priceValue').textContent = sym + ' 0.00';
+                }
+            });
+        });
+
+        async function loadRates() {
+            const { data, error } = await window.supabaseClient.from('pound_options').select('*');
+            if (!error) poundRates = data;
+        }
+
+        async function loadFlavors() {
+            const { data, error } = await window.supabaseClient.from('flavour_options').select('*').order('name');
+            const select = document.getElementById('selectedFlavor');
+            if (!error && data) {
+                select.innerHTML = '<option value="">Choose a flavor</option>' +
+                    data.map(f => `<option value="${f.name}">${f.name}</option>`).join('');
+            } else {
+                select.innerHTML = '<option value="">No flavors available</option>';
+            }
+        }
+
+
+        function handleImage(file) {
+            if (!file) return;
+            selectedFileData = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('uploadPlaceholder').style.display = 'none';
+                const img = document.getElementById('previewImg');
+                img.src = e.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function uploadToBucket(file) {
+            const ext = file.name.split('.').pop();
+            const fileName = `custom_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.${ext}`;
+
+            const { data, error } = await window.supabaseClient.storage
+                .from('product-images')
+                .upload(fileName, file);
+
+            if (error) throw error;
+
+            const { data: urlData } = window.supabaseClient.storage
+                .from('product-images')
+                .getPublicUrl(fileName);
+
+            return urlData.publicUrl;
+        }
+
+        document.getElementById('customOrderForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const weight = document.getElementById('selectedWeight').value;
+
+            if (!weight) return alert('Please select weight');
+            if (!selectedFileData) return alert('Please upload a design photo');
+
+            btn.disabled = true;
+            btn.textContent = 'Uploading Design...';
+
+            try {
+                const imageUrl = await uploadToBucket(selectedFileData);
+
+                btn.textContent = 'Submitting Request...';
+
+                const orderData = {
+                    customer_name: document.getElementById('custName').value,
+                    customer_phone: document.getElementById('custPhone').value,
+                    delivery_address: document.getElementById('custAddress').value,
+                    instructions: document.getElementById('custNotes').value,
+                    pound_value: parseFloat(weight),
+                    flavour: document.getElementById('selectedFlavor').value,
+                    image_url: imageUrl,
+                    status: 'Pending',
+                    created_at: new Date().toISOString()
+                };
+
+                const { error } = await window.supabaseClient.from('custom_orders').insert([orderData]);
+
+                if (error) throw error;
+
+                alert('Request submitted successfully! We will contact you soon.');
+                window.location.href = '../home/index.html';
+
+            } catch (err) {
+                console.error(err);
+                alert('Submission failed: ' + err.message);
+                btn.disabled = false;
+                btn.textContent = 'Try Again';
+            }
+        };
+
+        // Drag and drop for upload-area
+        const dropArea = document.getElementById('dropArea');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, e => e.preventDefault(), false);
+        });
+
+        dropArea.addEventListener('drop', e => {
+            handleImage(e.dataTransfer.files[0]);
+        });
+    </script>
+</body>
+
+</html>

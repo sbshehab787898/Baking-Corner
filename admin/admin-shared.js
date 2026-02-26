@@ -14,6 +14,7 @@ function renderAdminSidebar(activePage) {
   const pages = [
     { id: 'dashboard', label: 'Dashboard', icon: '💎', href: 'admin-dashboard.html' },
     { id: 'orders', label: 'Orders', icon: '🧾', href: 'admin-orders.html' },
+    { id: 'custom-orders', label: 'Custom Orders', icon: '🎨', href: 'admin-custom-orders.html' },
     { id: 'corners', label: 'Categories', icon: '🏬', href: 'admin-corners.html' },
     { id: 'products', label: 'Products', icon: '📦', href: 'admin-products.html' },
     { id: 'settings', label: 'Settings', icon: '⚙️', href: 'admin-settings.html' },
@@ -203,6 +204,12 @@ async function syncAdminDataFromSupabase() {
       localStorage.setItem('siteOrders', JSON.stringify(formattedOrders));
     }
 
+    // Sync Custom Orders
+    const { data: customOrders, error: coError } = await window.supabaseClient.from('custom_orders').select('*').order('created_at', { ascending: false });
+    if (!coError && customOrders) {
+      localStorage.setItem('customOrders', JSON.stringify(customOrders));
+    }
+
     // Sync Global Pound Options
     const { data: pOpts, error: poError } = await window.supabaseClient.from('pound_options').select('*').order('value', { ascending: true });
     if (!poError && pOpts) {
@@ -225,6 +232,25 @@ async function syncAdminDataFromSupabase() {
   if (typeof renderCorners === 'function') renderCorners();
   if (typeof renderStats === 'function') renderStats();
   if (typeof renderGlobalOptions === 'function') renderGlobalOptions();
+  if (typeof renderCustomOrders === 'function') renderCustomOrders();
+}
+
+async function dbAddCustomOrder(order) {
+  if (!window.supabaseClient) return { error: 'Supabase client not initialized' };
+  const { data, error } = await window.supabaseClient.from('custom_orders').insert([order]).select();
+  return { data: data ? data[0] : null, error };
+}
+
+async function dbUpdateCustomOrder(id, updates) {
+  if (!window.supabaseClient) return { error: 'Supabase client not initialized' };
+  const { data, error } = await window.supabaseClient.from('custom_orders').update(updates).eq('id', id).select();
+  return { data: data ? data[0] : null, error };
+}
+
+async function dbDeleteCustomOrder(id) {
+  if (!window.supabaseClient) return;
+  const { error } = await window.supabaseClient.from('custom_orders').delete().eq('id', id);
+  return { error };
 }
 
 async function dbAddGlobalPound(option) {

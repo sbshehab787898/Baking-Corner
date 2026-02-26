@@ -42,7 +42,8 @@ const translations = {
         back: '← Back',
         orderDetails: 'Order Details',
         successPlaced: 'Order Placed!',
-        redirectingShop: 'Redirecting to shop...'
+        redirectingShop: 'Redirecting to shop...',
+        customOrder: 'Custom Order'
     },
     bn: {
         atelier: 'বেকারি', collection: 'দোকান', legacy: 'আমাদের গল্প',
@@ -84,7 +85,8 @@ const translations = {
         back: '← ফিরে যান',
         orderDetails: 'অর্ডার এর বিস্তারিত',
         successPlaced: 'অর্ডার সম্পন্ন হয়েছে!',
-        redirectingShop: 'দোকান পৃষ্ঠায় রিডাইরেক্ট করা হচ্ছে...'
+        redirectingShop: 'দোকান পৃষ্ঠায় রিডাইরেক্ট করা হচ্ছে...',
+        customOrder: 'কাস্টম অর্ডার'
     },
     orderFields: {
         en: {
@@ -228,6 +230,11 @@ function toggleLang() {
 function initNavbar() {
     const navbar = document.getElementById('navbar');
     if (!navbar) return;
+
+    // Prevent double binding
+    if (navbar.dataset.navbarBound) return;
+    navbar.dataset.navbarBound = 'true';
+
     window.addEventListener('scroll', () => {
         navbar.classList.toggle('scrolled', window.scrollY > 60);
     });
@@ -237,6 +244,7 @@ function initNavbar() {
     const closeMenu = document.getElementById('closeMenu');
 
     if (hamburger && mobileMenu) {
+        hamburger.dataset.boundMenu = 'true';
         hamburger.addEventListener('click', () => {
             const isOpen = mobileMenu.classList.toggle('open');
             hamburger.classList.toggle('open');
