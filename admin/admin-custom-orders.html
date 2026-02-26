@@ -117,6 +117,40 @@
             max-height: 90%;
             border-radius: 0.5rem;
         }
+
+        .admin-flex-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .admin-main {
+                margin-left: 0;
+                padding: 1.5rem;
+                padding-top: 5rem;
+            }
+
+            .admin-flex-row {
+                flex-direction: column;
+            }
+
+            .admin-flex-row .save-price-btn {
+                width: 100% !important;
+            }
+
+            .custom-order-card {
+                padding: 1rem;
+            }
+
+            .order-photo {
+                height: 150px;
+            }
+
+            .order-details p {
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 
@@ -140,7 +174,7 @@
             <h2 class="admin-card-title">⚖️ Set Weight-Based Pricing</h2>
             <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">Set prices for specific weights. These will
                 be shown to customers when they enter the weight.</p>
-            <div style="display:flex; gap:0.5rem; margin-bottom:1rem">
+            <div class="admin-flex-row">
                 <input type="number" step="0.1" id="gPoundVal" placeholder="Pound (e.g. 1)" class="admin-input"
                     style="flex:1">
                 <input type="number" id="gPoundPrice" placeholder="Price (e.g. 500)" class="admin-input" style="flex:1">
@@ -154,7 +188,7 @@
             <h2 class="admin-card-title">🍰 Manage Flavors</h2>
             <p style="font-size: 0.8rem; color: #666; margin-bottom: 1rem;">Add flavors that customers can choose from
                 for custom orders.</p>
-            <div style="display:flex; gap:0.5rem; margin-bottom:1rem">
+            <div class="admin-flex-row">
                 <input type="text" id="gFlavorName" placeholder="Flavor Name (e.g. Vanilla)" class="admin-input"
                     style="flex:1">
                 <button class="save-price-btn" style="width:auto; height: 42px; background: #9c27b0;"
